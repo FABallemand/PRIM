@@ -2,6 +2,13 @@
 administrative/
 perso/
 
+# Datasets
+data/kodak/
+data/vimeo/
+
+# Results
+**/results/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

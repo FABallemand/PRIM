@@ -45,3 +45,7 @@
 > pip install pip
   - Install compressai on balle_reproduction env
 > pip install compressai
+  - Connect to GPU cluster with VS Code
+  - Submit script to the queue
+  - Fix small issues and test things
+  - First training

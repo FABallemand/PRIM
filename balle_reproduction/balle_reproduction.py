@@ -221,6 +221,7 @@ def parse_args(argv):
     parser.add_argument(
         "--save", action="store_true", default=True, help="Save model to disk"
     )
+    parser.add_argument("--savepath", type=str, help="Path to save checkpoint")
     parser.add_argument("--seed", type=int, help="Set random seed for reproducibility")
     parser.add_argument(
         "--clip_max_norm",
@@ -311,17 +312,31 @@ def main(argv):
         best_loss = min(loss, best_loss)
 
         if args.save:
-            save_checkpoint(
-                {
-                    "epoch": epoch,
-                    "state_dict": net.state_dict(),
-                    "loss": loss,
-                    "optimizer": optimizer.state_dict(),
-                    "aux_optimizer": aux_optimizer.state_dict(),
-                    "lr_scheduler": lr_scheduler.state_dict(),
-                },
-                is_best,
-            )
+            if args.savepath:
+                save_checkpoint(
+                    {
+                        "epoch": epoch,
+                        "state_dict": net.state_dict(),
+                        "loss": loss,
+                        "optimizer": optimizer.state_dict(),
+                        "aux_optimizer": aux_optimizer.state_dict(),
+                        "lr_scheduler": lr_scheduler.state_dict(),
+                    },
+                    is_best,
+                    args.savepath + "/checkpoint.pth.tar"
+                )
+            else:
+                save_checkpoint(
+                    {
+                        "epoch": epoch,
+                        "state_dict": net.state_dict(),
+                        "loss": loss,
+                        "optimizer": optimizer.state_dict(),
+                        "aux_optimizer": aux_optimizer.state_dict(),
+                        "lr_scheduler": lr_scheduler.state_dict(),
+                    },
+                    is_best,
+                )
 
 
 if __name__ == "__main__":
