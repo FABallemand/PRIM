@@ -10,4 +10,4 @@
 eval "$(conda shell.bash hook)"
 
 set -x
-srun python3 -u examples/train.py -m mbt2018-mean -d /path/to/image/dataset --batch-size 16 -lr 1e-4 --save --cuda
+srun python3 -u balle_reproduction.py -m bmshj2018-hyperprior -d /home/ids/fallemand-24/PRIM/data/vimeo/vimeo_triplet --batch-size 8 -lr 1e-4 --save --cuda

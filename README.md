@@ -3,8 +3,8 @@
 ## 🖼️ Learned Image Compression on FPGA
 
 ## 👥 Authors
-- ALLEMAND Fabien
-- 
+- Fabien ALLEMAND
+
 ## 🔗 Related Links
 - [Neural/Learned Image Compression: An Overview](https://medium.com/@loijilai_me/learned-image-compression-an-overview-625f3ab709f2)
 - [End-to-end Optimized Image Compression](https://arxiv.org/abs/1611.01704)
