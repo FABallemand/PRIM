@@ -34,3 +34,14 @@
   - Install conda
   - Create balle_reproduction env
   - Clone PRIM GitHub repository
+  - Download vimeo dataset
+
+## 20/10/2024
+- Reproduce Ballé results:
+  - Modify train scripts (to work with vimeo dataset)
+  - Install pytorch on balle_reproduction env
+> conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+  - Install pip on balle_reproduction env
+> pip install pip
+  - Install compressai on balle_reproduction env
+> pip install compressai

@@ -252,7 +252,7 @@ def main(argv):
     # test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
 
     train_dataset = Vimeo90kDataset(args.dataset, split="train", transform=train_transforms)
-    test_dataset = Vimeo90kDataset(args.dataset, split="test", transform=test_transforms)
+    test_dataset = Vimeo90kDataset(args.dataset, split="valid", transform=test_transforms)
 
     device = "cuda" if args.cuda and torch.cuda.is_available() else "cpu"
 
