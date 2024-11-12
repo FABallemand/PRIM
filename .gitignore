@@ -3,11 +3,17 @@ administrative/
 perso/
 
 # Datasets
+data/clic/
 data/kodak/
 data/vimeo/
 
 # Results
+*.out
+*.err
+*.tar
 **/results/
+**/train_res/
+**/test_res/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -48,4 +48,39 @@
   - Connect to GPU cluster with VS Code
   - Submit script to the queue
   - Fix small issues and test things
-  - First training
+  - First training (224584)
+  - Explore results in compressai notebooks
+
+## 21/10/2024
+- Reproduce Ballé results:
+  - More training from checkpoint of last training (224844)
+- LIC understanding:
+  - Multiple decoders architecture to better handle textures and details (https://www.youtube.com/watch?v=DwZBlGy1lbg&list=PL_bDvITUYucAh0c2I_jR2oImaz9Yzl4IS&ab_channel=ComputerVisionFoundationVideos)
+  - Stanford course on LIC (https://www.youtube.com/watch?v=H7dvh35xNuE&ab_channel=StanfordOnline)
+    - Trick to back pro through quantization
+    - 39:00 ??
+  - Need to understand entropy coding...
+
+## 22/10/2024
+- Datasets:
+  - Download CLIC dataset
+  - Install tensorflow datasets to access Open Images dataset
+  - Create script to download all datasets
+- Model evaluation:
+  - Code understanding compressai/provided files
+  - Write eval script
+
+## 23/10/2024
+- Model evaluation:
+  - Evaluate models with compressai notebooks
+  - Evaluate models with script
+
+## 29/10/2024
+- Reproduce Ballé results:
+  - More training from checkpoint of last training (225698)
+
+## 05/11/2024
+- Reproduce Ballé results:
+  - More training from checkpoint of last training (227892)
+
+- Need to impprove eval script
