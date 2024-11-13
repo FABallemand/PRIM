@@ -83,4 +83,11 @@
 - Reproduce Ballé results:
   - More training from checkpoint of last training (227892)
 
+## 12/11/2024
+- Meeting:
+  - Find lambda values used in papers
+  - Do training for each lambda value for the same amount of epochs (idealy the same amount of the pre-trained model)
+  - Visualise Rate distortion curves (distortion in function of lmabda like in papers)
+  - Compute BDPSNR / BD Rate to compare models (curves)
+
 - Need to impprove eval script
