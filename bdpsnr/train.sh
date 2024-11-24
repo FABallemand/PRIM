@@ -18,7 +18,7 @@ DATASET=/home/ids/fallemand-24/PRIM/data/vimeo/vimeo_triplet
 
 # By default metric is MSE
 # MSE 0.0018 0.0035 0.0067 0.0130 0.0250 0.0483 0.0932 0.1800
-LAMBDA=0.0067
+LAMBDA=0.1800
 
 # CHECKPOINT=/home/ids/fallemand-24/PRIM/balle_reproduction/train_res/227892/checkpoint.pth.tar
 

@@ -87,7 +87,24 @@
 - Meeting:
   - Find lambda values used in papers
   - Do training for each lambda value for the same amount of epochs (idealy the same amount of the pre-trained model)
-  - Visualise Rate distortion curves (distortion in function of lmabda like in papers)
+  - Visualise Rate distortion curves (distortion in function of lambda like in papers)
   - Compute BDPSNR / BD Rate to compare models (curves)
+- BDPSNR curve:
+  - Create train/test scripts
+  - Start first 3 training
+
+## 12/11/2024
+- BDPSNR curve:
+  - Start last 5 training
+
+## 22/11/2024
+- Meeting:
+  - Discuss results
+  - Need to evaluate on kodak dataset
+- Fix issue with pre-trained models (pretrained=True)
+
+## 24/11/2024
+- BDPSNR curve:
+  - Create script to evaluate on kodak dataset
 
 - Need to impprove eval script

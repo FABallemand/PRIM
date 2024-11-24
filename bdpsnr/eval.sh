@@ -10,17 +10,9 @@
 DATE=$(date +'%Y%m%d_%H%M%S')
 echo $DATE
 
-mkdir test_res/$SLURM_JOB_ID
-
-MODEL="bmshj2018-hyperprior"
-
-DATASET=/home/ids/fallemand-24/PRIM/data/kodak
-
-CHECKPOINT=/home/ids/fallemand-24/PRIM/balle_reproduction/train_res/224584/checkpoint.pth.tar
-
 eval "$(conda shell.bash hook)"
 
 conda activate balle_reproduction
 
 set -x
-srun python3 -u eval.py checkpoint -a $MODEL --dataset $DATASET -p $CHECKPOINT --cuda -d test_res/$SLURM_JOB_ID -o $SLURM_JOB_ID.json
+srun python3 -u eval.py
