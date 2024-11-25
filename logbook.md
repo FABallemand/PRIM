@@ -107,4 +107,7 @@
 - BDPSNR curve:
   - Create script to evaluate on kodak dataset
 
+## 25/11/2024
+- Write intermediary report
+
 - Need to impprove eval script

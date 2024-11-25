@@ -1,0 +1,27 @@
+\chapter{Results}
+\label{results}
+This section presents the methodology used and the results obtained during the first part of the PRIM project.
+
+\section{Methodology}
+As explained in Section \ref{stoa}, state of the art \acrshort{lic} models provide great results: they provide encoding of images that contain very few bits while preserving the images quality. However, these models require a lot of processign power making them unsuitable for realtime application on resource constrained devices. The goal of this project is to explore solutions to reduce the processign power used by these models, leading to realtime image compression/decompression on such devices. In order to do that, it is necessary to have access to the state of the art \acrshort{lic} models, the image datasets used to train them and enough processing power to train such models.
+
+CompressAI \cite{compressai} is a Python library for learned compression. Based on the well known machine learning library PyTorch, compressAI provides custom operations, layers and models for deep learning based data compression and pre-trained end-to-end compression models for \acrshort{lic}. Amongs the pre-trained models is the model from \cite{ballemshj18} that will be used throughout the project.
+
+Usually, researchers train their models on the OpenImages dataset \cite{openimages} but pre-trained models on compressAI have been trained on the Vimeo90K dataset \cite{xue2019video}. In order to perform proper model comparisons, the Vimeo dataset will be used for training in this project. For testing, two datasets will be used: the Kodak dataset \cite{kodak} and the dataset from the \acrfull{clic} \cite{clic}.
+
+The computing power required for training and using models will be provided by the GPU cluster of Télécom Paris.
+
+\section{Results Reproduction}
+In a research project, reproducing state of the art results is key. The first thing to do is to ensure that our work environnement is correct by reproducing results from articles. This also provides a shared baseline results between papers and our work, that can be used to compare our future results.
+
+As experiments parameters are not disclosed in the papers we studied, we used tried to reproduce results from the compressAI library, taht is to say: achieve the same results as the pre-trained models from the model zoo.
+
+The training methodology used by compressAI is described on this page \cite{compressai_train}. Models were trained between 4 and 5 million steps on 256x256 image patches randomly extracted and cropped from the Vimeo90K dataset. The batch size is 16 or 32 (I chose 16). The initial learning rate is 1e-4 and decreases over time (it is divided by 2 when the evaluation loss reaches a plateau). Two different metrics can be used: MSE or MS-SSIM. I kept the default metric (MSE) which corresponds to using the following loss function: \(L = \lambda * 255^{2} * D + R\) with \(D\) and \(R\) respectively the mean distortion and the mean estimated bit-rate. The parameter \(\lambda\) allows to adjust the tradeoff between compression and image quality. Higher values give more importance to distortion encouraging the model to produce reconstructed images with high quality at the expense of bit rate. Inversely, lower values of lambda imply more compression and more data loss. CompressAI proposes 8 pre-trained models with different values of \(\lambda\) represented by the argument \textsf{quality}.
+
+This part of the project was done in two steps. First, I tried to train a single model and compare it to other pre-trained models. Then I produced rate-distortion curves.
+
+\subsection{Single Model}
+Using the training script provided by compressAI and following the same methodology, I trained a model for ? hours (approximately ? epochs). ANALYSE RESULTS
+
+\subsection{Rate-Distortion Curves}
+Using the training script provided by compressAI and following the same methodology, I trained 8 different models: one for each value of \(\lambda\).

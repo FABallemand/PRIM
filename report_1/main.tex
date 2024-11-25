@@ -1,0 +1,153 @@
+\documentclass[a4paper, twoside, openright]{report}
+%\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm,marginparwidth=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\edef\restoreparindent{\parindent=\the\parindent\relax}
+\usepackage[parfill]{parskip}
+\restoreparindent
+\usepackage{tocloft}
+\usepackage{afterpage}
+\usepackage[french]{babel}
+\usepackage[babel=true,kerning=true]{microtype}
+\usepackage[acronym]{glossaries}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{phonenumbers}
+% \usepackage{fancyhdr}
+% \pagestyle{fancy}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{src/bibliography.bib}
+\usepackage{appendix}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{svg}
+\usepackage{tikz}
+\usepackage{minted}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{csquotes}
+
+\setlength{\cftbeforelottitleskip}{1em}
+\setlength{\cftbeforeloftitleskip}{1em}
+\setlength{\cftbeforetoctitleskip}{1em}
+
+\setlength{\cftafterlottitleskip}{1.5em}
+\setlength{\cftafterloftitleskip}{1.5em}
+\setlength{\cftaftertoctitleskip}{1.5em}
+
+\newcommand{\figwidth}{15cm}
+
+\newcommand\blankpage{
+    \null
+    \thispagestyle{empty}
+    \addtocounter{page}{-2}
+    \newpage}
+
+\newcommand\emptypage{
+    \null
+    \newpage}
+
+% Command to create a glossary entry with correspondent acronym.
+% https://tex.stackexchange.com/questions/8946/how-to-combine-acronym-and-glossary
+% Args : 1: entry, 2: acronym/name, 3: long name, 4: description
+\newcommand{\newglossaryentrywithacronym}[4]{
+    %%% The glossary entry the acronym links to   
+    \newglossaryentry{#1_gls}{
+        name={#2},
+        long={#3},
+        description={#4}
+    }
+
+    % Acronym pointing to glossary
+    \newglossaryentry{#1}{
+        type=\acronymtype,
+        name={#2},
+        description={#3},
+        see=[Glossary:]{#1_gls}
+    }
+}
+
+\definecolor{LightGray}{gray}{0.9}
+
+\newminted[pythonCode]{python}{
+    frame=lines,
+    framesep=2mm,
+    baselinestretch=1.2,
+    bgcolor=LightGray,
+    fontsize=\footnotesize,
+    linenos}
+
+\newminted[outputCode]{bash}{
+    frame=lines,
+    framesep=2mm,
+    baselinestretch=1.2,
+    bgcolor=LightGray,
+    fontsize=\footnotesize,
+    linenos}
+
+% \setlength{\headheight}{28pt}
+% \fancyhead[L]{ALLEMAND Fabien}
+% \fancyhead[C]{}
+% \fancyhead[R]{\includegraphics[scale=0.025]{/home/fabien/logo_TSP_1.jpg}}
+% \fancyfoot[L]{}
+% \fancyfoot[R]{}
+
+\input{src/glossary.tex}
+
+\begin{document}
+
+\input{src/coverpage.tex}
+
+\afterpage{\blankpage}
+
+\newpage
+\pagenumbering{roman}
+
+% \input{src/contact.tex}
+
+% \input{src/acknowledgements.tex}
+
+\printglossary[type=\acronymtype]
+\printglossary
+
+% \newpage
+%\listoftables
+
+\afterpage{\emptypage}
+
+\newpage
+\listoffigures
+
+\afterpage{\emptypage}
+
+\newpage
+\tableofcontents
+
+\afterpage{\emptypage}
+
+\newpage
+\pagenumbering{arabic}
+
+\input{src/introduction.tex}
+
+\afterpage{\emptypage}
+
+\input{src/lic.tex}
+
+\input{src/state_of_the_art.tex}
+
+\input{src/results.tex}
+
+\input{src/conclusion.tex}
+
+\printbibliography
+
+\input{src/appendix.tex}
+
+% \vspace*{-2cm}
+% \input{src/abstract.tex}
+
+\end{document}
