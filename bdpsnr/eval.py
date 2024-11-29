@@ -38,10 +38,11 @@ os.makedirs(output_folder)
 networks = {}
 
 lambdas = [0.0018, 0.0035, 0.0067, 0.0130, 0.0250, 0.0483, 0.0932, 0.1800]
-ids = [234218, 234220, 234222, 235713, 235714, 235715, 235716, 235717]
+# ids = [234218, 234220, 234222, 235713, 235714, 235715, 235716, 235717]
+ids = [239167, 239169, 239170, 239171, 239172, 239173, 239174, 239175]
 
-for id in ids:
-    net = bmshj2018_hyperprior(quality=2, pretrained=False)
+for quality, id in enumerate(ids, start=1):
+    net = bmshj2018_hyperprior(quality=quality, pretrained=False)
     checkpoint = torch.load(f"train_res/{id}/checkpoint.pth.tar",
                             weights_only=True, map_location=torch.device("cpu"))
     net.load_state_dict(checkpoint["state_dict"])

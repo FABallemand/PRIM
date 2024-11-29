@@ -17,14 +17,14 @@ MODEL=bmshj2018-hyperprior
 DATASET=/home/ids/fallemand-24/PRIM/data/vimeo/vimeo_triplet
 
 # By default metric is MSE
+# QUALITY  1      2      3      4      5      6      7      8
 # MSE 0.0018 0.0035 0.0067 0.0130 0.0250 0.0483 0.0932 0.1800
+QUALITY=8
 LAMBDA=0.1800
-
-# CHECKPOINT=/home/ids/fallemand-24/PRIM/balle_reproduction/train_res/227892/checkpoint.pth.tar
 
 eval "$(conda shell.bash hook)"
 
 conda activate balle_reproduction
 
 set -x
-srun python3 -u train.py -m $MODEL -d $DATASET --num-workers 2 --epochs 200 --batch-size 16 -lr 1e-4 --cuda --savepath train_res/$SLURM_JOB_ID --lambda $LAMBDA
+srun python3 -u train.py -m $MODEL -d $DATASET --num-workers 2 --epochs 65 --batch-size 16 -lr 1e-4 --cuda --savepath train_res/$SLURM_JOB_ID --lambda $LAMBDA --quality $QUALITY

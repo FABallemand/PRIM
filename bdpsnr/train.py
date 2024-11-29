@@ -165,6 +165,13 @@ def parse_args(argv):
         help="Model architecture (default: %(default)s)",
     )
     parser.add_argument(
+        "-q",
+        "--quality",
+        default=1,
+        type=int,
+        help="Model architecture quality (default: %(default)s)",
+    )
+    parser.add_argument(
         "-d", "--dataset", type=str, required=True, help="Training dataset"
     )
     parser.add_argument(
@@ -236,6 +243,7 @@ def parse_args(argv):
 
 def main(argv):
     args = parse_args(argv)
+    print(args)
 
     if args.seed is not None:
         torch.manual_seed(args.seed)
@@ -273,7 +281,7 @@ def main(argv):
         pin_memory=(device == "cuda"),
     )
 
-    net = image_models[args.model](quality=3)
+    net = image_models[args.model](quality=args.quality)
     net = net.to(device)
 
     if args.cuda and torch.cuda.device_count() > 1:
