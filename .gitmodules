@@ -1,0 +1,3 @@
+[submodule "bdpsnr/Bjontegaard_metric"]
+	path = bdpsnr/Bjontegaard_metric
+	url = https://github.com/Anserw/Bjontegaard_metric

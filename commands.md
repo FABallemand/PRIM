@@ -23,6 +23,9 @@ Enter wait queue mode for real computation (ex: training). Only bash scripts can
 - A job configuration heading (name of job, requested resources...) in the form of a list of SLURM options preceded by the word #SBATCH
 - The command lines to execute (loading env, launching the executable file using the srun command to accounbt for the sbatch configuration provided...)
 ```bash
+# See available resources
+sinfo
+
 # Submit script to queue
 sbatch <scriptname>
 

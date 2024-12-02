@@ -1,8 +1,10 @@
 import os
 from datetime import datetime
 import json
+
 import math
 import numpy as np
+import scipy.interpolate
 
 import torch
 from torchvision import transforms
@@ -20,8 +22,10 @@ def compute_psnr(a, b):
     mse = torch.mean((a - b)**2).item()
     return -10 * math.log10(mse)
 
+
 def compute_msssim(a, b):
     return ms_ssim(a, b, data_range=1.).item()
+
 
 def compute_bpp(out_net):
     size = out_net["x_hat"].size()
@@ -29,10 +33,88 @@ def compute_bpp(out_net):
     return sum(torch.log(likelihoods).sum() / (-math.log(2) * num_pixels)
               for likelihoods in out_net["likelihoods"].values()).item()
 
+
+def BD_PSNR(R1, PSNR1, R2, PSNR2, piecewise=0):
+    lR1 = np.log(R1)
+    lR2 = np.log(R2)
+
+    PSNR1 = np.array(PSNR1)
+    PSNR2 = np.array(PSNR2)
+
+    p1 = np.polyfit(lR1, PSNR1, 3)
+    p2 = np.polyfit(lR2, PSNR2, 3)
+
+    # integration interval
+    min_int = max(min(lR1), min(lR2))
+    max_int = min(max(lR1), max(lR2))
+
+    # find integral
+    if piecewise == 0:
+        p_int1 = np.polyint(p1)
+        p_int2 = np.polyint(p2)
+
+        int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
+        int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
+    else:
+        # See https://chromium.googlesource.com/webm/contributor-guide/+/master/scripts/visual_metrics.py
+        lin = np.linspace(min_int, max_int, num=100, retstep=True)
+        interval = lin[1]
+        samples = lin[0]
+        v1 = scipy.interpolate.pchip_interpolate(np.sort(lR1), PSNR1[np.argsort(lR1)], samples)
+        v2 = scipy.interpolate.pchip_interpolate(np.sort(lR2), PSNR2[np.argsort(lR2)], samples)
+        # Calculate the integral using the trapezoid method on the samples.
+        int1 = np.trapz(v1, dx=interval)
+        int2 = np.trapz(v2, dx=interval)
+
+    # find avg diff
+    avg_diff = (int2-int1)/(max_int-min_int)
+
+    return avg_diff
+
+
+def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
+    lR1 = np.log(R1)
+    lR2 = np.log(R2)
+
+    # rate method
+    p1 = np.polyfit(PSNR1, lR1, 3)
+    p2 = np.polyfit(PSNR2, lR2, 3)
+
+    # integration interval
+    min_int = max(min(PSNR1), min(PSNR2))
+    max_int = min(max(PSNR1), max(PSNR2))
+
+    # find integral
+    if piecewise == 0:
+        p_int1 = np.polyint(p1)
+        p_int2 = np.polyint(p2)
+
+        int1 = np.polyval(p_int1, max_int) - np.polyval(p_int1, min_int)
+        int2 = np.polyval(p_int2, max_int) - np.polyval(p_int2, min_int)
+    else:
+        lin = np.linspace(min_int, max_int, num=100, retstep=True)
+        interval = lin[1]
+        samples = lin[0]
+        v1 = scipy.interpolate.pchip_interpolate(np.sort(PSNR1), lR1[np.argsort(PSNR1)], samples)
+        v2 = scipy.interpolate.pchip_interpolate(np.sort(PSNR2), lR2[np.argsort(PSNR2)], samples)
+        # Calculate the integral using the trapezoid method on the samples.
+        int1 = np.trapz(v1, dx=interval)
+        int2 = np.trapz(v2, dx=interval)
+
+    # find avg diff
+    avg_exp_diff = (int2-int1)/(max_int-min_int)
+    avg_diff = (np.exp(avg_exp_diff)-1)*100
+    return avg_diff
+
+
 # Create output directory
 time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 output_folder = f"/home/ids/fallemand-24/PRIM/bdpsnr/test_res/{time_stamp}"
 os.makedirs(output_folder)
+
+###############################################################################
+## Networks ###################################################################
+###############################################################################
 
 # Load networks
 networks = {}
@@ -48,7 +130,7 @@ for quality, id in enumerate(ids, start=1):
     net.load_state_dict(checkpoint["state_dict"])
     net.eval().to(device)
 
-    networks[f"{id}"] = net
+    networks[f"{id} - {lambdas[quality-1]}"] = net
 
 # Load pre-trained networks
 pretrained_networks = {}
@@ -57,7 +139,7 @@ for quality in range(1, 9):
     net = bmshj2018_hyperprior(quality=quality,
                                pretrained=True).eval().to(device)
 
-    pretrained_networks[f"{quality}"] = net
+    pretrained_networks[f"{quality} - {lambdas[quality-1]}"] = net
 
 # Create dict for average metrics
 avg_metrics = {}
@@ -77,8 +159,14 @@ for name in pretrained_networks.keys():
             "bit-rate": [],
         }
 
+###############################################################################
+## Inference, Metrics and Plots ###############################################
+###############################################################################
+
 # Find images
 dataset_path = "/home/ids/fallemand-24/PRIM/data/kodak"
+# dataset_path = "/home/ids/fallemand-24/PRIM/data/clic/clic_validation"
+# dataset_path = "/home/ids/fallemand-24/PRIM/data/clic/clic_test"
 dataset_name = dataset_path.split("/")[-1]
 
 dataset_imgs = [p for p in os.listdir(dataset_path) if p.endswith(".png")]
@@ -87,6 +175,7 @@ for img_name in dataset_imgs:
     # Load image
     img = Image.oimg = Image.open(os.path.join(dataset_path,
                                                img_name)).convert("RGB")
+    # img = img.crop((0, 0, 768, 512)) # For CLIC dataset
     x = transforms.ToTensor()(img).unsqueeze(0).to(device)
     img_name = img_name.split(".")[0]
 
@@ -99,10 +188,10 @@ for img_name in dataset_imgs:
             outputs[name] = rv
 
     reconstructions = {name: transforms.ToPILImage()(out["x_hat"].squeeze())
-                  for name, out in outputs.items()}
+                       for name, out in outputs.items()}
 
     diffs = [torch.mean((out["x_hat"] - x).abs(), axis=1).squeeze()
-            for out in outputs.values()]
+             for out in outputs.values()]
 
     # Inference with pre-trained networks
     pretrained_outputs = {}
@@ -113,7 +202,7 @@ for img_name in dataset_imgs:
             pretrained_outputs[name] = rv
 
     pretrained_reconstructions = {name: transforms.ToPILImage()(out["x_hat"].squeeze())
-                              for name, out in pretrained_outputs.items()}
+                                  for name, out in pretrained_outputs.items()}
 
     pretrained_diffs = [torch.mean((out["x_hat"] - x).abs(), axis=1).squeeze()
                         for out in pretrained_outputs.values()]
@@ -240,6 +329,10 @@ for img_name in dataset_imgs:
                              f"curve_{dataset_name}_{img_name}.png"))
     plt.close()
 
+###############################################################################
+## Average Metrics and Plots ##################################################
+###############################################################################
+
 # Compute average metrics
 for name in networks.keys():
     avg_metrics[name]["psnr"] = np.average(avg_metrics[name]["psnr"])
@@ -253,10 +346,28 @@ for name in pretrained_networks.keys():
     pretrained_avg_metrics[name]["bit-rate"] = np.average(pretrained_avg_metrics[name]["bit-rate"])
 
 # Save average metrics
-all_avg_metrics = avg_metrics | pretrained_avg_metrics
+all_avg_metrics = {"proposed": avg_metrics, "pretrained": pretrained_avg_metrics}
 with open(os.path.join(output_folder,
-                        f"avg_metrics_{dataset_name}.json"), "w") as f:
+                       f"avg_metrics_{dataset_name}.json"), "w") as f:
     json.dump(all_metrics, f)
+
+# Retrieve average metrics as lists
+brs = [m["bit-rate"] for _, m in avg_metrics.items()]
+psnrs = [m["psnr"] for _, m in avg_metrics.items()]
+msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in avg_metrics.items()]
+pretrained_brs = [m["bit-rate"] for _, m in pretrained_avg_metrics.items()]
+pretrained_psnrs = [m["psnr"] for _, m in pretrained_avg_metrics.items()]
+pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_avg_metrics.items()]
+
+# Compute average BD metrics
+avg_bd_metrics = {}
+avg_bd_metrics["bd_rate"] = BD_RATE(pretrained_brs, pretrained_psnrs, brs, psnrs)
+avg_bd_metrics["bd_psnr"] = BD_PSNR(pretrained_brs, pretrained_psnrs, brs, psnrs)
+
+# Save average BD metrics
+with open(os.path.join(output_folder,
+                       f"avg_bd_metrics_{dataset_name}.json"), "w") as f:
+    json.dump(avg_bd_metrics, f)
 
 # Plot average rate-distortion curves
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
@@ -291,23 +402,12 @@ for name, m in pretrained_avg_metrics.items():
     axes[1].set_xlabel("Bit-rate [bpp]")
     axes[1].title.set_text("MS-SSIM (log) comparison")
 
-brs = [m["bit-rate"] for _, m in avg_metrics.items()]
-pretrained_brs = [m["bit-rate"] for _, m in pretrained_avg_metrics.items()]
-
-psnrs = [m["psnr"] for _, m in avg_metrics.items()]
 axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-
-pretrained_psnrs = [m["psnr"] for _, m in pretrained_avg_metrics.items()]
 axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
-
 axes[0].legend(loc="best")
 
-msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in avg_metrics.items()]
 axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
-
-pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_avg_metrics.items()]
 axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
-
 axes[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,

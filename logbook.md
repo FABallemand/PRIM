@@ -117,3 +117,8 @@
 
 ## 29/11/2024
 - Write intermediary report
+
+## 2/11/2024
+- Compute BD-rate and BD-PSNR:
+  - https://github.com/Anserw/Bjontegaard_metric/tree/master
+  - Do evaluation on CLIC dataset
