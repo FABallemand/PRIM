@@ -110,4 +110,10 @@
 ## 25/11/2024
 - Write intermediary report
 
-- Need to impprove eval script
+## 26/11/2024
+- BDPSNR curve:
+  - Find issue related to `quality`
+  - Retrain models
+
+## 29/11/2024
+- Write intermediary report
