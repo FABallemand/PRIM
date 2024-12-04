@@ -122,3 +122,10 @@
 - Compute BD-rate and BD-PSNR:
   - https://github.com/Anserw/Bjontegaard_metric/tree/master
   - Do evaluation on CLIC dataset
+
+## 4/11/2024
+- Meeting:
+  - `quality` 8 is too much for our project, skip it to avoid useless computation
+  - Understand knowledge distillation
+    - Papers (https://arxiv.org/abs/1503.02531, https://arxiv.org/pdf/2309.02529)
+    - PyTorch tutorial (https://pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html)

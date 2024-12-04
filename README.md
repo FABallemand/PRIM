@@ -8,12 +8,14 @@ With the recent progress of machine learning, new compression algorithms appeare
 ## Image Compression
 - [Neural/Learned Image Compression: An Overview](https://medium.com/@loijilai_me/learned-image-compression-an-overview-625f3ab709f2)
 - [End-to-end Optimized Image Compression](https://arxiv.org/abs/1611.01704)
-- [Training data-efficient image transformers & distillation through attention](https://arxiv.org/abs/2012.12877)
 - [Variational Image Compression with a Scale Hyperprior](https://arxiv.org/abs/1802.01436)
 - [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736)
 - [The Devil Is in the Details: Window-based Attention for Image Compression](https://arxiv.org/abs/2203.08450)
 - [A Survey on Visual Transformer](https://arxiv.org/abs/2012.12556)
+- [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
+- [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/pdf/2309.02529)
 - [Cross-Architecture Knowledge Distillation](https://arxiv.org/abs/2207.05273)
+- [Training data-efficient image transformers & distillation through attention](https://arxiv.org/abs/2012.12877)
 
 ### Metrics
 - [Structural similarity index measure](https://en.wikipedia.org/wiki/Structural_similarity_index_measure)
