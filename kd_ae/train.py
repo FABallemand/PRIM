@@ -39,9 +39,11 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from compressai.datasets import ImageFolder, Vimeo90kDataset
+from compressai.datasets import Vimeo90kDataset
 from compressai.optimizers import net_aux_optimizer
 from compressai.zoo import image_models
+
+from models import TeacherAE
 
 
 class AverageMeter:
@@ -89,31 +91,24 @@ def train_one_epoch(
 
     for i, d in enumerate(train_dataloader):
         d = d.to(device)
+        d_noisy = d + torch.randn_like(d) * 0.2
 
         optimizer.zero_grad()
-        aux_optimizer.zero_grad()
 
-        out_net = model(d)
+        out_net = model(d_noisy)
 
         out_criterion = criterion(out_net, d)
-        out_criterion["loss"].backward()
+        out_criterion.backward()
         if clip_max_norm > 0:
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip_max_norm)
         optimizer.step()
-
-        aux_loss = model.aux_loss()
-        aux_loss.backward()
-        aux_optimizer.step()
 
         if i % 10 == 0:
             print(
                 f"Train epoch {epoch}: ["
                 f"{i*len(d)}/{len(train_dataloader.dataset)}"
                 f" ({100. * i / len(train_dataloader):.0f}%)]"
-                f'\tLoss: {out_criterion["loss"].item():.3f} |'
-                f'\tMSE loss: {out_criterion["mse_loss"].item():.3f} |'
-                f'\tBpp loss: {out_criterion["bpp_loss"].item():.2f} |'
-                f"\tAux loss: {aux_loss.item():.2f}"
+                f'\tLoss: {out_criterion.item():.3f}\n'
             )
 
 
@@ -122,36 +117,28 @@ def test_epoch(epoch, test_dataloader, model, criterion):
     device = next(model.parameters()).device
 
     loss = AverageMeter()
-    bpp_loss = AverageMeter()
-    mse_loss = AverageMeter()
-    aux_loss = AverageMeter()
 
     with torch.no_grad():
         for d in test_dataloader:
             d = d.to(device)
-            out_net = model(d)
+            d_noisy = d + torch.randn_like(d) * 0.2
+            out_net = model(d_noisy)
             out_criterion = criterion(out_net, d)
 
-            aux_loss.update(model.aux_loss())
-            bpp_loss.update(out_criterion["bpp_loss"])
             loss.update(out_criterion["loss"])
-            mse_loss.update(out_criterion["mse_loss"])
 
     print(
         f"Test epoch {epoch}: Average losses:"
-        f"\tLoss: {loss.avg:.3f} |"
-        f"\tMSE loss: {mse_loss.avg:.3f} |"
-        f"\tBpp loss: {bpp_loss.avg:.2f} |"
-        f"\tAux loss: {aux_loss.avg:.2f}\n"
+        f"\tLoss: {loss.avg:.3f}\n"
     )
 
     return loss.avg
 
 
-def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
+def save_checkpoint(state, is_best, filename="checkpoint.pth.tar", best_filename="checkpoint_best.pth.tar"):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, "checkpoint_best_loss.pth.tar")
+        shutil.copyfile(best_filename, "checkpoint_best_loss.pth.tar")
 
 
 def parse_args(argv):
@@ -248,9 +235,6 @@ def main(argv):
         [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
     )
 
-    # train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
-    # test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
-
     train_dataset = Vimeo90kDataset(args.dataset, split="train", transform=train_transforms)
     test_dataset = Vimeo90kDataset(args.dataset, split="valid", transform=test_transforms)
 
@@ -272,15 +256,15 @@ def main(argv):
         pin_memory=(device == "cuda"),
     )
 
-    net = image_models[args.model](quality=3)
+    net = TeacherAE()
     net = net.to(device)
 
     if args.cuda and torch.cuda.device_count() > 1:
         net = CustomDataParallel(net)
 
-    optimizer, aux_optimizer = configure_optimizers(net, args)
+    optimizer = torch.optim.Adam(net.parameters(), lr=args.learning_rate)
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
-    criterion = RateDistortionLoss(lmbda=args.lmbda)
+    criterion = nn.MSELoss()
 
     last_epoch = 0
     if args.checkpoint:  # load from previous checkpoint
@@ -289,7 +273,6 @@ def main(argv):
         last_epoch = checkpoint["epoch"] + 1
         net.load_state_dict(checkpoint["state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer"])
-        aux_optimizer.load_state_dict(checkpoint["aux_optimizer"])
         lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
 
     best_loss = float("inf")
@@ -300,7 +283,7 @@ def main(argv):
             criterion,
             train_dataloader,
             optimizer,
-            aux_optimizer,
+            None,
             epoch,
             args.clip_max_norm,
         )
@@ -318,11 +301,11 @@ def main(argv):
                         "state_dict": net.state_dict(),
                         "loss": loss,
                         "optimizer": optimizer.state_dict(),
-                        "aux_optimizer": aux_optimizer.state_dict(),
                         "lr_scheduler": lr_scheduler.state_dict(),
                     },
                     is_best,
-                    args.savepath + "/checkpoint.pth.tar"
+                    args.savepath + "/checkpoint.pth.tar",
+                    args.savepath + "/checkpoint_best.pth.tar"
                 )
             else:
                 save_checkpoint(
@@ -331,7 +314,6 @@ def main(argv):
                         "state_dict": net.state_dict(),
                         "loss": loss,
                         "optimizer": optimizer.state_dict(),
-                        "aux_optimizer": aux_optimizer.state_dict(),
                         "lr_scheduler": lr_scheduler.state_dict(),
                     },
                     is_best,
