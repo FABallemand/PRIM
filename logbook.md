@@ -118,14 +118,32 @@
 ## 29/11/2024
 - Write intermediary report
 
-## 2/11/2024
+## 2/12/2024
 - Compute BD-rate and BD-PSNR:
   - https://github.com/Anserw/Bjontegaard_metric/tree/master
   - Do evaluation on CLIC dataset
 
-## 4/11/2024
+## 4/12/2024
 - Meeting:
   - `quality` 8 is too much for our project, skip it to avoid useless computation
   - Understand knowledge distillation
     - Papers (https://arxiv.org/abs/1503.02531, https://arxiv.org/pdf/2309.02529)
     - PyTorch tutorial (https://pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html)
+
+## 9/12/2024
+- KD PyTorch tutorial reading:
+  - 3 KD methods
+    - Distillatio loss on logits
+    - Cosine similarity on flattened hidden representation
+    - MSE on hidden representation
+- Read Distilling the Knowledge in a Neural Network
+  - Beginning easy to understand
+
+## 11/12/2024
+- Meeting:
+  - Apply KD to simple AE
+    - Try different ways
+      - Loss on latent (cosine similarity, KL divergeance)
+      - Loss on reconstruction (MSE, MS-SSIM)
+  - Apply KD to LIC
+    - On decoder part (image + hyperprior decoder)
