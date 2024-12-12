@@ -84,7 +84,7 @@ def configure_optimizers(net, args):
 
 
 def train_one_epoch(
-    model, criterion, train_dataloader, optimizer, aux_optimizer, epoch, clip_max_norm
+    model, criterion, train_dataloader, optimizer, epoch, clip_max_norm
 ):
     model.train()
     device = next(model.parameters()).device
@@ -95,7 +95,7 @@ def train_one_epoch(
 
         optimizer.zero_grad()
 
-        out_net = model(d_noisy)
+        _, out_net = model(d_noisy)
 
         out_criterion = criterion(out_net, d)
         out_criterion.backward()
@@ -122,10 +122,10 @@ def test_epoch(epoch, test_dataloader, model, criterion):
         for d in test_dataloader:
             d = d.to(device)
             d_noisy = d + torch.randn_like(d) * 0.2
-            out_net = model(d_noisy)
+            _, out_net = model(d_noisy)
             out_criterion = criterion(out_net, d)
 
-            loss.update(out_criterion["loss"])
+            loss.update(out_criterion)
 
     print(
         f"Test epoch {epoch}: Average losses:"
@@ -138,7 +138,7 @@ def test_epoch(epoch, test_dataloader, model, criterion):
 def save_checkpoint(state, is_best, filename="checkpoint.pth.tar", best_filename="checkpoint_best.pth.tar"):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(best_filename, "checkpoint_best_loss.pth.tar")
+        shutil.copyfile(filename, best_filename)
 
 
 def parse_args(argv):
@@ -283,7 +283,6 @@ def main(argv):
             criterion,
             train_dataloader,
             optimizer,
-            None,
             epoch,
             args.clip_max_norm,
         )

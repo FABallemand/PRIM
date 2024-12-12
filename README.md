@@ -12,7 +12,10 @@ With the recent progress of machine learning, new compression algorithms appeare
 - [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736)
 - [The Devil Is in the Details: Window-based Attention for Image Compression](https://arxiv.org/abs/2203.08450)
 - [A Survey on Visual Transformer](https://arxiv.org/abs/2012.12556)
+
+## Knowledge Distillation
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
+- [Microdosing: Knowledge Distillation for GAN based Compression](https://arxiv.org/pdf/2201.02624)
 - [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/pdf/2309.02529)
 - [Cross-Architecture Knowledge Distillation](https://arxiv.org/abs/2207.05273)
 - [Training data-efficient image transformers & distillation through attention](https://arxiv.org/abs/2012.12877)

@@ -157,9 +157,9 @@ class TeacherAE(nn.Module):
         self.decoder = BigDecoder()
 
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
+        latent = self.encoder(x)
+        y = self.decoder(latent)
+        return latent, y
     
 ###############################################################################
 ## Student ####################################################################
@@ -177,6 +177,23 @@ class StudentAE(nn.Module):
         self.decoder = SmallDecoder()
 
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
+        latent = self.encoder(x)
+        y = self.decoder(latent)
+        return latent, y
+    
+
+class StudentAE_decoder(nn.Module):
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        # Encoder
+        self.encoder = BigEncoder()
+
+        # Decoder
+        self.decoder = SmallDecoder()
+
+    def forward(self, x):
+        latent = self.encoder(x)
+        y = self.decoder(latent)
+        return latent, y

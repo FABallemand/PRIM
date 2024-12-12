@@ -126,7 +126,7 @@
 ## 4/12/2024
 - Meeting:
   - `quality` 8 is too much for our project, skip it to avoid useless computation
-  - Understand knowledge distillation
+  - Understand knowledge distillation (KD)
     - Papers (https://arxiv.org/abs/1503.02531, https://arxiv.org/pdf/2309.02529)
     - PyTorch tutorial (https://pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html)
 
@@ -136,14 +136,29 @@
     - Distillatio loss on logits
     - Cosine similarity on flattened hidden representation
     - MSE on hidden representation
-- Read Distilling the Knowledge in a Neural Network
-  - Beginning easy to understand
+- Understand KD:
+  - Read Distilling the Knowledge in a Neural Network
+    - Beginning easy to understand
 
 ## 11/12/2024
 - Meeting:
+  - Understand KD
+    - Papers (https://arxiv.org/pdf/2201.02624, https://arxiv.org/pdf/2309.02529)
   - Apply KD to simple AE
     - Try different ways
       - Loss on latent (cosine similarity, KL divergeance)
       - Loss on reconstruction (MSE, MS-SSIM)
   - Apply KD to LIC
     - On decoder part (image + hyperprior decoder)
+- Apply KD to AE:
+  - Create models
+  - Create script to train teacher AE
+
+## 12/12/2024
+- Apply KD to AE:
+  - Train teacher AE
+  - Create script to train student AE
+- Understand KD:
+  - Read and create reading notes
+  - Read Distilling the Knowledge in a Neural Network
+  - Read Microdosing: Knowledge Distillation for GAN based Compression
