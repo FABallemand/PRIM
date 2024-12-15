@@ -122,7 +122,7 @@ class SmallDecoder(nn.Module):
             nn.Linear(1024, 32 * 32 * 128),              # FC -> [32 * 32 * 128]
             nn.ReLU(inplace=True),
 
-            nn.Unflatten(1, (-1, 128, 32, 32)),
+            nn.Unflatten(1, (128, 32, 32)),
 
             nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [64, 64, 128]
             nn.ConvTranspose2d(128, 64, 3, padding=1),   # T Conv -> [64, 64, 64]

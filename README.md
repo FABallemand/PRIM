@@ -5,7 +5,7 @@ With the recent progress of machine learning, new compression algorithms appeare
 
 ## 🔗 Related Links
 
-## Image Compression
+## Learned Image Compression
 - [Neural/Learned Image Compression: An Overview](https://medium.com/@loijilai_me/learned-image-compression-an-overview-625f3ab709f2)
 - [End-to-end Optimized Image Compression](https://arxiv.org/abs/1611.01704)
 - [Variational Image Compression with a Scale Hyperprior](https://arxiv.org/abs/1802.01436)

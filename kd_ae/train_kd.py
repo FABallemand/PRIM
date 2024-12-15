@@ -112,6 +112,8 @@ def train_one_epoch(
     student_device = next(student_net.parameters()).device
 
     for i, d in enumerate(train_dataloader):
+        d_student = d.to(student_device)
+
         d_noisy = d + torch.randn_like(d) * 0.2
         d_teacher_noisy = d_noisy.to(teacher_device)
         d_student_noisy = d_noisy.to(student_device)
@@ -122,7 +124,7 @@ def train_one_epoch(
         latent_student_out, student_out = student_net(d_student_noisy)
 
         out_criterion = criterion(latent_student_out, latent_teacher_out,
-                                  student_out, teacher_out, d)
+                                  student_out, teacher_out, d_student)
         out_criterion.backward()
         if clip_max_norm > 0:
             torch.nn.utils.clip_grad_norm_(student_net.parameters(), clip_max_norm)
@@ -147,6 +149,8 @@ def test_epoch(epoch, test_dataloader, teacher_net, student_net, criterion):
 
     with torch.no_grad():
         for d in test_dataloader:
+            d_student = d.to(student_device)
+
             d_noisy = d + torch.randn_like(d) * 0.2
             d_teacher_noisy = d_noisy.to(teacher_device)
             d_student_noisy = d_noisy.to(student_device)
@@ -155,7 +159,7 @@ def test_epoch(epoch, test_dataloader, teacher_net, student_net, criterion):
             latent_student_out, student_out = student_net(d_student_noisy)
 
             out_criterion = criterion(latent_student_out, latent_teacher_out,
-                                    student_out, teacher_out, d)
+                                      student_out, teacher_out, d_student)
 
             loss.update(out_criterion)
 

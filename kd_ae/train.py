@@ -43,7 +43,7 @@ from compressai.datasets import Vimeo90kDataset
 from compressai.optimizers import net_aux_optimizer
 from compressai.zoo import image_models
 
-from models import TeacherAE
+from models import TeacherAE, StudentAE
 
 
 class AverageMeter:
@@ -256,7 +256,8 @@ def main(argv):
         pin_memory=(device == "cuda"),
     )
 
-    net = TeacherAE()
+    # net = TeacherAE()
+    net = StudentAE()
     net = net.to(device)
 
     if args.cuda and torch.cuda.device_count() > 1:

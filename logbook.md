@@ -162,3 +162,14 @@
   - Read and create reading notes
   - Read Distilling the Knowledge in a Neural Network
   - Read Microdosing: Knowledge Distillation for GAN based Compression
+
+## 13/12/2024
+- Apply KD to AE:
+  - Test teacher AE
+  - Bad results
+  - Noise scaled by 0.2 too high -> change for 0.1??
+  - Train student AE
+  - Train student AE with KD
+- Understand KD:
+  - Read and create reading notes
+  - Read Microdosing: Knowledge Distillation for GAN based Compression
