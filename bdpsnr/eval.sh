@@ -12,7 +12,7 @@ echo $DATE
 
 eval "$(conda shell.bash hook)"
 
-conda activate balle_reproduction
+conda activate prim_env
 
 set -x
 srun python3 -u eval.py

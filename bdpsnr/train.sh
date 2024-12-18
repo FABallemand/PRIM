@@ -24,7 +24,7 @@ LAMBDA=0.1800
 
 eval "$(conda shell.bash hook)"
 
-conda activate balle_reproduction
+conda activate prim_env
 
 set -x
 srun python3 -u train.py -m $MODEL -d $DATASET --num-workers 2 --epochs 65 --batch-size 16 -lr 1e-4 --cuda --savepath train_res/$SLURM_JOB_ID --lambda $LAMBDA --quality $QUALITY

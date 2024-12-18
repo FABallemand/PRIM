@@ -173,3 +173,34 @@
 - Understand KD:
   - Read and create reading notes
   - Read Microdosing: Knowledge Distillation for GAN based Compression
+
+## 14/12/2024
+- Understand KD:
+  - Read and create reading notes
+  - Read Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation
+  - Read RD efficient FPGA implementation of LIC model without complex hardware space design exploration (DRAFT)
+
+## 18/12/2024
+- Meeting:
+  - Apply KD to AE
+    - Difficult to analyse results when teacher does not perform great
+    - Train on 10% of OpenImages
+    - Do reconstruction (instead of denoising) ie: learn identity function
+    - Use Ballé models as teacher (192 channels) and create a student from this architecture
+    - Use weight and biases to log results
+    - Future: experiment with different architectures and loss functions
+- Apply KD to AE:
+  - Find N, M values for "bmshj2018-hyperprior": {
+        1: (128, 192),
+        2: (128, 192),
+        3: (128, 192),
+        4: (128, 192),
+        5: (128, 192),
+        6: (192, 320),
+        7: (192, 320),
+        8: (192, 320),
+    },
+    - Learn how to use Weights and Biases
+    - Rename conda env (balle_reproduction -> prim_env)
+    - Access OpenImages dataset with TensorFlow Datasets
+      - it does not work, storage limitation...

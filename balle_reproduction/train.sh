@@ -20,7 +20,7 @@ CHECKPOINT=/home/ids/fallemand-24/PRIM/balle_reproduction/train_res/227892/check
 
 eval "$(conda shell.bash hook)"
 
-conda activate balle_reproduction
+conda activate prim_env
 
 set -x
 # srun python3 -u balle_reproduction.py -m $MODEL -d $DATASET --num-workers 2 --epochs 1000000 --batch-size 8 -lr 1e-4 --cuda --savepath train_res/$SLURM_JOB_ID
