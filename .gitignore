@@ -15,6 +15,7 @@ data/vimeo/
 **/results/
 **/train_res/
 **/test_res/
+**/wandb/
 
 # Report
 _minted-main/
