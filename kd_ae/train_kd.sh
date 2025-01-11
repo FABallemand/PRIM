@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --output=train_res/%j/%j_train.out
-#SBATCH --error=train_res/%j/%j_train.err
+#SBATCH --output=train_res/%j/%j_train_kd.out
+#SBATCH --error=train_res/%j/%j_train_kd.err
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --gpus=1
@@ -15,4 +15,4 @@ eval "$(conda shell.bash hook)"
 conda activate prim_env
 
 set -x
-srun python3 -u train.py $SLURM_JOB_ID
+srun python3 -u train_kd.py $SLURM_JOB_ID

@@ -14,12 +14,13 @@ from torch.utils.data import DataLoader
 
 from compressai.datasets import Vimeo90kDataset
 # from compressai.zoo.image import _load_model
-from compressai.models.google import ScaleHyperprior
+# from compressai.models.google import ScaleHyperprior
 
 from tqdm.auto import tqdm
 import wandb
 
-from losses import AverageMeter
+from models import ScaleHyperprior
+from losses import AverageMeter, KDLoss
 
 # Set seeds
 torch.backends.cudnn.deterministic = True
@@ -74,26 +75,28 @@ def make(config):
         shuffle=True, pin_memory=(device == "cuda")
     )
 
-    # Create model
-    model = ScaleHyperprior(config.N, config.M).to(device)
+    # Create models
+    teacher_model = ScaleHyperprior(config.teacher_N, config.M).to(device)
+    student_model = ScaleHyperprior(config.student_N, config.M).to(device)
 
     # Create loss
-    criterion = nn.MSELoss()
+    criterion = KDLoss(latent=config.latent_loss)
 
     # Create optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+    optimizer = torch.optim.Adam(student_model.parameters(), lr=config.learning_rate)
 
     # Learning rate scheduler
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
     
-    return model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler
+    return teacher_model, student_model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler
 
 
 def train_epoch(
-        epoch, model, criterion, train_dataloader, optimizer, clip_max_norm=1.0):
+        epoch, teacher_model, student_model, criterion, train_dataloader,
+        optimizer, clip_max_norm=1.0):
     # Set-up
-    model.train()
-    device = next(model.parameters()).device
+    student_model.train()
+    device = next(student_model.parameters()).device
 
     n_examples = 0 # Number of examples processed
     for i, x in enumerate(train_dataloader):
@@ -101,8 +104,11 @@ def train_epoch(
         x = x.to(device)
 
         # Forward pass
-        output = model(x)
-        loss = criterion(output["x_hat"], x)
+        teacher_output = teacher_model(x)
+        student_output = student_model(x)
+        loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"],
+                                    student_output["x_hat"], teacher_output["x_hat"],
+                                    x)
 
         # Backward pass
         optimizer.zero_grad()
@@ -110,7 +116,7 @@ def train_epoch(
 
         # Optimisation step
         if clip_max_norm > 0:
-            torch.nn.utils.clip_grad_norm_(model.parameters(), clip_max_norm)
+            torch.nn.utils.clip_grad_norm_(student_model.parameters(), clip_max_norm)
         optimizer.step()
 
         # Update variables
@@ -118,20 +124,26 @@ def train_epoch(
 
         # Logging
         if ((i + 1) % 10) == 0:
-            wandb.log({"epoch": epoch, "loss": loss.item()}, step=n_examples)
+            log_dict = {
+                "epoch": epoch,
+                "loss": loss.item()
+            }
+            log_dict |= loss_dict
+            wandb.log(log_dict, step=n_examples)
             print(
                 f"Train epoch {epoch}: ["
                 f"{i*len(x)}/{len(train_dataloader.dataset)}"
                 f" ({100. * i / len(train_dataloader):.0f}%)]"
                 f"\tLoss: {loss.item():.3f}"
+                f"\t{f"{[f'{k} = {v:.3f}' for k, v in loss_dict.items()]}"}"
             )
 
 
 def train(
-        model, train_data_loader, validation_data_loader, criterion, optimizer,
-        lr_scheduler, config):
+        teacher_model, student_model, train_data_loader, validation_data_loader,
+        criterion, optimizer, lr_scheduler, config):
     # Configure wandb
-    wandb.watch(model, criterion, log="all", log_freq=10)
+    wandb.watch(student_model, criterion, log="all", log_freq=10)
 
     # Run training and track with wandb
     best_loss = float("inf") # Best loss
@@ -139,10 +151,10 @@ def train(
         print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
 
         # Train one epoch
-        train_epoch(epoch, model, criterion, train_data_loader, optimizer)
+        train_epoch(epoch, teacher_model, student_model, criterion, train_data_loader, optimizer)
 
         # Validation
-        loss = validation(validation_data_loader, model, criterion) # other data loader
+        loss = validation(validation_data_loader, student_model, criterion) # other data loader
 
         # Learning rate scheduler step
         lr_scheduler.step(loss)
@@ -152,7 +164,7 @@ def train(
         best_loss = min(loss, best_loss)
         checkpoint = {
             "epoch": epoch,
-            "state_dict": model.state_dict(),
+            "state_dict": student_model.state_dict(),
             "loss": loss,
             "optimizer": optimizer.state_dict(),
             "lr_scheduler": lr_scheduler.state_dict(),
@@ -160,8 +172,8 @@ def train(
         save_checkpoint(
             checkpoint,
             is_best,
-            os.path.join(config.save_path, "checkpoint.pth.tar"),
-            os.path.join(config.save_path, "checkpoint_best.pth.tar")
+            os.path.join(config.save_path, "/checkpoint.pth.tar"),
+            os.path.join(config.save_path, "/checkpoint_best.pth.tar")
         )
 
 
@@ -228,16 +240,17 @@ def model_pipeline(config):
         print(config)
 
         # Make model, data and optimizater
-        model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler = make(config)
-        print(model)
+        teacher_model, student_model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler = make(config)
+        print(teacher_model)
+        print(student_model)
 
         # Train model
-        train(model, train_loader, validation_loader, criterion, optimizer, lr_scheduler, config)
+        train(teacher_model, student_model, train_loader, validation_loader, criterion, optimizer, lr_scheduler, config)
 
         # Test model
-        test(model, test_loader, config)
+        test(student_model, test_loader, config)
 
-    return model
+    return teacher_model, student_model
 
 
 if __name__ == "__main__":
@@ -248,12 +261,14 @@ if __name__ == "__main__":
         job_id=job_id,
         dataset="Vimeo90K",
         architecture="ScaleHyperprior",
-        N=64,
-        # N=128,
+        N_teacher=128,
+        N_student=64,
         M=192,
+        teacher_checkpoint="train_res/id/best_checkpoint.pth.tar",
         epochs=1000,
         batch_size=128,
         learning_rate=1e-4,
+        latent_loss=False,
         save_path=f"train_res/{job_id}"
     )
 

@@ -21,19 +21,32 @@ class AverageMeter:
 
 class KDLoss(nn.Module):
 
-    def __init__(self):
+    def __init__(self, latent=True):
         super().__init__()
-
-        self.lmbda_1 = 0.2
-        self.lmbda_2 = 0.2
-        self.lmbda_3 = 0.6
+        self.latent = latent
+        if self.latent:
+            self.lmbda_1 = 0.2
+            self.lmbda_2 = 0.2
+            self.lmbda_3 = 0.6
+        else:
+            self.lmbda_1 = 0.0
+            self.lmbda_2 = 0.4
+            self.lmbda_3 = 0.6
 
         self.latent_kd_loss = nn.KLDivLoss()
         self.output_kd_loss = nn.MSELoss()
         self.output_loss = nn.MSELoss()
 
-    def forward(self, latent_input, latent_kd_target, input, kd_trarget, target):
-        latent_kd_loss = self.lmbda_1 * self.latent_kd_loss(latent_input, latent_kd_target)
-        kd_loss = self.lmbda_2 * self.output_kd_loss(input, kd_trarget)
-        loss = self.lmbda_3 * self.output_loss(input, target)
-        return latent_kd_loss + kd_loss + loss
+    def forward(self, input_latent, latent_kd_target, input, kd_target, target):
+        if self.latent:
+            latent_kd_loss = self.latent_kd_loss(input_latent, latent_kd_target)
+        else:
+            latent_kd_loss = 0.0
+        kd_loss = self.output_kd_loss(input, kd_target)
+        loss = self.output_loss(input, target)
+        total_loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * kd_loss + self.lmbda_3 * loss
+        loss_dict = {
+            "latent_kd_loss": latent_kd_loss,
+            "kd_loss": kd_loss,
+            "loss": loss}
+        return total_loss, loss_dict

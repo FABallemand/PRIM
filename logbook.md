@@ -204,3 +204,14 @@
     - Rename conda env (balle_reproduction -> prim_env)
     - Access OpenImages dataset with TensorFlow Datasets
       - it does not work, storage limitation...
+
+## 19/12/2024
+- Meeting:
+  - possibility to use other image dataset
+  - Student number of channels 160/128
+  - Improve training script (log other losses, fix checkpoint save...)
+  - Train teacher and student alone
+  - Train student with KD try different losses, architecture and add loss on latent hyperprior
+
+# 11/01/2025
+- Update README

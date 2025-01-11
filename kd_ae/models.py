@@ -18,7 +18,7 @@ from compressai.models.base import (
 from compressai.models.utils import conv, deconv
 
 
-class ScaleHyperpriorTeacher(CompressionModel):
+class ScaleHyperprior(CompressionModel):
     r"""Scale Hyperprior model from J. Balle, D. Minnen, S. Singh, S.J. Hwang,
     N. Johnston: `"Variational Image Compression with a Scale Hyperprior"
     <https://arxiv.org/abs/1802.01436>`_ Int. Conf. on Learning Representations
@@ -115,6 +115,7 @@ class ScaleHyperpriorTeacher(CompressionModel):
 
         return {
             "x_hat": x_hat,
+            "y_hat": y_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
 

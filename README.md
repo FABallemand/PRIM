@@ -3,6 +3,12 @@
 ## 🖼️ Learned Image Compression on FPGA
 With the recent progress of machine learning, new compression algorithms appeared. These probabilistic algorithms are based on neural networks that can learn a better way to encode data with a minimum number of bits. The only issue being that these methods require way more processing power than previous state of the art compression algorithms. The goal of this project is to achieve realtime image compression on resource constrained platforms using frugal machine learning techniques such as pruning, quantisation and knowledge distillation.
 
+## 🗂️ Reporistory Organisation
+- The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model
+- The second step was to reproduce state-of-the-art results for different bit-rate/quality tradeoffs, this is contained in the `bdpsnr` folder
+- I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising (should have done reconstruction), the experiments and results can be found in `kd_ae_test`
+- As previsous results were not good, I proceeded in implementing knowledge distillation on state-of-the-art Ballé model for image reconstruction in `kd_ae`
+
 ## 🔗 Related Links
 
 ## Learned Image Compression
