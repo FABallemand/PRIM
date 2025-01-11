@@ -215,3 +215,6 @@
 
 # 11/01/2025
 - Update README
+- Train ScaleHyperPrior models (image reconstruction, no KD)
+  - Teacher (N=128) / Student (N=64)
+- Train TeacherAE and StudentAE models (image reconstruction, no KD)

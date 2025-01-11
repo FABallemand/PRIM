@@ -5,7 +5,7 @@ With the recent progress of machine learning, new compression algorithms appeare
 
 ## 🗂️ Reporistory Organisation
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model
-- The second step was to reproduce state-of-the-art results for different bit-rate/quality tradeoffs, this is contained in the `bdpsnr` folder
+- The second step was to reproduce state-of-the-art results for different bit-rate/quality tradeoffs, this is contained in the `balle_bdpsnr` folder
 - I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising (should have done reconstruction), the experiments and results can be found in `kd_ae_test`
 - As previsous results were not good, I proceeded in implementing knowledge distillation on state-of-the-art Ballé model for image reconstruction in `kd_ae`
 
