@@ -13,6 +13,7 @@ With the recent progress of machine learning, new compression algorithms appeare
 
 ## Learned Image Compression
 - [Neural/Learned Image Compression: An Overview](https://medium.com/@loijilai_me/learned-image-compression-an-overview-625f3ab709f2)
+- [End-to-end optimization of nonlinear transform codes for perceptual quality](https://arxiv.org/abs/1607.05006)
 - [End-to-end Optimized Image Compression](https://arxiv.org/abs/1611.01704)
 - [Variational Image Compression with a Scale Hyperprior](https://arxiv.org/abs/1802.01436)
 - [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736)
@@ -21,15 +22,15 @@ With the recent progress of machine learning, new compression algorithms appeare
 
 ## Knowledge Distillation
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
-- [Microdosing: Knowledge Distillation for GAN based Compression](https://arxiv.org/pdf/2201.02624)
-- [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/pdf/2309.02529)
+- [Microdosing: Knowledge Distillation for GAN based Compression](https://arxiv.org/abs/2201.02624)
+- [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/abs/2309.02529)
 - [Cross-Architecture Knowledge Distillation](https://arxiv.org/abs/2207.05273)
 - [Training data-efficient image transformers & distillation through attention](https://arxiv.org/abs/2012.12877)
 
 ### Metrics
 - [Structural similarity index measure](https://en.wikipedia.org/wiki/Structural_similarity_index_measure)
 - [Peak signal-to-noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio)
-- [Bjøntegaard Delta (BD): A Tutorial Overview of the Metric, Evolution, Challenges, and Recommendations](https://arxiv.org/pdf/2401.04039)
+- [Bjøntegaard Delta (BD): A Tutorial Overview of the Metric, Evolution, Challenges, and Recommendations](https://arxiv.org/abs/2401.04039)
 
 ### Tools
 - [CompressAI](https://interdigitalinc.github.io/CompressAI/zoo.html)

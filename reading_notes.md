@@ -2,6 +2,26 @@
 
 ## Learned Image Compression
 
+### [End-to-end Optimized Image Compression](https://arxiv.org/abs/1611.01704)
+- Image compression method with nonlinear analysis transformation, uniform quantizer, nonlinear synthesis transformation (conv and + nonlinear activation functions)
+- Jointly optimize entire model for rate-distortion performance
+- Better performance than JPEG and JPEG-2000 + improved visual quality
+- Image compression -> link with entropy and probability
+- Compression code -> finite entropy -> quantization -> lossy compression -> rate-distortion problem (depends on the use (storage, transmission))
+- Transfrom coding (linear transformation, quantization, lossless entropy coding) like JPEG and JPEG-2000
+- Framework for end-to-end optimization of an image compression model based
+on nonlinear transforms (trained using MSE and GDN achitecture inspired by biological visual system) (architecture figure)
+- Trick: quantization (zero gradient) is replaced by adding uniform noise during training
+- Close to VAE
+- Use of bitrate
+- MSE used to comparison to other related works and because there was no reliable perceptual metric for color images
+- Relation with variational generative models (authors started from rate-distortion optimization problem but their framework can be cast to variational problems)
+- Yields unperfect but impressive (perceptual and measured (PSNR and MS-SSIM)) results (lack of detail but no artifcats like JPEG and JPEG-2000 on all images at all bit-rates)
+- When bit-rate decreases quality progressively decrease (not the cas with JPEG and JPEG-2000, basis function)
+- Possible improvement if trained with perceptual metric (not MSE)
+
+In 2016, ... propose the first end-to-end optimised image compression framework. Based on the same three-step transform coding method (linear transformation, quantization, lossless entropy coding) as deterministic image compression algorithms like JPEG and JPEG-2000, the proposed model uses a nonlinear analysis transformation, a uniform quantizer and a lossless entropy coding. It should be noted that the analysis transformation is inspired by biological visual systems and made of convolutions and nonlinear activation functions. By replacing quanitization by additive uniform noise at training time (where quantization would have cancelled gradients), the model is jointly optimised for rate-distortion performance using MSE. Although optimizing the model for a measure of perceptual distortion, would have exhibited visually superior performance, MSE was used in order to facilitate comparison with related works (usually trained with MSE) and because there was no reliable perceptual metric for color images. This novel framework yields unperfect but impressive results: details are lost in compression but it does not suffer from artifacts like JPEG and JPEG-2000. It outperforms JPEG and JPEG-2000 at all bit-rates both perceptually and quantitatively according to PSNR and MS-SSIM measures thanks to its ability of progressively reducing the image quality.
+
 ## Knowledge Distillation
 
 ### [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
@@ -28,7 +48,7 @@
 
 Originally created in ... to achieve the same results than ensemble of models with a lower computational cost, knowledge distillation consists in transferring the knowledge of a cumbersome model into a single smaller one. In this approach the knowledge of a neural network is not represented by its weights but by the vector to vector mapping it has learned. A large "teacher" model can be trained with unlimited computing power for a long time on large datasets, then a smaller "student" model can learn the mapping of the teacher by using teh teacher's predictions as soft targets. This is different than training a smaller model alone, as the student model has a higher ability to generalize while requiring fewer and possibly unlabelled data. To compensate the lack of entropy (information) of the soft targets of simple tasks, the authors propose to use a temperature parameter to soften the teacher model output distribution.
 
-### [Microdosing: Knowledge Distillation for GAN based Compression](https://arxiv.org/pdf/2201.02624)
+### [Microdosing: Knowledge Distillation for GAN based Compression](https://arxiv.org/abs/2201.02624)
 - Context of image and video compression (internet traffic, pandamy)
 - "At a high level, most of the methods can be understood as a sort of generative model that tries to
 reconstruct the input instance from a quantized latent representation, coupled with a prior that is used
@@ -54,7 +74,7 @@ In the context of LIC, it is often assumed that the encoding task is performed o
 
 Noting that GAN-based LIC frameworks (like state of the art HiFiC) are able to reproduce texture using large general purpose networks, the approach proposed in ... overfits a smaller decoder network for every sequence of images that can be sent alongside the latents (more precisely only the blocs responsible of the texture decompression are replaced by a smaller bloc). The smaller decoder is trained using KD on the encoder side. This approach dramatically reduces the decoder model size and the decoding time while providing a great image quality.
 
-### [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/pdf/2309.02529)
+### [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/abs/2309.02529)
 - "The main components of classical image compression standards, e.g., JPEG [1], JPEG 2000 [2], BPG (intra-coding of H.265/HEVC) [3], and H.266/VVC [4], include linear transform, quantization, and entropy coding. In the end-to-end learning-based framework, these components have been re-designed carefully."
 - Detail current techniques of LIC
 - Deformable Residual Module (DRM)
@@ -78,4 +98,4 @@ Noting that GAN-based LIC frameworks (like state of the art HiFiC) are able to r
 - Big and complex architecture!!
 - TODO: better understand the architecture...
 
-The authors of ... propose four techniques to improve LIC with resource cautious decoders. They first imporve standard LIC by using deformable conviolution (convolution with a deformable receptive field) that helps extracting better features and representing objects. Then, a checkerboard context model is used to increase parallelism execution and a three-step KD method is used to reduce the decoder complexity (train teacher, train student with same architecture of the teacher jointly with the teacher, perform ablation on less relevant blocs of the student decoder and re-train jointly with teacher). Finally, L1 regularisation is introduced to make the latent representation sparser allowing to speed up decoding by only encoding non-zero channels in the encoding and decoding process, which can greatly reduce the encoding and decoding time at the cost of coding performance. The experimental results presented by the authors show better performance than traditional codes and state of the art LIC methods in both image quality and encoding-decoding time. 
+The authors of ... propose four techniques to improve LIC with resource cautious decoders. They first improve standard LIC by using deformable convolution (convolution with a deformable receptive field) that helps extracting better features and representing objects. Then, a checkerboard context model is used to increase parallelism execution and a three-step KD method is used to reduce the decoder complexity (train teacher, train student with same architecture of the teacher jointly with the teacher, perform ablation on less relevant blocs of the student decoder and re-train jointly with teacher). Finally, L1 regularisation is introduced to make the latent representation sparser allowing to speed up decoding by only encoding non-zero channels in the encoding and decoding process, which can greatly reduce the encoding and decoding time at the cost of coding performance. The experimental results presented by the authors show better performance than traditional codes and state of the art LIC methods in both image quality and encoding-decoding time. 
