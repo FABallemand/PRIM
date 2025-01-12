@@ -164,8 +164,8 @@ def test_epoch(epoch, test_dataloader, teacher_net, student_net, criterion):
             loss.update(out_criterion)
 
     print(
-        f"Test epoch {epoch}: Average losses:"
-        f"\tLoss: {loss.avg:.3f}\n"
+        f"Test epoch {epoch}: "
+        f"Loss: {loss.avg:.3f}"
     )
 
     return loss.avg

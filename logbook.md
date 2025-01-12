@@ -213,8 +213,15 @@
   - Train teacher and student alone
   - Train student with KD try different losses, architecture and add loss on latent hyperprior
 
-# 11/01/2025
+## 11/01/2025
 - Update README
-- Train ScaleHyperPrior models (image reconstruction, no KD)
+- Train ScaleHyperPrior models (image reconstruction, teacher and no KD)
   - Teacher (N=128) / Student (N=64)
-- Train TeacherAE and StudentAE models (image reconstruction, no KD)
+- Train TeacherAE and StudentAE models (image reconstruction, teacher and no KD)
+- Understand LIC:
+  - Read and create reading notes
+  - Read End-to-end Optimized Image Compression
+
+## 12/01/2025
+- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss)
+- Train TeacherAE and StudentAE models (image reconstruction, student KD)

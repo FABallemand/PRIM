@@ -44,6 +44,11 @@ def save_checkpoint(
 
 
 def make(config):
+    # Configure GPUs
+    print([torch.cuda.device(i) for i in range(torch.cuda.device_count())])
+    teacher_device = torch.device("cuda:0")
+    student_device = torch.device("cuda:1")
+
     # Create transformation
     load_transform = transforms.Compose(
         [transforms.RandomCrop((256,256)), transforms.ToTensor()]
@@ -76,8 +81,14 @@ def make(config):
     )
 
     # Create models
-    teacher_model = ScaleHyperprior(config.teacher_N, config.M).to(device)
-    student_model = ScaleHyperprior(config.student_N, config.M).to(device)
+    teacher_model = ScaleHyperprior(config.N_teacher, config.M)
+    student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
+
+    # Load teacher weights
+    checkpoint = torch.load(config.teacher_checkpoint,
+        weights_only=True, map_location=torch.device("cpu"))
+    teacher_model.load_state_dict(checkpoint["state_dict"])
+    teacher_model = teacher_model.eval().to(teacher_device)
 
     # Create loss
     criterion = KDLoss(latent=config.latent_loss)
@@ -96,19 +107,21 @@ def train_epoch(
         optimizer, clip_max_norm=1.0):
     # Set-up
     student_model.train()
-    device = next(student_model.parameters()).device
+    student_device = next(student_model.parameters()).device
+    teacher_device = next(teacher_model.parameters()).device
 
     n_examples = 0 # Number of examples processed
     for i, x in enumerate(train_dataloader):
         # Load batch
-        x = x.to(device)
+        teacher_x = x.to(teacher_device)
+        student_x = x.to(student_device)
 
         # Forward pass
-        teacher_output = teacher_model(x)
-        student_output = student_model(x)
-        loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"],
-                                    student_output["x_hat"], teacher_output["x_hat"],
-                                    x)
+        teacher_output = teacher_model(teacher_x)
+        student_output = student_model(student_x)
+        loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
+                                    student_output["x_hat"], teacher_output["x_hat"].to(student_device),
+                                    student_x)
 
         # Backward pass
         optimizer.zero_grad()
@@ -264,11 +277,11 @@ if __name__ == "__main__":
         N_teacher=128,
         N_student=64,
         M=192,
-        teacher_checkpoint="train_res/id/best_checkpoint.pth.tar",
-        epochs=1000,
+        teacher_checkpoint="train_res/254451/checkpoint_best.pth.tar",
+        epochs=93,
         batch_size=128,
         learning_rate=1e-4,
-        latent_loss=False,
+        latent_loss=True,
         save_path=f"train_res/{job_id}"
     )
 
