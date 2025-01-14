@@ -167,7 +167,7 @@ def train(
         train_epoch(epoch, teacher_model, student_model, criterion, train_data_loader, optimizer)
 
         # Validation
-        loss = validation(validation_data_loader, student_model, criterion) # other data loader
+        loss = validation(validation_data_loader, teacher_model, student_model, criterion)
 
         # Learning rate scheduler step
         lr_scheduler.step(loss)
@@ -185,26 +185,31 @@ def train(
         save_checkpoint(
             checkpoint,
             is_best,
-            os.path.join(config.save_path, "/checkpoint.pth.tar"),
-            os.path.join(config.save_path, "/checkpoint_best.pth.tar")
+            os.path.join(config.save_path, "checkpoint.pth.tar"),
+            os.path.join(config.save_path, "checkpoint_best.pth.tar")
         )
 
 
-def validation(data_loader, model, criterion):
+def validation(data_loader, teacher_model, student_model, criterion):
     # Set-up
-    model.eval()
-    device = next(model.parameters()).device
+    student_model.eval()
+    student_device = next(student_model.parameters()).device
+    teacher_device = next(teacher_model.parameters()).device
 
     avg_loss = AverageMeter()
 
     with torch.no_grad():
         for i, x in enumerate(data_loader):
             # Load batch
-            x = x.to(device)
+            teacher_x = x.to(teacher_device)
+            student_x = x.to(student_device)
 
             # Forward pass
-            output = model(x)
-            loss = criterion(output["x_hat"], x)
+            teacher_output = teacher_model(teacher_x)
+            student_output = student_model(student_x)
+            loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
+                                        student_output["x_hat"], teacher_output["x_hat"].to(student_device),
+                                        student_x)
 
             # Update loss
             avg_loss.update(loss)
@@ -214,14 +219,15 @@ def validation(data_loader, model, criterion):
     return avg_loss.avg
 
 
-def test(model, data_loader, criterion, config):
+def test(model, data_loader, config):
     # Set-up
     device = next(model.parameters()).device
-    checkpoint = torch.load(f"{config.save_path}/checkpoint_best.pth.tar",
+    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
                             weights_only=True, map_location=torch.device("cpu"))
     model.load_state_dict(checkpoint["state_dict"])
     model = model.eval().to(device)
 
+    criterion = nn.MSELoss()
     avg_loss = AverageMeter()
 
     with torch.no_grad():
@@ -241,7 +247,7 @@ def test(model, data_loader, criterion, config):
     print(f"Validation loss: {avg_loss.avg:.3f}")
 
     # Save the model in the exchangeable ONNX format
-    torch.onnx.export(model, x, f"{config.save_path}/model.onnx")
+    torch.onnx.export(model, x, os.path.join(config.save_path, "model.onnx"))
     wandb.save(f"{config.save_path}/model.onnx")
 
 

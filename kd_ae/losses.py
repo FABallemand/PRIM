@@ -42,11 +42,11 @@ class KDLoss(nn.Module):
             latent_kd_loss = self.latent_kd_loss(input_latent, latent_kd_target)
         else:
             latent_kd_loss = 0.0
-        kd_loss = self.output_kd_loss(input, kd_target)
+        output_kd_loss = self.output_kd_loss(input, kd_target)
         output_loss = self.output_loss(input, target)
-        loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * kd_loss + self.lmbda_3 * loss
+        loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * output_kd_loss + self.lmbda_3 * output_loss
         loss_dict = {
             "latent_kd_loss": latent_kd_loss,
-            "output_kd_loss": kd_loss,
+            "output_kd_loss": output_kd_loss,
             "output_loss": output_loss}
         return loss, loss_dict

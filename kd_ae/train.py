@@ -35,10 +35,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def save_checkpoint(
         checkpoint, is_best, path="checkpoint.pth.tar",
         best_path="checkpoint_best.pth.tar"):
-    print(path)
     torch.save(checkpoint, path)
     if is_best:
-        print(best_path)
         shutil.copyfile(path, best_path)
 
 
@@ -192,7 +190,7 @@ def validation(data_loader, model, criterion):
 def test(model, data_loader, criterion, config):
     # Set-up
     device = next(model.parameters()).device
-    checkpoint = torch.load(f"{config.save_path}/checkpoint_best.pth.tar",
+    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
                             weights_only=True, map_location=torch.device("cpu"))
     model.load_state_dict(checkpoint["state_dict"])
     model = model.eval().to(device)
@@ -216,7 +214,7 @@ def test(model, data_loader, criterion, config):
     print(f"Validation loss: {avg_loss.avg:.3f}")
 
     # Save the model in the exchangeable ONNX format
-    torch.onnx.export(model, x, f"{config.save_path}/model.onnx")
+    torch.onnx.export(model, x, os.path.join(config.save_path, "model.onnx"))
     wandb.save(f"{config.save_path}/model.onnx")
 
 

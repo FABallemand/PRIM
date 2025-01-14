@@ -225,3 +225,8 @@
 ## 12/01/2025
 - Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss)
 - Train TeacherAE and StudentAE models (image reconstruction, student KD)
+
+## 13/01/2025
+- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss)
+- Test TeacherAE and StudentAE models (image reconstruction)
+  - Not impressive...
