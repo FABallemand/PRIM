@@ -230,3 +230,13 @@
 - Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss)
 - Test TeacherAE and StudentAE models (image reconstruction)
   - Not impressive...
+
+## 14/01/2025
+- Understand LIC:
+  - Read and create reading notes
+  - Read End-to-end optimization of nonlinear transform codes for perceptual quality
+- Update report 2
+
+
+## TODO
+- Remake pdf of first report (correct errors)
