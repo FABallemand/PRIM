@@ -217,17 +217,21 @@
 - Update README
 - Train ScaleHyperPrior models (image reconstruction, teacher and no KD)
   - Teacher (N=128) / Student (N=64)
+  - 254451
+  - 254452
 - Train TeacherAE and StudentAE models (image reconstruction, teacher and no KD)
 - Understand LIC:
   - Read and create reading notes
   - Read End-to-end Optimized Image Compression
 
 ## 12/01/2025
-- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss)
+- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss KL)
 - Train TeacherAE and StudentAE models (image reconstruction, student KD)
 
 ## 13/01/2025
-- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss)
+- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss KL)
+  - 256893
+  - 256894
 - Test TeacherAE and StudentAE models (image reconstruction)
   - Not impressive...
 
@@ -236,6 +240,9 @@
   - Read and create reading notes
   - Read End-to-end optimization of nonlinear transform codes for perceptual quality
 - Update report 2
+- Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss MSE)
+  - 257451 (no latent loss)
+  - 257451 (latent loss)
 
 
 ## TODO

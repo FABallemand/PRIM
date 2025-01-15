@@ -33,15 +33,14 @@ class KDLoss(nn.Module):
             self.lmbda_2 = 0.4
             self.lmbda_3 = 0.6
 
-        self.latent_kd_loss = nn.KLDivLoss()
+        self.latent_kd_loss = nn.MSELoss() # nn.KLDivLoss()
         self.output_kd_loss = nn.MSELoss()
         self.output_loss = nn.MSELoss()
 
     def forward(self, input_latent, latent_kd_target, input, kd_target, target):
+        latent_kd_loss = 0.0
         if self.latent:
             latent_kd_loss = self.latent_kd_loss(input_latent, latent_kd_target)
-        else:
-            latent_kd_loss = 0.0
         output_kd_loss = self.output_kd_loss(input, kd_target)
         output_loss = self.output_loss(input, target)
         loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * output_kd_loss + self.lmbda_3 * output_loss
