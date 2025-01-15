@@ -244,6 +244,10 @@
   - 257451 (no latent loss)
   - 257451 (latent loss)
 
+## 15/01/2025
+- Meeting:
+  - Need working code
+  - Evaluate with PSNR during training
 
 ## TODO
 - Remake pdf of first report (correct errors)
