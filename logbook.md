@@ -248,6 +248,7 @@
 - Meeting:
   - Need working code
   - Evaluate with PSNR during training
+- Train multiple students with different architectures
 
 ## TODO
 - Remake pdf of first report (correct errors)

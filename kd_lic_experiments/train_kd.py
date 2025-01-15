@@ -3,6 +3,7 @@ import sys
 import shutil
 import random
 
+import math
 import numpy as np
 
 import torch
@@ -11,15 +12,23 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
+from pytorch_msssim import ms_ssim
 
 from compressai.datasets import Vimeo90kDataset
-# from compressai.zoo.image import _load_model
-# from compressai.models.google import ScaleHyperprior
+from compressai.zoo.image import (
+    model_urls,
+    load_state_dict_from_url,
+    load_pretrained,
+    _load_model,
+    bmshj2018_hyperprior,
+    mbt2018_mean,
+    mbt2018
+)
 
 from tqdm.auto import tqdm
 import wandb
 
-from models import ScaleHyperprior
+from models import ScaleHyperprior, MeanScaleHyperprior, JointAutoregressiveHierarchicalPriors
 from losses import AverageMeter, KDLoss
 
 # Set seeds
@@ -31,6 +40,22 @@ torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2**32 - 1)
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def compute_psnr(a, b):
+    mse = torch.mean((a - b)**2).item()
+    return -10 * math.log10(mse)
+
+
+def compute_msssim(a, b):
+    return ms_ssim(a, b, data_range=1.).item()
+
+
+def compute_bpp(out_net):
+    size = out_net["x_hat"].size()
+    num_pixels = size[0] * size[2] * size[3]
+    return sum(torch.log(likelihoods).sum() / (-math.log(2) * num_pixels)
+               for likelihoods in out_net["likelihoods"].values()).item()
 
 
 def save_checkpoint(
@@ -79,20 +104,20 @@ def make(config):
     )
 
     # Create models
-    teacher_model = ScaleHyperprior(config.N_teacher, config.M)
+    # teacher_model = bmshj2018_hyperprior(quality=5, # Best quality with (N, M) = (128, 192)
+    #                                      pretrained=True).eval().to(teacher_device)
+    url = model_urls["bmshj2018-hyperprior"]["mse"][5]
+    state_dict = load_state_dict_from_url(url, progress=False)
+    state_dict = load_pretrained(state_dict)
+    teacher_model = ScaleHyperprior.from_state_dict(state_dict).eval().to(teacher_device)
     student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
-
-    # Load teacher weights
-    checkpoint = torch.load(config.teacher_checkpoint,
-        weights_only=True, map_location=torch.device("cpu"))
-    teacher_model.load_state_dict(checkpoint["state_dict"])
-    teacher_model = teacher_model.eval().to(teacher_device)
 
     # Create loss
     criterion = KDLoss(latent=config.latent_loss)
 
     # Create optimizer
-    optimizer = torch.optim.Adam(student_model.parameters(), lr=config.learning_rate)
+    optimizer = torch.optim.Adam(student_model.parameters(),
+                                 lr=config.learning_rate)
 
     # Learning rate scheduler
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
@@ -136,18 +161,70 @@ def train_epoch(
         # Logging
         if ((i + 1) % 10) == 0:
             log_dict = {
-                "epoch": epoch,
-                "loss": loss.item()
+                "epoch": epoch
             }
             log_dict |= loss_dict
             wandb.log(log_dict, step=n_examples)
             print(
-                f"Train epoch {epoch}: ["
+                f"Epoch {epoch}: ["
                 f"{i*len(x)}/{len(train_loader.dataset)}"
                 f" ({100. * i / len(train_loader):.0f}%)]"
-                f"\tLoss: {loss.item():.3f}"
-                f"\t{f"{[f'{k} = {v:.3f}' for k, v in loss_dict.items()]}"}"
+                f"{f"{[f'{k} = {v:.6f}' for k, v in loss_dict.items()]}"}"
             )
+
+
+def validation(data_loader, teacher_model, student_model, criterion):
+    # Set-up
+    student_model.eval()
+    student_device = next(student_model.parameters()).device
+    teacher_device = next(teacher_model.parameters()).device
+
+    # Init measures
+    avg_loss = AverageMeter()
+    avg_latent_kd_loss = AverageMeter()
+    avg_output_kd_loss = AverageMeter()
+    avg_output_loss = AverageMeter()
+    avg_psnr = AverageMeter()
+    avg_msssim = AverageMeter()
+    avg_bpp = AverageMeter()
+
+    with torch.no_grad():
+        for i, x in enumerate(data_loader):
+            # Load batch
+            teacher_x = x.to(teacher_device)
+            student_x = x.to(student_device)
+
+            # Forward pass
+            teacher_output = teacher_model(teacher_x)
+            student_output = student_model(student_x)
+            loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
+                                        student_output["x_hat"], teacher_output["x_hat"].to(student_device),
+                                        student_x)
+            # Update measures
+            avg_loss.update(loss_dict["loss"])
+            avg_latent_kd_loss.update(loss_dict["latent_kd_loss"])
+            avg_output_kd_loss.update(loss_dict["output_kd_loss"])
+            avg_output_loss.update(loss_dict["output_loss"])
+            avg_psnr.update(compute_psnr(student_x, student_output["x_hat"]))
+            avg_msssim.update(compute_msssim(student_x, student_output["x_hat"]))
+            avg_bpp.update(compute_bpp(student_output))
+
+    # Logging
+    log_dict = {
+        "validation_loss": avg_loss.avg,
+        "validation_latent_kd_loss": avg_latent_kd_loss.avg,
+        "validation_output_kd_loss": avg_output_kd_loss.avg,
+        "validation_output_loss": avg_output_loss.avg,
+        "validation_psnr": avg_psnr.avg,
+        "validation_msssim": avg_msssim.avg,
+        "validation_bpp": avg_bpp.avg
+    }
+    wandb.log(log_dict)
+    print(
+        f"Validation: {f"{[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"}"
+    )
+
+    return avg_loss.avg
 
 
 def train(
@@ -188,70 +265,56 @@ def train(
         )
 
 
-def validation(data_loader, teacher_model, student_model, criterion):
+def test(student_model, data_loader, config):
     # Set-up
-    student_model.eval()
     student_device = next(student_model.parameters()).device
-    teacher_device = next(teacher_model.parameters()).device
+    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
+                            weights_only=True, map_location=torch.device("cpu"))
+    student_model.load_state_dict(checkpoint["state_dict"])
+    student_model = student_model.eval().to(device)
 
+    # Init measures
+    criterion = nn.MSELoss()
     avg_loss = AverageMeter()
+    avg_psnr = AverageMeter()
+    avg_msssim = AverageMeter()
+    avg_bpp = AverageMeter()
 
     with torch.no_grad():
         for i, x in enumerate(data_loader):
             # Load batch
-            teacher_x = x.to(teacher_device)
             student_x = x.to(student_device)
 
             # Forward pass
-            teacher_output = teacher_model(teacher_x)
             student_output = student_model(student_x)
-            loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
-                                        student_output["x_hat"], teacher_output["x_hat"].to(student_device),
-                                        student_x)
+            loss = criterion(student_output["x_hat"], student_x)
 
-            # Update loss
+            # Update measures
             avg_loss.update(loss)
-
-    print(f"Validation loss: {avg_loss.avg:.3f}")
-
-    return avg_loss.avg
-
-
-def test(model, data_loader, config):
-    # Set-up
-    device = next(model.parameters()).device
-    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
-                            weights_only=True, map_location=torch.device("cpu"))
-    model.load_state_dict(checkpoint["state_dict"])
-    model = model.eval().to(device)
-
-    criterion = nn.MSELoss()
-    avg_loss = AverageMeter()
-
-    with torch.no_grad():
-        for i, x in enumerate(data_loader):
-            # Load batch
-            x = x.to(device)
-
-            # Forward pass
-            output = model(x)
-            loss = criterion(output["x_hat"], x)
-
-            # Update loss
-            avg_loss.update(loss)
+            avg_psnr.update(compute_psnr(student_x, student_output["x_hat"]))
+            avg_msssim.update(compute_msssim(student_x, student_output["x_hat"]))
+            avg_bpp.update(compute_bpp(student_output))
 
     # Logging
-    wandb.log({"test_loss": avg_loss.avg})
-    print(f"Validation loss: {avg_loss.avg:.3f}")
+    log_dict = {
+        "test_loss": avg_loss.avg,
+        "test_psnr": avg_psnr.avg,
+        "test_msssim": avg_msssim.avg,
+        "test_bpp": avg_bpp.avg
+    }
+    wandb.log(log_dict)
+    print(
+        f"Test: {f"{[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"}"
+    )
 
     # Save the model in the exchangeable ONNX format
-    torch.onnx.export(model, x, os.path.join(config.save_path, "model.onnx"))
+    torch.onnx.export(student_model, x, os.path.join(config.save_path, "model.onnx"))
     wandb.save(f"{config.save_path}/model.onnx")
 
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_kd_experiments", config=config):
         # Access config
         config = wandb.config
         print(config)
@@ -260,6 +323,7 @@ def model_pipeline(config):
         teacher_model, student_model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler = make(config)
         print(teacher_model)
         print(student_model)
+        print(criterion)
 
         # Train model
         train(teacher_model, student_model, train_loader, validation_loader, criterion, optimizer, lr_scheduler, config)
@@ -278,11 +342,10 @@ if __name__ == "__main__":
         job_id=job_id,
         dataset="Vimeo90K",
         architecture="ScaleHyperprior",
-        N_teacher=128,
         N_student=64,
         M=192,
         teacher_checkpoint="train_res/254451/checkpoint_best.pth.tar",
-        epochs=93,
+        epochs=2,
         batch_size=128,
         learning_rate=1e-4,
         latent_loss=True,

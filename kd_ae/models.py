@@ -1,20 +1,9 @@
-import warnings
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-from compressai.ans import BufferedRansEncoder, RansDecoder
 from compressai.entropy_models import EntropyBottleneck, GaussianConditional
-from compressai.layers import GDN, MaskedConv2d
-
-from compressai.models.base import (
-    SCALES_LEVELS,
-    SCALES_MAX,
-    SCALES_MIN,
-    CompressionModel,
-    get_scale_table,
-)
+from compressai.layers import GDN
+from compressai.models.base import CompressionModel
 from compressai.models.utils import conv, deconv
 
 
