@@ -256,6 +256,9 @@
   - 258259
   - 258262
   - 258263
+- Test ScaleHyperPrior models (image reconstruction, student KD with and without latent loss MSE)
+  - 257451 (no latent loss)
+  - 257451 (latent loss)
 
 ## TODO
 - Remake pdf of first report (correct errors)

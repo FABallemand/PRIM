@@ -289,8 +289,8 @@ def test(student_model, data_loader, config):
 
             # Update measures
             avg_loss.update(loss)
-            avg_psnr.update(compute_psnr(student_x, student_output["x_hat"]))
-            avg_msssim.update(compute_msssim(student_x, student_output["x_hat"]))
+            avg_psnr.update(compute_psnr(student_output["x_hat"], student_x))
+            avg_msssim.update(compute_msssim(student_output["x_hat"], student_x))
             avg_bpp.update(compute_bpp(student_output))
 
     # Logging
