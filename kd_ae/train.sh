@@ -10,9 +10,13 @@
 DATE=$(date +'%Y%m%d_%H%M%S')
 echo $DATE
 
+mkdir train_res/$SLURM_JOB_ID
+
+DATASET=/home/ids/fallemand-24/PRIM/data/vimeo/vimeo_triplet
+
 eval "$(conda shell.bash hook)"
 
 conda activate prim_env
 
 set -x
-srun python3 -u train.py $SLURM_JOB_ID
+srun python3 -u train.py -d $DATASET --num-workers 2 --epochs 40 --batch-size 8 -lr 1e-4 --cuda --savepath train_res/$SLURM_JOB_ID

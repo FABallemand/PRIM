@@ -1,292 +1,368 @@
-import os
-import sys
-import shutil
-import random
+# Copyright (c) 2021-2024, InterDigital Communications, Inc
+# All rights reserved.
 
-import numpy as np
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted (subject to the limitations in the disclaimer
+# below) provided that the following conditions are met:
+
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# * Neither the name of InterDigital Communications, Inc nor the names of its
+#   contributors may be used to endorse or promote products derived from this
+#   software without specific prior written permission.
+
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY
+# THIS LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
+# NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+import argparse
+import random
+import shutil
+import sys
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
+
 from torch.utils.data import DataLoader
+from torchvision import transforms
 
 from compressai.datasets import Vimeo90kDataset
-# from compressai.zoo.image import _load_model
-# from compressai.models.google import ScaleHyperprior
+from compressai.optimizers import net_aux_optimizer
+from compressai.zoo import image_models
 
-from tqdm.auto import tqdm
-import wandb
-
-from models import ScaleHyperprior
-from losses import AverageMeter, KDLoss
-
-# Set seeds
-torch.backends.cudnn.deterministic = True
-random.seed(hash("setting random seeds") % 2**32 - 1)
-np.random.seed(hash("improves reproducibility") % 2**32 - 1)
-torch.manual_seed(hash("by removing stochasticity") % 2**32 - 1)
-torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2**32 - 1)
-
-# Device configuration
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from models import TeacherAE, StudentAE
 
 
-def save_checkpoint(
-        checkpoint, is_best, path="checkpoint.pth.tar",
-        best_path="checkpoint_best.pth.tar"):
-    torch.save(checkpoint, path)
-    if is_best:
-        shutil.copyfile(path, best_path)
+class AverageMeter:
+    """Compute running average."""
+
+    def __init__(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
 
 
-def make(config):
-    # Configure GPUs
-    print([torch.cuda.device(i) for i in range(torch.cuda.device_count())])
-    teacher_device = torch.device("cuda:0")
-    student_device = torch.device("cuda:1")
+class CustomDataParallel(nn.DataParallel):
+    """Custom DataParallel to access the module methods."""
 
-    # Create transformation
-    load_transform = transforms.Compose(
-        [transforms.RandomCrop((256,256)), transforms.ToTensor()]
-    )
-
-    # Create data sets
-    if config.dataset == "Vimeo90K":
-        train_dataset = Vimeo90kDataset(
-            "/home/ids/fallemand-24/PRIM/data/vimeo/vimeo_triplet",
-            split="train", transform=load_transform)
-        validation_dataset = Vimeo90kDataset(
-            "/home/ids/fallemand-24/PRIM/data/vimeo/vimeo_triplet",
-            split="valid", transform=load_transform)
-        test_dataset = validation_dataset
-    else:
-        raise ValueError("Invalid dataset")
-
-    # Create data loaders
-    train_loader = DataLoader(
-        train_dataset, batch_size=config.batch_size, num_workers=2,
-        shuffle=True, pin_memory=(device == "cuda")
-    )
-    validation_loader = DataLoader(
-        validation_dataset, batch_size=config.batch_size, num_workers=2,
-        shuffle=True, pin_memory=(device == "cuda")
-    )
-    test_loader = DataLoader(
-        test_dataset, batch_size=config.batch_size, num_workers=2,
-        shuffle=True, pin_memory=(device == "cuda")
-    )
-
-    # Create models
-    teacher_model = ScaleHyperprior(config.N_teacher, config.M)
-    student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
-
-    # Load teacher weights
-    checkpoint = torch.load(config.teacher_checkpoint,
-        weights_only=True, map_location=torch.device("cpu"))
-    teacher_model.load_state_dict(checkpoint["state_dict"])
-    teacher_model = teacher_model.eval().to(teacher_device)
-
-    # Create loss
-    criterion = KDLoss(latent=config.latent_loss)
-
-    # Create optimizer
-    optimizer = torch.optim.Adam(student_model.parameters(), lr=config.learning_rate)
-
-    # Learning rate scheduler
-    lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
-    
-    return teacher_model, student_model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler
+    def __getattr__(self, key):
+        try:
+            return super().__getattr__(key)
+        except AttributeError:
+            return getattr(self.module, key)
 
 
-def train_epoch(
-        epoch, teacher_model, student_model, criterion, train_loader,
-        optimizer, clip_max_norm=1.0):
-    # Set-up
-    student_model.train()
-    student_device = next(student_model.parameters()).device
-    teacher_device = next(teacher_model.parameters()).device
+def configure_optimizers(net, args):
+    """Separate parameters for the main optimizer and the auxiliary optimizer.
+    Return two optimizers"""
+    conf = {
+        "net": {"type": "Adam", "lr": args.learning_rate},
+        "aux": {"type": "Adam", "lr": args.aux_learning_rate},
+    }
+    optimizer = net_aux_optimizer(net, conf)
+    return optimizer["net"], optimizer["aux"]
 
-    n_examples = 0 # Number of examples processed
-    for i, x in enumerate(train_loader):
-        # Load batch
-        teacher_x = x.to(teacher_device)
-        student_x = x.to(student_device)
 
-        # Forward pass
-        teacher_output = teacher_model(teacher_x)
-        student_output = student_model(student_x)
-        loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
-                                    student_output["x_hat"], teacher_output["x_hat"].to(student_device),
-                                    student_x)
+class KDLoss(nn.Module):
 
-        # Backward pass
+    def __init__(self):
+        super().__init__()
+
+        self.lmbda_1 = 0.2
+        self.lmbda_2 = 0.2
+        self.lmbda_3 = 0.6
+
+        self.latent_kd_loss = nn.KLDivLoss()
+        self.output_kd_loss = nn.MSELoss()
+        self.output_loss = nn.MSELoss()
+
+    def forward(self, latent_input, latent_kd_target, input, kd_trarget, target):
+        latent_kd_loss = self.lmbda_1 * self.latent_kd_loss(latent_input, latent_kd_target)
+        kd_loss = self.lmbda_2 * self.output_kd_loss(input, kd_trarget)
+        loss = self.lmbda_3 * self.output_loss(input, target)
+        return latent_kd_loss + kd_loss + loss
+
+
+def train_one_epoch(
+    teacher_net, student_net, criterion, train_dataloader, optimizer, epoch, clip_max_norm
+):
+    teacher_device = next(teacher_net.parameters()).device
+
+    student_net.train()
+    student_device = next(student_net.parameters()).device
+
+    for i, d in enumerate(train_dataloader):
+        d_student = d.to(student_device)
+
+        d_noisy = d + torch.randn_like(d) * 0.2
+        d_teacher_noisy = d_noisy.to(teacher_device)
+        d_student_noisy = d_noisy.to(student_device)
+
         optimizer.zero_grad()
-        loss.backward()
 
-        # Optimisation step
+        latent_teacher_out, teacher_out = teacher_net(d_teacher_noisy)
+        latent_student_out, student_out = student_net(d_student_noisy)
+
+        out_criterion = criterion(latent_student_out, latent_teacher_out,
+                                  student_out, teacher_out, d_student)
+        out_criterion.backward()
         if clip_max_norm > 0:
-            torch.nn.utils.clip_grad_norm_(student_model.parameters(), clip_max_norm)
+            torch.nn.utils.clip_grad_norm_(student_net.parameters(), clip_max_norm)
         optimizer.step()
 
-        # Update variables
-        n_examples += len(x)
-
-        # Logging
-        if ((i + 1) % 10) == 0:
-            log_dict = {
-                "epoch": epoch,
-                "loss": loss.item()
-            }
-            log_dict |= loss_dict
-            wandb.log(log_dict, step=n_examples)
+        if i % 10 == 0:
             print(
                 f"Train epoch {epoch}: ["
-                f"{i*len(x)}/{len(train_loader.dataset)}"
-                f" ({100. * i / len(train_loader):.0f}%)]"
-                f"\tLoss: {loss.item():.3f}"
-                f"\t{f"{[f'{k} = {v:.3f}' for k, v in loss_dict.items()]}"}"
+                f"{i*len(d)}/{len(train_dataloader.dataset)}"
+                f" ({100. * i / len(train_dataloader):.0f}%)]"
+                f'\tLoss: {out_criterion.item():.3f}\n'
             )
 
 
-def train(
-        teacher_model, student_model, train_data_loader, validation_data_loader,
-        criterion, optimizer, lr_scheduler, config):
-    # Configure wandb
-    wandb.watch(student_model, criterion, log="all", log_freq=10)
+def test_epoch(epoch, test_dataloader, teacher_net, student_net, criterion):
+    teacher_device = next(teacher_net.parameters()).device
 
-    # Run training and track with wandb
-    best_loss = float("inf") # Best loss
-    for epoch in tqdm(range(config.epochs)):
+    student_net.eval()
+    student_device = next(student_net.parameters()).device
+
+    loss = AverageMeter()
+
+    with torch.no_grad():
+        for d in test_dataloader:
+            d_student = d.to(student_device)
+
+            d_noisy = d + torch.randn_like(d) * 0.2
+            d_teacher_noisy = d_noisy.to(teacher_device)
+            d_student_noisy = d_noisy.to(student_device)
+
+            latent_teacher_out, teacher_out = teacher_net(d_teacher_noisy)
+            latent_student_out, student_out = student_net(d_student_noisy)
+
+            out_criterion = criterion(latent_student_out, latent_teacher_out,
+                                      student_out, teacher_out, d_student)
+
+            loss.update(out_criterion)
+
+    print(
+        f"Test epoch {epoch}: "
+        f"Loss: {loss.avg:.3f}"
+    )
+
+    return loss.avg
+
+
+def save_checkpoint(state, is_best, filename="checkpoint.pth.tar", best_filename="checkpoint_best.pth.tar"):
+    torch.save(state, filename)
+    if is_best:
+        shutil.copyfile(filename, best_filename)
+
+
+def parse_args(argv):
+    parser = argparse.ArgumentParser(description="Example training script.")
+    parser.add_argument(
+        "-m",
+        "--model",
+        default="bmshj2018-factorized",
+        choices=image_models.keys(),
+        help="Model architecture (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-d", "--dataset", type=str, required=True, help="Training dataset"
+    )
+    parser.add_argument(
+        "-e",
+        "--epochs",
+        default=100,
+        type=int,
+        help="Number of epochs (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-lr",
+        "--learning-rate",
+        default=1e-4,
+        type=float,
+        help="Learning rate (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-n",
+        "--num-workers",
+        type=int,
+        default=4,
+        help="Dataloaders threads (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--lambda",
+        dest="lmbda",
+        type=float,
+        default=1e-2,
+        help="Bit-rate distortion parameter (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=16, help="Batch size (default: %(default)s)"
+    )
+    parser.add_argument(
+        "--test-batch-size",
+        type=int,
+        default=64,
+        help="Test batch size (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--aux-learning-rate",
+        type=float,
+        default=1e-3,
+        help="Auxiliary loss learning rate (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--patch-size",
+        type=int,
+        nargs=2,
+        default=(256, 256),
+        help="Size of the patches to be cropped (default: %(default)s)",
+    )
+    parser.add_argument("--cuda", action="store_true", help="Use cuda")
+    parser.add_argument(
+        "--save", action="store_true", default=True, help="Save model to disk"
+    )
+    parser.add_argument("--savepath", type=str, help="Path to save checkpoint")
+    parser.add_argument("--seed", type=int, help="Set random seed for reproducibility")
+    parser.add_argument(
+        "--clip_max_norm",
+        default=1.0,
+        type=float,
+        help="gradient clipping max norm (default: %(default)s",
+    )
+    parser.add_argument("--checkpoint", type=str, help="Path to a checkpoint")
+    parser.add_argument("--teacher-checkpoint", type=str, help="Path to a checkpoint")
+    args = parser.parse_args(argv)
+    return args
+
+
+def main(argv):
+    args = parse_args(argv)
+
+    if args.seed is not None:
+        torch.manual_seed(args.seed)
+        random.seed(args.seed)
+
+    train_transforms = transforms.Compose(
+        [transforms.RandomCrop(args.patch_size), transforms.ToTensor()]
+    )
+
+    test_transforms = transforms.Compose(
+        [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
+    )
+
+    train_dataset = Vimeo90kDataset(args.dataset, split="train", transform=train_transforms)
+    test_dataset = Vimeo90kDataset(args.dataset, split="valid", transform=test_transforms)
+
+    device = "cuda" if args.cuda and torch.cuda.is_available() else "cpu"
+
+    train_dataloader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=True,
+        pin_memory=(device == "cuda"),
+    )
+
+    test_dataloader = DataLoader(
+        test_dataset,
+        batch_size=args.test_batch_size,
+        num_workers=args.num_workers,
+        shuffle=False,
+        pin_memory=(device == "cuda"),
+    )
+
+    teacher_net = TeacherAE()
+    checkpoint = torch.load(args.teacher_checkpoint,
+        weights_only=True, map_location=torch.device("cpu"))
+    teacher_net.load_state_dict(checkpoint["state_dict"])
+    teacher_net = teacher_net.eval().to(device)
+
+    student_net = StudentAE()
+    student_net = student_net.to(device)
+
+    if args.cuda and torch.cuda.device_count() > 1:
+        teacher_net = CustomDataParallel(teacher_net)
+        student_net = CustomDataParallel(student_net)
+
+    optimizer = torch.optim.Adam(student_net.parameters(), lr=args.learning_rate)
+    lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
+    criterion = KDLoss()
+
+    last_epoch = 0
+    if args.checkpoint:  # load from previous checkpoint
+        print("Loading", args.checkpoint)
+        checkpoint = torch.load(args.checkpoint, map_location=device)
+        last_epoch = checkpoint["epoch"] + 1
+        student_net.load_state_dict(checkpoint["state_dict"])
+        optimizer.load_state_dict(checkpoint["optimizer"])
+        lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+
+    best_loss = float("inf")
+    for epoch in range(last_epoch, args.epochs):
         print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
-
-        # Train one epoch
-        train_epoch(epoch, teacher_model, student_model, criterion, train_data_loader, optimizer)
-
-        # Validation
-        loss = validation(validation_data_loader, teacher_model, student_model, criterion)
-
-        # Learning rate scheduler step
+        train_one_epoch(
+            teacher_net,
+            student_net,
+            criterion,
+            train_dataloader,
+            optimizer,
+            epoch,
+            args.clip_max_norm,
+        )
+        loss = test_epoch(epoch, test_dataloader, teacher_net, student_net, criterion)
         lr_scheduler.step(loss)
 
-        # Save model
         is_best = loss < best_loss
         best_loss = min(loss, best_loss)
-        checkpoint = {
-            "epoch": epoch,
-            "state_dict": student_model.state_dict(),
-            "loss": loss,
-            "optimizer": optimizer.state_dict(),
-            "lr_scheduler": lr_scheduler.state_dict(),
-        }
-        save_checkpoint(
-            checkpoint,
-            is_best,
-            os.path.join(config.save_path, "checkpoint.pth.tar"),
-            os.path.join(config.save_path, "checkpoint_best.pth.tar")
-        )
 
-
-def validation(data_loader, teacher_model, student_model, criterion):
-    # Set-up
-    student_model.eval()
-    student_device = next(student_model.parameters()).device
-    teacher_device = next(teacher_model.parameters()).device
-
-    avg_loss = AverageMeter()
-
-    with torch.no_grad():
-        for i, x in enumerate(data_loader):
-            # Load batch
-            teacher_x = x.to(teacher_device)
-            student_x = x.to(student_device)
-
-            # Forward pass
-            teacher_output = teacher_model(teacher_x)
-            student_output = student_model(student_x)
-            loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
-                                        student_output["x_hat"], teacher_output["x_hat"].to(student_device),
-                                        student_x)
-
-            # Update loss
-            avg_loss.update(loss)
-
-    print(f"Validation loss: {avg_loss.avg:.3f}")
-
-    return avg_loss.avg
-
-
-def test(model, data_loader, config):
-    # Set-up
-    device = next(model.parameters()).device
-    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
-                            weights_only=True, map_location=torch.device("cpu"))
-    model.load_state_dict(checkpoint["state_dict"])
-    model = model.eval().to(device)
-
-    criterion = nn.MSELoss()
-    avg_loss = AverageMeter()
-
-    with torch.no_grad():
-        for i, x in enumerate(data_loader):
-            # Load batch
-            x = x.to(device)
-
-            # Forward pass
-            output = model(x)
-            loss = criterion(output["x_hat"], x)
-
-            # Update loss
-            avg_loss.update(loss)
-
-    # Logging
-    wandb.log({"test_loss": avg_loss.avg})
-    print(f"Validation loss: {avg_loss.avg:.3f}")
-
-    # Save the model in the exchangeable ONNX format
-    torch.onnx.export(model, x, os.path.join(config.save_path, "model.onnx"))
-    wandb.save(f"{config.save_path}/model.onnx")
-
-
-def model_pipeline(config):
-    # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd", config=config):
-        # Access config
-        config = wandb.config
-        print(config)
-
-        # Make model, data and optimizater
-        teacher_model, student_model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler = make(config)
-        print(teacher_model)
-        print(student_model)
-
-        # Train model
-        train(teacher_model, student_model, train_loader, validation_loader, criterion, optimizer, lr_scheduler, config)
-
-        # Test model
-        test(student_model, test_loader, config)
-
-    return teacher_model, student_model
+        if args.save:
+            if args.savepath:
+                save_checkpoint(
+                    {
+                        "epoch": epoch,
+                        "state_dict": student_net.state_dict(),
+                        "loss": loss,
+                        "optimizer": optimizer.state_dict(),
+                        "lr_scheduler": lr_scheduler.state_dict(),
+                    },
+                    is_best,
+                    args.savepath + "/checkpoint.pth.tar",
+                    args.savepath + "/checkpoint_best.pth.tar"
+                )
+            else:
+                save_checkpoint(
+                    {
+                        "epoch": epoch,
+                        "state_dict": student_net.state_dict(),
+                        "loss": loss,
+                        "optimizer": optimizer.state_dict(),
+                        "lr_scheduler": lr_scheduler.state_dict(),
+                    },
+                    is_best,
+                )
 
 
 if __name__ == "__main__":
-    job_id = sys.argv[1]
-
-    # Experiment configuration
-    config = dict(
-        job_id=job_id,
-        dataset="Vimeo90K",
-        architecture="ScaleHyperprior",
-        N_teacher=128,
-        N_student=64,
-        M=192,
-        teacher_checkpoint="train_res/254451/checkpoint_best.pth.tar",
-        epochs=93,
-        batch_size=128,
-        learning_rate=1e-4,
-        latent_loss=True,
-        save_path=f"train_res/{job_id}"
-    )
-
-    model_pipeline(config)
+    main(sys.argv[1:])

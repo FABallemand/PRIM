@@ -3,7 +3,6 @@ import sys
 import shutil
 import random
 
-import math
 import numpy as np
 
 import torch
@@ -12,10 +11,9 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from pytorch_msssim import ms_ssim
 
 from compressai.datasets import Vimeo90kDataset
-# from compressai.zoo.image import _load_model, bmshj2018_hyperprior, mbt2018_mean, mbt2018
+# from compressai.zoo.image import _load_model
 from compressai.models.google import ScaleHyperprior
 
 from tqdm.auto import tqdm
@@ -30,21 +28,8 @@ np.random.seed(hash("improves reproducibility") % 2**32 - 1)
 torch.manual_seed(hash("by removing stochasticity") % 2**32 - 1)
 torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2**32 - 1)
 
-
-def compute_psnr(a, b):
-    mse = torch.mean((a - b)**2).item()
-    return -10 * math.log10(mse)
-
-
-def compute_msssim(a, b):
-    return ms_ssim(a, b, data_range=1.).item()
-
-
-def compute_bpp(out_net):
-    size = out_net["x_hat"].size()
-    num_pixels = size[0] * size[2] * size[3]
-    return sum(torch.log(likelihoods).sum() / (-math.log(2) * num_pixels)
-               for likelihoods in out_net["likelihoods"].values()).item()
+# Device configuration
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def save_checkpoint(
@@ -56,9 +41,6 @@ def save_checkpoint(
 
 
 def make(config):
-    # Configure GPU
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
     # Create transformation
     load_transform = transforms.Compose(
         [transforms.RandomCrop((256,256)), transforms.ToTensor()]
@@ -79,15 +61,15 @@ def make(config):
     # Create data loaders
     train_loader = DataLoader(
         train_dataset, batch_size=config.batch_size, num_workers=2,
-        shuffle=True, pin_memory=True
+        shuffle=True, pin_memory=(device == "cuda")
     )
     validation_loader = DataLoader(
         validation_dataset, batch_size=config.batch_size, num_workers=2,
-        shuffle=True, pin_memory=True
+        shuffle=True, pin_memory=(device == "cuda")
     )
     test_loader = DataLoader(
         test_dataset, batch_size=config.batch_size, num_workers=2,
-        shuffle=True, pin_memory=True
+        shuffle=True, pin_memory=(device == "cuda")
     )
 
     # Create model
@@ -139,50 +121,8 @@ def train_epoch(
                 f"Train epoch {epoch}: ["
                 f"{i*len(x)}/{len(train_dataloader.dataset)}"
                 f" ({100. * i / len(train_dataloader):.0f}%)]"
-                f"loss: {loss.item():.3f}"
+                f"\tLoss: {loss.item():.3f}"
             )
-
-
-def validation(epoch, data_loader, model, criterion):
-    # Set-up
-    model.eval()
-    device = next(model.parameters()).device
-
-    # Init measures
-    avg_loss = AverageMeter()
-    avg_psnr = AverageMeter()
-    avg_msssim = AverageMeter()
-    avg_bpp = AverageMeter()
-
-    with torch.no_grad():
-        for i, x in enumerate(data_loader):
-            # Load batch
-            x = x.to(device)
-
-            # Forward pass
-            output = model(x)
-            loss = criterion(output["x_hat"], x)
-
-            # Update measures
-            avg_loss.update(loss)
-            avg_psnr.update(compute_psnr(x, output["x_hat"]))
-            avg_msssim.update(compute_msssim(x, output["x_hat"]))
-            avg_bpp.update(compute_bpp(output))
-
-    # Logging
-    log_dict = {
-        "epoch": epoch,
-        "validation_loss": avg_loss.avg,
-        "validation_psnr": avg_psnr.avg,
-        "validation_msssim": avg_msssim.avg,
-        "validation_bpp": avg_bpp.avg
-    }
-    wandb.log(log_dict)
-    print(
-        f"Validation: {f"{[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"}"
-    )
-
-    return avg_loss.avg
 
 
 def train(
@@ -200,7 +140,7 @@ def train(
         train_epoch(epoch, model, criterion, train_data_loader, optimizer)
 
         # Validation
-        loss = validation(epoch, validation_data_loader, model, criterion) # other data loader
+        loss = validation(validation_data_loader, model, criterion) # other data loader
 
         # Learning rate scheduler step
         lr_scheduler.step(loss)
@@ -223,20 +163,12 @@ def train(
         )
 
 
-def test(model, data_loader, config):
+def validation(data_loader, model, criterion):
     # Set-up
+    model.eval()
     device = next(model.parameters()).device
-    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
-                            weights_only=True, map_location=torch.device("cpu"))
-    model.load_state_dict(checkpoint["state_dict"])
-    model = model.eval().to(device)
 
-    # Init measures
-    criterion = nn.MSELoss()
     avg_loss = AverageMeter()
-    avg_psnr = AverageMeter()
-    avg_msssim = AverageMeter()
-    avg_bpp = AverageMeter()
 
     with torch.no_grad():
         for i, x in enumerate(data_loader):
@@ -247,28 +179,44 @@ def test(model, data_loader, config):
             output = model(x)
             loss = criterion(output["x_hat"], x)
 
-            # Update measures
+            # Update loss
             avg_loss.update(loss)
-            avg_psnr.update(compute_psnr(x, output["x_hat"]))
-            avg_msssim.update(compute_msssim(x, output["x_hat"]))
-            avg_bpp.update(compute_bpp(output))
+
+    print(f"Validation loss: {avg_loss.avg:.3f}")
+
+    return avg_loss.avg
+
+
+def test(model, data_loader, criterion, config):
+    # Set-up
+    device = next(model.parameters()).device
+    checkpoint = torch.load(os.path.join(config.save_path, "checkpoint_best.pth.tar"),
+                            weights_only=True, map_location=torch.device("cpu"))
+    model.load_state_dict(checkpoint["state_dict"])
+    model = model.eval().to(device)
+
+    avg_loss = AverageMeter()
+
+    with torch.no_grad():
+        for i, x in enumerate(data_loader):
+            # Load batch
+            x = x.to(device)
+
+            # Forward pass
+            output = model(x)
+            loss = criterion(output["x_hat"], x)
+
+            # Update loss
+            avg_loss.update(loss)
 
     # Logging
-    log_dict = {
-        "test_loss": avg_loss.avg,
-        "test_psnr": avg_psnr.avg,
-        "test_msssim": avg_msssim.avg,
-        "test_bpp": avg_bpp.avg
-    }
-    wandb.log(log_dict)
-    print(
-        f"Test: {f"{[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"}"
-    )
+    wandb.log({"test_loss": avg_loss.avg})
+    print(f"Validation loss: {avg_loss.avg:.3f}")
 
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd_experiments", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_kd", config=config):
         # Access config
         config = wandb.config
         print(config)

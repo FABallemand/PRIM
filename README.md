@@ -6,8 +6,8 @@ With the recent progress of machine learning, new compression algorithms appeare
 ## 🗂️ Reporistory Organisation
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.
 - The second step was to reproduce state-of-the-art results for different bit-rate/quality tradeoffs, this is contained in the `balle_bdpsnr` folder.
-- I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae_test`. Results are unimpressive to say the least...
-- Next, I proceeded in implementing knowledge distillation on state-of-the-art image reconstruction model in `kd_lic_test` aka `kd_ae`. Training teacher and student model from scratch produced great visual results.
+- I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae`. Results are unimpressive to say the least...
+- Next, I proceeded in implementing knowledge distillation on state-of-the-art image reconstruction model in `kd_lic`. Training teacher and student model from scratch produced great visual results.
 - Finally, I experimented with different student architectures (number of channels) and loss functions (...) in `kd_lic_experiments`.
 
 ## 🔗 Related Links

@@ -250,5 +250,12 @@
   - Evaluate with PSNR during training
 - Train multiple students with different architectures
 
+## 13/01/2025
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+  - 258258
+  - 258259
+  - 258262
+  - 258263
+
 ## TODO
 - Remake pdf of first report (correct errors)
