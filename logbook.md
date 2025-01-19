@@ -260,5 +260,13 @@
   - 257451 (no latent loss)
   - 257451 (latent loss)
 
+## 19/01/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+  - 258258
+  - 258259
+  - 258262
+  - 258263
+- fvcore to compute FLOPS
+
 ## TODO
 - Remake pdf of first report (correct errors)

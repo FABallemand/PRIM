@@ -145,8 +145,8 @@ def train_epoch(
                 f"Train epoch {epoch}: ["
                 f"{i*len(x)}/{len(train_loader.dataset)}"
                 f" ({100. * i / len(train_loader):.0f}%)]"
-                f"\tLoss: {loss.item():.3f}"
-                f"\t{f"{[f'{k} = {v:.3f}' for k, v in loss_dict.items()]}"}"
+                f"\tLoss: {loss.item():.6f}"
+                f"\t{f"{[f'{k} = {v:.6f}' for k, v in loss_dict.items()]}"}"
             )
 
 
@@ -212,7 +212,7 @@ def validation(data_loader, teacher_model, student_model, criterion):
             # Update loss
             avg_loss.update(loss)
 
-    print(f"Validation loss: {avg_loss.avg:.3f}")
+    print(f"Validation loss: {avg_loss.avg}")
 
     return avg_loss.avg
 
@@ -242,7 +242,7 @@ def test(model, data_loader, config):
 
     # Logging
     wandb.log({"test_loss": avg_loss.avg})
-    print(f"Validation loss: {avg_loss.avg:.3f}")
+    print(f"Test loss: {avg_loss.avg}")
 
 
 def model_pipeline(config):
@@ -278,8 +278,8 @@ if __name__ == "__main__":
         N_student=64,
         M=192,
         teacher_checkpoint="train_res/254451/checkpoint_best.pth.tar",
-        epochs=93,
-        batch_size=128,
+        epochs=1000,
+        batch_size=16,
         learning_rate=1e-4,
         latent_loss=True,
         save_path=f"train_res/{job_id}"

@@ -338,8 +338,8 @@ if __name__ == "__main__":
         architecture="ScaleHyperprior",
         N_student=16,
         M=192,
-        epochs=100,
-        batch_size=128,
+        epochs=1000,
+        batch_size=16,
         learning_rate=1e-4,
         latent_loss=True,
         save_path=f"train_res/{job_id}"
