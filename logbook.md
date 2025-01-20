@@ -277,7 +277,7 @@
   - Read Joint Autoregressive and Hierarchical Priors for Learned Image Compression
 - Report:
   - Update intro
-  - Write SOTA
+  - Update SOTA
 - Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
   - 259782 (16)
   - 259783 (32)
