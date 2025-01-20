@@ -267,6 +267,9 @@
   - 258262
   - 258263
 - fvcore to compute FLOPS
+- Understand LIC:
+  - Read and create reading notes
+  - Read End-to-end optimization of nonlinear transform codes for perceptual quality
 
 ## TODO
 - Remake pdf of first report (correct errors)

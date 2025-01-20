@@ -41,6 +41,41 @@ In 2016, ... update the first end-to-end optimised image compression framework. 
 
 ... update the framework. Based on the same three-step transform coding method (linear transformation, quantization, lossless entropy coding) as deterministic image compression algorithms like JPEG and JPEG-2000, the proposed model uses a nonlinear analysis transformation, a uniform quantizer and a lossless entropy coding. It should be noted that the analysis transformation is inspired by biological visual systems and made of convolutions and nonlinear activation functions. By replacing quanitization by additive uniform noise at training time (where quantization would have cancelled gradients), the model is jointly optimised for rate-distortion performance using bit-rate (instead of entropy)(more appropirate in the context of image compression) and MSE. Although optimizing the model for a measure of perceptual distortion, would have exhibited visually superior performance, MSE was used in order to facilitate comparison with related works (usually trained with MSE) and because there was no reliable perceptual metric for color images. This novel framework yields unperfect but impressive results: details are lost in compression but it does not suffer from artifacts like JPEG and JPEG-2000. It outperforms JPEG and JPEG-2000 at all bit-rates both perceptually and quantitatively according to PSNR and MS-SSIM measures thanks to its ability of progressively reducing the image quality.
 
+### [Variational Image Compression with a Scale Hyperprior](https://arxiv.org/abs/1802.01436)
+- End-to-end trainable model for image compression based on VAE
+- Hyperprior to capture spacial dependencies in latent representation similar to side information used in modern image codecs but not yet in image compression using NN
+- Train complex prior jointly with autoencoder
+- SOTA performance (visual quality using MS-SSIM, outperforms other LIC methods in PSNR) + qualitative comparison
+- "Recent machine learning methods for lossy image compression have generated significant interest in both the machine learning and image processing communities"
+- Explains image compression
+- ???
+- Other compression methods increase compression performance using side information, sent from encoder to decoder
+- Idea: marginal for an image different from marginal for ensemble of training images, additional info (not seen during training) for decoder to reduce mismatch
+- Traditional codecs: side information is hand designed, here the model learns a latent representation of the entropy model
+- Some LIC methods are equivalent to VAE (VAE used as a formalism to "prove" results: side information = prior on the parameters of the entropy model = hyperprior of the latent representation)
+- Extend model presented in End-to-end Optimized Image Compression (fully factorized prior) with hyperprior
+- Lambdas vaires depending on applications
+- Relaxation of the problem using additive noise instead of quantization
+- 2: Image compression in VAE formalism, 3: Introduction of the scale hyperprior, 4: Experiments
+- Compare the results of 32 trained models (with/out hyperprior, MSE or MS-SSIM and various values for lambda)
+- Discussion on visual results depending on MSE or MS-SSIM training (high frequencies vs low frequencies)
+
+Driven by the interest of the machine learning and image processing communities in machine learning methods for lossy image compression, ... extend their end-to-end trainable model for image compression presented in End-to-end Optimized Image Compression [CITE] with side information. Conventional image compression codecs increase their compression performance by sending additional information from the encoder to the decoder. Commonly named side information, it is usually hand designed in these codecs. Using the same formalism as VAEs, the authors introduce a more powerful entropy model which acts as a VAE on the latent representation. In other words, it is a prior on the parameters of the entropy model (hyperprior) that is jointly learnt with the main autoencoder and can be interpreted as side information. This side information is particularily useful as the marginal for an image is likely to be different from the marginal for ensemble of training images. The additional side information (not seen during training) is valuable for the decoder to reduce mismatch. Once again using the relaxation of the problem (using additive noise instead of quantisation at training time), the authors train different models with and without hyperprior optimised for MSE or MS-SSIM reconstruction loss and for different rate-distortion tradeoffs. PSNR results show that the hyperprior model optimised for MSE consistently outperforms all others LIC methods and performs on par with heavily optimised BGP algorithm. When optimised for MS-SSIM, the hyperprior model is even able to provide better results than state-of-the-art method at all bit-rates. The distinction between MSE and MS-SSIM optimised results is relevant as neither have understanding of the semantic meaning of the image, leading to perceptual preferences depending of the image. MS-SSIM, based on human visibility threshold and contrast, attenuates the error in image regions with high contrast, and boosts the error in regions with low contrast yielding good results on images with a lot of textures (like grass) but unsatisfactory results on meaningful high contrast areas like text.
+
+### [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736)
+- LIC based on autoencoders with entropy model (prior on latent representation) and arithmetic coding
+- Hierarchical entropy models
+- Inspired by success of autoregressive prior in generative models
+- SOTA results in rate and distortion on both PSNR and MS-SSIM
+- Dimensionality reduction different from compression (reduce the entropy of the representation under a prior probability model shared between the sender and the receiver (the entropy model), not only the dimensionality)
+- Extend model from Variational Image Compression with a Scale Hyperprior
+- Generalise hierarchical Gaussian Scale Mixture model to Gaussian Mixture model + add autoregressive component
+- "The first is the core autoencoder, which learns a quantized latent representation of images (Encoder and Decoder blocks). The second sub-network is responsible for learning a probabilistic model over quantized latents used for entropy coding."
+- Main encoder bottleneck size (set it large and let the model decide [same latent value, no additional entropy], small bottleneck size can imapct rate-distortion performance for higher bit-rate but larger bottleneck does not harm performance)
+- When optimised for MS-SSIM, outperforms all conventional and NN based methods in both PSNR and MS-SSIM including BPG in RD performance as well as perceptual
+
+Inspired by success of autoregressive prior in generative models, the authors of ... extend their previous work (Variational Image Compression with a Scale Hyperprior [CITE]). They generalise hierarchical Gaussian Scale Mixture model to Gaussian Mixture model and add an autoregressive component. The autoregressive components captures the context of each pixel, that is to say is allows the model to find spacial dependencies in the image leading to improved image reconstruction. The authors highlight the fact that dimensionality reduction is different from compression which consists in reducing the entropy of the representation under a prior probability model shared between the sender and the receiver, not only the dimensionality. Experimental results show that the end-to-end optimisation of the model can learn the optimal bottleneck size: if the bottleneck size is large enough, the same latent value is generated and a probability of 1 is assigned for useless channels. This wastes computation but requires no additional entropy. Conversely, small sizes of bottleneck can impact rate-distortion performance. When optimised for MS-SSIM, the proposed model outperforms all conventional and NN based methods in both PSNR and MS-SSIM (including BPG) in RD performance as well as visual results.
+
 ## Knowledge Distillation
 
 ### [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
