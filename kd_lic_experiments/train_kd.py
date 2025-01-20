@@ -25,7 +25,6 @@ from compressai.zoo.image import (
     mbt2018
 )
 
-from tqdm.auto import tqdm
 import wandb
 
 from models import ScaleHyperprior, MeanScaleHyperprior, JointAutoregressiveHierarchicalPriors
@@ -130,7 +129,6 @@ def train_epoch(
     student_device = next(student_model.parameters()).device
     teacher_device = next(teacher_model.parameters()).device
 
-    n_examples = 0 # Number of examples processed
     for i, x in enumerate(train_loader):
         # Load batch
         teacher_x = x.to(teacher_device)
@@ -152,22 +150,18 @@ def train_epoch(
             torch.nn.utils.clip_grad_norm_(student_model.parameters(), clip_max_norm)
         optimizer.step()
 
-        # Update variables
-        n_examples += len(x)
-
-        # Logging
-        if ((i + 1) % 10) == 0:
-            log_dict = {
-                "epoch": epoch
-            }
-            log_dict |= loss_dict
-            wandb.log(log_dict, step=n_examples)
-            print(
-                f"Epoch {epoch}: ["
-                f"{i*len(x)}/{len(train_loader.dataset)}"
-                f" ({100. * i / len(train_loader):.0f}%)]"
-                f"{f"{[f'{k} = {v:.6f}' for k, v in loss_dict.items()]}"}"
-            )
+    # Logging
+    log_dict = {
+        "epoch": epoch
+    }
+    log_dict |= loss_dict
+    wandb.log(log_dict, step=epoch)
+    print(
+        f"Epoch {epoch}: ["
+        f"{i*len(x)}/{len(train_loader.dataset)}"
+        f" ({100. * i / len(train_loader):.0f}%)]"
+        f"{f"{[f'{k} = {v:.6f}' for k, v in loss_dict.items()]}"}"
+    )
 
 
 def validation(epoch, data_loader, teacher_model, student_model, criterion):
@@ -233,7 +227,7 @@ def train(
 
     # Run training and track with wandb
     best_loss = float("inf") # Best loss
-    for epoch in tqdm(range(config.epochs)):
+    for epoch in range(config.epochs):
         print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
 
         # Train one epoch
@@ -335,7 +329,6 @@ if __name__ == "__main__":
     config = dict(
         job_id=job_id,
         dataset="Vimeo90K",
-        architecture="ScaleHyperprior",
         N_student=16,
         M=192,
         epochs=1000,

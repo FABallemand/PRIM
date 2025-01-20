@@ -33,7 +33,8 @@ class KDLoss(nn.Module):
             self.lmbda_2 = 0.4
             self.lmbda_3 = 0.6
 
-        self.latent_kd_loss = nn.MSELoss() # nn.KLDivLoss()
+        # self.latent_kd_loss = nn.MSELoss()
+        self.latent_kd_loss = nn.KLDivLoss()
         self.output_kd_loss = nn.MSELoss()
         self.output_loss = nn.MSELoss()
 

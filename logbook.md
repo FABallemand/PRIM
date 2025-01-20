@@ -251,7 +251,7 @@
 - Train multiple students with different architectures
 
 ## 13/01/2025
-- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
   - 258258
   - 258259
   - 258262
@@ -261,7 +261,7 @@
   - 257451 (latent loss)
 
 ## 19/01/2025
-- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
   - 258258
   - 258259
   - 258262
@@ -269,7 +269,23 @@
 - fvcore to compute FLOPS
 - Understand LIC:
   - Read and create reading notes
-  - Read End-to-end optimization of nonlinear transform codes for perceptual quality
+  - Read Variational Image Compression with a Scale Hyperprior
+
+## 20/01/2025
+- Understand LIC:
+  - Read and create reading notes
+  - Read Joint Autoregressive and Hierarchical Priors for Learned Image Compression
+- Report:
+  - Update intro
+  - Write SOTA
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
+  - 259782 (16)
+  - 259783 (32)
+  - 259784 (64)
+  - 259785 (96)
+  - 259786 (112)
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+  - 259787 (16)
 
 ## TODO
 - Remake pdf of first report (correct errors)

@@ -293,7 +293,6 @@ if __name__ == "__main__":
     config = dict(
         job_id=job_id,
         dataset="Vimeo90K",
-        architecture="ScaleHyperprior",
         N=64,
         # N=128,
         M=192,
