@@ -100,28 +100,28 @@ Let us start by passing a single image through the networks. The image from the 
 
 \begin{figure}[H]
     \centering
-    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/networks_kodak_kodim14.png} \label{bdpsnr_1:a}}}
-    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/pretrained_networks_kodak_kodim14.png} \label{bdpsnr_1:b}}}
+    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{../balle_bdpsnr/test_res/20250121_183151/networks_kodak_kodim14.png} \label{bdpsnr_1:a}}}
+    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{../balle_bdpsnr/test_res/20250121_183151/pretrained_networks_kodak_kodim14.png} \label{bdpsnr_1:b}}}
     \caption{Reconstruction results on image 14 of the Kodak dataset. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
 
-We can produce rate-distortion curve for this single image of the testing dataset (Figure \ref{bdpsnr_3}). Consistently with our previous analysis, The curve shows that the visual fidelity increases as bitrates increase for both our models and pre-trained models. This also shows that for the same \acrshort{rd} settings, models have close \acrshort{rd} performances. However, this quantitative assessment of the models reveals some differences. For lower bit-rates our models performs on par with the pre-trained models but there is a slight difference for higher bit-rates where our models do not reach the same level of image quality in terms of \acrshort{psnr}. This difference was difficult to measure visually.
+We can produce rate-distortion curve for this single image of the testing dataset (Figure \ref{bdpsnr_2}). Consistently with our previous analysis, The curve shows that the visual fidelity increases as bitrates increase for both our models and pre-trained models. This also shows that for the same \acrshort{rd} settings, models have close \acrshort{rd} performances. However, this quantitative assessment of the models reveals some differences. For lower bit-rates our models performs on par with the pre-trained models but there is a slight difference for higher bit-rates where our models do not reach the same level of image quality in terms of \acrshort{psnr}. This difference was difficult to measure visually.
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/curve_kodak_kodim15.png}
+    \includegraphics[width=15cm]{../balle_bdpsnr/test_res/20250121_183151/curve_kodak_kodim14.png}
     \caption{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit-rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit-rates where our models do not manage to maintain the quality of the image.}
-    \label{bdpsnr_3}
+    \label{bdpsnr_2}
 \end{figure}
 
-It should be noted that the previous \acrshort{rd} curve corresponds to the results on a single image and thus is not representative of the overall performance of the models. By averaging metrics on the test dataset, we create an average rate-distortion curve for the entire test dataset. This curve is shown in Figure \ref{bdpsnr_4}. Results are similar to those obtained in Figure \ref{bdpsnr_3}: on average, our models are very close to pre-trained models with a little disadvantage when dealing with higher bit-rates.
+It should be noted that the previous \acrshort{rd} curve corresponds to the results on a single image and thus is not representative of the overall performance of the models. By averaging metrics on the test dataset, we create an average rate-distortion curve for the entire test dataset. This curve is shown in Figure \ref{bdpsnr_3}. Results are similar to those obtained in Figure \ref{bdpsnr_2}: on average, our models are very close to pre-trained models with a little disadvantage when dealing with higher bit-rates.
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/avg_curve_kodak.png}
+    \includegraphics[width=15cm]{../balle_bdpsnr/test_res/20250121_183151/avg_curve_kodak.png}
     \caption{Average rate-distortion curve for the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit-rate for a lower measured image quality, especially for high bit-rates.}
-    \label{bdpsnr_4}
+    \label{bdpsnr_3}
 \end{figure}
 
 The selected model, more complex than a simple auto-encoder, makes use of side information obtained by an hyperprior. The results obtained by following the same methodology as compressAI show that we are able to achieve close to, if not state-of-the-art \acrshort{lic} results on traditional hardware using publicly available datasets and the processing power of the Télécom Paris GPU cluster. The performance of the models was assessed quantitatively using \acrshort{rd} performance and perceptually by visual inspection.

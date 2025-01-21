@@ -130,7 +130,7 @@ for quality, id in enumerate(ids, start=1):
     net.load_state_dict(checkpoint["state_dict"])
     net.eval().to(device)
 
-    networks[f"id={id} | quality={quality} | lambda={lambdas[quality-1]}"] = net
+    networks[f"lambda={lambdas[quality-1]}"] = net
 
 # Load pre-trained networks
 pretrained_networks = {}
@@ -139,7 +139,7 @@ for quality in range(1, 9):
     net = bmshj2018_hyperprior(quality=quality,
                                pretrained=True).eval().to(device)
 
-    pretrained_networks[f"quality={quality} | lambda={lambdas[quality-1]}"] = net
+    pretrained_networks[f"lambda={lambdas[quality-1]}"] = net
 
 # Create dict for average metrics
 avg_metrics = {}
@@ -276,18 +276,16 @@ for img_name in dataset_imgs:
         json.dump(all_metrics, f)
 
     # Plot rate-distortion curves
-    fig, axes = plt.subplots(1, 2)
-    plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
+    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+    # plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
     for name, m in metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"], "o", color="red") # label=name
-        # axes[0].legend(loc="best")
         axes[0].grid()
         axes[0].set_ylabel("PSNR [dB]")
         axes[0].set_xlabel("Bit-rate [bpp]")
         axes[0].title.set_text("PSNR comparison")
 
         axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="red")
-        # axes[1].legend(loc="best")
         axes[1].grid()
         axes[1].set_ylabel("MS-SSIM [dB]")
         axes[1].set_xlabel("Bit-rate [bpp]")
@@ -295,14 +293,12 @@ for img_name in dataset_imgs:
 
     for name, m in pretrained_metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-        # axes[0].legend(loc="best")
         axes[0].grid()
         axes[0].set_ylabel("PSNR [dB]")
         axes[0].set_xlabel("Bit-rate [bpp]")
         axes[0].title.set_text("PSNR comparison")
 
         axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-        # axes[1].legend(loc="best")
         axes[1].grid()
         axes[1].set_ylabel("MS-SSIM [dB]")
         axes[1].set_xlabel("Bit-rate [bpp]")
@@ -317,6 +313,7 @@ for img_name in dataset_imgs:
     pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
     axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
+    axes[0].grid()
     axes[0].legend(loc="best")
 
     msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
@@ -325,6 +322,7 @@ for img_name in dataset_imgs:
     pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
     axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
+    axes[1].grid()
     axes[1].legend(loc="best")
 
     plt.savefig(os.path.join(output_folder,
@@ -372,18 +370,16 @@ with open(os.path.join(output_folder,
     json.dump(avg_bd_metrics, f)
 
 # Plot average rate-distortion curves
-fig, axes = plt.subplots(1, 2)
-plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+# plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
 for name, m in avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"], "o", color="red") # label=name
-    # axes[0].legend(loc="best")
     axes[0].grid()
     axes[0].set_ylabel("PSNR [dB]")
     axes[0].set_xlabel("Bit-rate [bpp]")
     axes[0].title.set_text("PSNR comparison")
 
     axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="red")
-    # axes[1].legend(loc="best")
     axes[1].grid()
     axes[1].set_ylabel("MS-SSIM [dB]")
     axes[1].set_xlabel("Bit-rate [bpp]")
@@ -391,14 +387,12 @@ for name, m in avg_metrics.items():
 
 for name, m in pretrained_avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    # axes[0].legend(loc="best")
     axes[0].grid()
     axes[0].set_ylabel("PSNR [dB]")
     axes[0].set_xlabel("Bit-rate [bpp]")
     axes[0].title.set_text("PSNR comparison")
 
     axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    # axes[1].legend(loc="best")
     axes[1].grid()
     axes[1].set_ylabel("MS-SSIM [dB]")
     axes[1].set_xlabel("Bit-rate [bpp]")
@@ -406,10 +400,12 @@ for name, m in pretrained_avg_metrics.items():
 
 axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+axes[0].grid()
 axes[0].legend(loc="best")
 
 axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+axes[1].grid()
 axes[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,
