@@ -7,12 +7,14 @@ As explained in chapter \ref{sota}, current \acrshort{lic} models achieve impres
 
 CompressAI \cite{compressai} is a Python library for learned compression. Based on the well known machine learning library PyTorch, compressAI provides custom operations, layers and models for deep learning based data compression and pre-trained end-to-end compression models for \acrshort{lic}. Amongs the pre-trained models is the model from Ballé et al. \cite{ballé2018variationalimagecompressionscale} that will be used throughout the project.
 
-Usually, researchers train their models on the OpenImages dataset \cite{openimages} but pre-trained models on compressAI have been trained on the Vimeo90K dataset \cite{xue2019video}. In order to perform proper model comparisons, the Vimeo dataset will be used for training in this project. For testing, two datasets will be used: the Kodak dataset \cite{kodak} and the dataset from the \acrfull{clic} \cite{clic}.
+Usually, researchers train their models on the OpenImages dataset \cite{openimages} but pre-trained models on compressAI have been trained on the Vimeo90K dataset \cite{xue2019video}. In order to perform proper model comparisons, the Vimeo dataset will be used for training in this project. For testing, two datasets will be used: the Kodak dataset \cite{kodak} and the dataset from the \acrfull{clic} \cite{clic}. Similarly to compressAI, visual inspection are also performed on a photograph of the port of Saint-Malo available in the GitHub repository of the library.
 
 The computing power required for training and using models will be provided by the GPU cluster of Télécom Paris.
 
 \section{Results Reproduction}
-In a research project, reproducing state-of-the-art results is key. The first thing to do is to ensure that our work environnement is correct by reproducing results from articles. This also provides shared baseline results between papers and our work, that can be used to compare our future results. For this project, we selected the scale hyperprior model introduced in 2018 by Ballé et al. \cite{ballé2018variationalimagecompressionscale}. This model has the advantage of being straightforward and yet complex enough to be challenging but not impossible to run on ressource constrained computers. Its simple two stages architecture (described in \ref{}) makes it a suitable candidate to perform knowledge distillation experiments including using the latent spaces. As experiments parameters are not disclosed in the paper, we try to reproduce results from the compressAI library, that is to say: achieve the same results as the pre-trained model from the model zoo.
+In a research project, reproducing state-of-the-art results is key. The first thing to do is to ensure that our work environnement is correct by reproducing results from articles. This also provides shared baseline results between papers and our work, that is used to compare our future results.
+
+For this project, we selected the scale hyperprior model introduced in 2018 by Ballé et al. \cite{ballé2018variationalimagecompressionscale}. This model has the advantage of being straightforward and yet complex enough to be challenging but not impossible to run on ressource constrained computers. Its simple two stages architecture (described in \ref{}) makes it a suitable candidate to perform knowledge distillation experiments including using the latent spaces. As experiments parameters are not disclosed in the paper, we try to reproduce results from the compressAI library, that is to say: achieve the same results as the pre-trained model from the model zoo.
 
 The training methodology used by compressAI is described in the documentation \cite{compressai_train}. Models were trained between 4 and 5 million steps on 256x256 image patches randomly extracted and cropped from the Vimeo90K dataset. The batch size is 16 or 32 (we choose 16). The initial learning rate is 1e-4 and decreases over time (it is divided by 2 when the evaluation loss reaches a plateau). Two different metrics can be used: MSE or MS-SSIM. We keep the default metric (MSE) which corresponds to using the following loss function: \(L = \lambda * 255^{2} * D + R\) with \(D\) and \(R\) respectively the mean distortion and the mean estimated bit-rate. The parameter \(\lambda\) allows to adjust the tradeoff between compression and image quality. Higher values give more importance to distortion encouraging the model to produce reconstructed images with high quality at the expense of bit-rate. Inversely, lower values of \(\lambda\) imply more compression and more data loss. CompressAI proposes 8 pre-trained models with different values of \(\lambda\) represented by the argument \textsf{quality}. The correspondance between this argument and the value of \(\lambda\) is summarised in Table \ref{tab}. It is important to note that the \textsf{quality} argument in compressAI also impacts the network architecture (number of channels and size of the latent space).
 
@@ -30,18 +32,19 @@ The training methodology used by compressAI is described in the documentation \c
 This part of the project is divided in two parts. First, we try to train a single model and compare it to other pre-trained models. Then we train several models in order to produce rate-distortion curves.
 
 \subsection{Single Model}
-Using the training script provided by compressAI and following the same methodology, we train a model for \(5 \times 24\) hours (approximately 700 epochs). Eventhough weights are loaded from previous checkpoint at the beginning of each training, this is different than training the model for 6 hours straight due to the change of learning rate over time (for each training session the learning rate is set back to 1e-4). We use the default value for \(\lambda\) (1e-2) and the architecture corresponds to setting the compressAI argument \textsf{quality} to 3.
+Using the training script provided by compressAI and following the methodology, we train a scale hyperprior model with the compressAI argument \textsf{quality} set to 3, which corresponds to an architecture with 128 channels and 192 channels in the expansion layers (i.e. size of the image latent space). The model is trained for approximately one million steps.
 
-After training we can evaluate our model. First, we try a single inference with this newly trained model. Figure \ref{balle_repro_1} shows that the reconstructed image (middle) is visually close to the original image. However, the difference between the two images (right) reveals that there are a lot of differences. These differences are compared in the part of the image that contains details. These parts are often refered as containing high frequencies an are particularly hard to compress as opposed to low frequency areas (like the sky in this picture) that do not contain a lot of information and are easier to compress.
+% UPDATE RESULTS
+After training the model is evaluated and compared to pre-trained models. First, we try a single inference with this newly trained model. Figure \ref{balle_repro_1} shows that the reconstructed image (middle) is visually close to the original image. However, the difference between the two images (right) reveals that there are a lot of differences. These differences are located in the part of the image that contains details. These parts are often refered as containing high frequencies and are particularly hard to compress as opposed to low frequency areas (like the sky in this picture) that do not contain a lot of information. In this specific example, we found these differences are mainly noticeable in the clouds and the water that appear smoother on the reconstruction.
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/balle_repro_1.png}
-    \caption{Comparison of the reconstrcuted with the original image}
+    \caption{Comparison of the reconstructed image with the original image. At first glance, the reconstructed image (middle) looks very similar to the original (left). Further inspection using the difference between the two images (right) unveils the loss of details attributed to lossy image compression/decompression. As expected, parts of the image containing details are the most affected whereas plain areas are untouched.}
     \label{balle_repro_1}
 \end{figure}
 
-Figure \ref{balle_repro_2} shows encoding of the image at the same bit-rate using different methods. It is clear that the network is the more accurate among the three methods used: the reconstructed image is closer to the original image. JPEG introduces a lot of artifacts (blocs) and Webp does not retains as much details as the network, especially in the water.
+Figure \ref{balle_repro_2} shows encoding of the image at the same bit-rate using different methods. It is clear that the network (top right) is the more accurate among the three methods used: the reconstructed image is closer to the original image. JPEG introduces a lot of artifacts (blocs) and Webp does not retains as much details as the network, especially in the water.
 
 \begin{figure}
     \centering
@@ -84,48 +87,41 @@ Finally, we compare our models to other \acrshort{lic} models accessbible in the
     \label{balle_repro_6}
 \end{figure}
 
-This section show that we are able to train a \acrshort{lic} model that can compress and reconstruct images while mostly preserving its content. Our models perform better than deterministic codecs like JPEG or Webp but our models does not produce the same results as the pre-trained ones. It should be noted that, at this point, we are mainly checking if training is working properly on the GPU cluster and that we are now comparing models that were trained differently. Next section focuses more on the models parameters and the impact on the bit-rate/distortion tradeoff.
+This section show that we are able to train a \acrshort{lic} model able to compress and reconstruct images while mostly preserving its content. Our model performs better than deterministic codecs like JPEG or Webp but does not produce the same results as the pre-trained ones. It should be noted that, at this point, we are mainly checking if training is working properly on the GPU cluster and that we are now comparing models that were trained differently. Next section focuses more on the models parameters and the impact on the bit-rate/distortion tradeoff.
+% END UPDATE RESULTS
 
 \subsection{Rate-Distortion Curves}
-Using the training script provided by compressAI and following the same methodology, we train 8 different models: one for each value of \textsf{quality}. That is to say, one for each couple of \(\lambda\) value and corresponding model architecture. However, to quickly achieve comparable results, we limit the number of epochs to 65, just under what the GPU cluster is able to compute in 24 hours.
+% Different applications require different tradeoffs in terms of bit-rate and image quality. While bandwith limited video calls require low bit-rate at the expense of image quality, transferring a single high resolution artistic picture necessitates is more focused on image quality than preserving bandwidth.
+Rate-distortion curves are a common tool to compare \acrshirt{nn} architectures in \acrshort{lic}. It consists in plotting the average distortion in function of the average bit-rate evaluated on a set of images. Using a range of rate-distortion tradeoffs allows to easily evaluate and compare the overall \acrshort{rd} performance of an architecture.
 
-This method allows us to compare models more precisely by taking into account the bit-rate/distortion tradeoff induced by the value of \(\lambda\) parameter. Figure \ref{bdpsnr_1} and \ref{bdpsnr_2} show image reconstruction results from our models and pre-trained models for each value of \(\lambda\). There is a clear change in image quality between images in the top-left corresponding to lower values of \(\lambda\) (low bit-rate and low quality) and images in the bottom-right corner correponding to higher values of \(\lambda\) (high bit-rate and high quality) for both our models and pre-trained models.
+Using the training script provided by compressAI and following the methodology, we train 8 different models: one for each value of the compressAI \textsf{quality} argument. That is to say, one for each couple of value of \(\lambda\) and corresponding model architecture. However, to quickly achieve comparable results, we limit the number of epochs to 65, just under what the GPU cluster is able to compute in 24 hours.
+
+Let us start by passing a single image through the networks. The image from the Kodak datset is compressed and decompressed before being cropped for easier comparison. Figure \ref{bdpsnr_1} shows image reconstruction results from our models and pre-trained models for each settings. Models with the same \acrshort{rd} tradeoff from the compressAI zoo or trained from scratch produce results that are visually very similar. As expected, there is a discernable shift in image quality accross the range of models. Images related to lower values of \(\lambda\) (low bit-rate and low quality) lack details and appear blurry. At the other end of the spectrum, images correponding to higher values of \(\lambda\) (high bit-rate and high quality) look more detailed, sharp and similar to the original image. Notice how the details in the faces and the water appear when the value of \(\lambda\) increases.
 
 \begin{figure}[H]
     \centering
     \subfloat[Our networks]{{\includegraphics[width=8.5cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/networks_kodak_kodim14.png} \label{bdpsnr_1:a}}}
     \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/pretrained_networks_kodak_kodim14.png} \label{bdpsnr_1:b}}}
-    \caption{Reconstruction results on image 14 of the Kodak dataset}
+    \caption{Reconstruction results on image 14 of the Kodak dataset. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/networks_kodak_kodim15.png} \label{bdpsnr_2:a}}}
-    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/pretrained_networks_kodak_kodim15.png} \label{bdpsnr_2:b}}}
-    \caption{Reconstruction results on image 15 of the Kodak dataset}
-    \label{bdpsnr_2}
-\end{figure}
-
-We are also able to produce rate-distortion curves for each image of the testing dataset in order to compare our models with pre-trained models. Figure \ref{bdpsnr_3} show an example of one of this curve. This shows that for lower bit-rate (lower values of \(\lambda\)) our model is very similar to the pre-trained models but there is a slight difference for higher bit-rates where our models do not reach the same level of image quality.
+We can produce rate-distortion curve for this single image of the testing dataset (Figure \ref{bdpsnr_3}). Consistently with our previous analysis, The curve shows that the visual fidelity increases as bitrates increase for both our models and pre-trained models. This also shows that for the same \acrshort{rd} settings, models have close \acrshort{rd} performances. However, this quantitative assessment of the models reveals some differences. For lower bit-rates our models performs on par with the pre-trained models but there is a slight difference for higher bit-rates where our models do not reach the same level of image quality in terms of \acrshort{psnr}. This difference was difficult to measure visually.
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/curve_kodak_kodim15.png}
-    \caption{Rate-distortion curve for image 14 of the Kodak dataset}
+    \caption{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit-rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit-rates where our models do not manage to maintain the quality of the image.}
     \label{bdpsnr_3}
 \end{figure}
 
-By averaging metrics on the test dataset, we create an average rate-distortion curve for the entire test dataset. This curve is shown in Figure \ref{bdpsnr_4}. Results are similar to those obtained in Figure \ref{bdpsnr_3}: our models are very close to pre-trained models with a little disadvantage when dealing with higher bit-rates.
+It should be noted that the previous \acrshort{rd} curve corresponds to the results on a single image and thus is not representative of the overall performance of the models. By averaging metrics on the test dataset, we create an average rate-distortion curve for the entire test dataset. This curve is shown in Figure \ref{bdpsnr_4}. Results are similar to those obtained in Figure \ref{bdpsnr_3}: on average, our models are very close to pre-trained models with a little disadvantage when dealing with higher bit-rates.
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{/home/fabien/TSP/3A/PRIM/bdpsnr/test_res/20241129_085637/avg_curve_kodak.png}
-    \caption{Average rate-distortion curve for the Kodak dataset}
+    \caption{Average rate-distortion curve for the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit-rate for a lower measured image quality, especially for high bit-rates.}
     \label{bdpsnr_4}
 \end{figure}
 
-These results show that we are able to reproduce state-of-the-art results for \acrshort{lic} using publicly available datasets and the processing power of the Télécom Paris GPU cluster.
-
-\section{Future Work}
-Current results prove that we are able to achieve close to, if not state-of-the-art \acrshort{lic} results on traditional hardware. Future work will focus on improving models to work on power constrained platforms (like FPGA) by using techniques like pruning, quantisation and knowledge distillation. We will start by implementing and evaluating these techniques to work on single images whereupon we will add the realtime constraint.
+The selected model, more complex than a simple auto-encoder, makes use of side information obtained by an hyperprior. The results obtained by following the same methodology as compressAI show that we are able to achieve close to, if not state-of-the-art \acrshort{lic} results on traditional hardware using publicly available datasets and the processing power of the Télécom Paris GPU cluster. The performance of the models was assessed quantitatively using \acrshort{rd} performance and perceptually by visual inspection.

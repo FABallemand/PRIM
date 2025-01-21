@@ -27,6 +27,8 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import sys
+import os
 import argparse
 import random
 import shutil
@@ -40,6 +42,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from compressai.datasets import ImageFolder, Vimeo90kDataset
+from compressai.losses import RateDistortionLoss
 from compressai.optimizers import net_aux_optimizer
 from compressai.zoo import image_models
 
@@ -110,10 +113,10 @@ def train_one_epoch(
                 f"Train epoch {epoch}: ["
                 f"{i*len(d)}/{len(train_dataloader.dataset)}"
                 f" ({100. * i / len(train_dataloader):.0f}%)]"
-                f'\tLoss: {out_criterion["loss"].item():.3f} |'
-                f'\tMSE loss: {out_criterion["mse_loss"].item():.3f} |'
-                f'\tBpp loss: {out_criterion["bpp_loss"].item():.2f} |'
-                f"\tAux loss: {aux_loss.item():.2f}"
+                f'Loss: {out_criterion["loss"].item():.3f} |'
+                f'MSE loss: {out_criterion["mse_loss"].item():.3f} |'
+                f'Bpp loss: {out_criterion["bpp_loss"].item():.3f} |'
+                f"Aux loss: {aux_loss.item():.3f}"
             )
 
 
@@ -138,20 +141,22 @@ def test_epoch(epoch, test_dataloader, model, criterion):
             mse_loss.update(out_criterion["mse_loss"])
 
     print(
-        f"Test epoch {epoch}: Average losses:"
-        f"\tLoss: {loss.avg:.3f} |"
-        f"\tMSE loss: {mse_loss.avg:.3f} |"
-        f"\tBpp loss: {bpp_loss.avg:.2f} |"
-        f"\tAux loss: {aux_loss.avg:.2f}\n"
+        f"Test epoch {epoch}: "
+        f"Loss: {loss.avg:.3f} |"
+        f"MSE loss: {mse_loss.avg:.3f} |"
+        f"Bpp loss: {bpp_loss.avg:.3f} |"
+        f"Aux loss: {aux_loss.avg:.3f}"
     )
 
     return loss.avg
 
 
-def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
-    torch.save(state, filename)
+def save_checkpoint(
+        checkpoint, is_best, path="checkpoint.pth.tar",
+        best_path="checkpoint_best.pth.tar"):
+    torch.save(checkpoint, path)
     if is_best:
-        shutil.copyfile(filename, "checkpoint_best_loss.pth.tar")
+        shutil.copyfile(path, best_path)
 
 
 def parse_args(argv):
@@ -248,29 +253,20 @@ def main(argv):
         [transforms.CenterCrop(args.patch_size), transforms.ToTensor()]
     )
 
-    # train_dataset = ImageFolder(args.dataset, split="train", transform=train_transforms)
-    # test_dataset = ImageFolder(args.dataset, split="test", transform=test_transforms)
-
-    train_dataset = Vimeo90kDataset(args.dataset, split="train", transform=train_transforms)
-    test_dataset = Vimeo90kDataset(args.dataset, split="valid", transform=test_transforms)
+    train_dataset = Vimeo90kDataset(args.dataset, split="train",
+                                    transform=train_transforms)
+    test_dataset = Vimeo90kDataset(args.dataset, split="valid",
+                                   transform=test_transforms)
 
     device = "cuda" if args.cuda and torch.cuda.is_available() else "cpu"
 
-    train_dataloader = DataLoader(
-        train_dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        shuffle=True,
-        pin_memory=(device == "cuda"),
-    )
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size,
+                                  num_workers=args.num_workers, shuffle=True,
+                                  pin_memory=(device == "cuda"),)
 
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=args.test_batch_size,
-        num_workers=args.num_workers,
-        shuffle=False,
-        pin_memory=(device == "cuda"),
-    )
+    test_dataloader = DataLoader(test_dataset, batch_size=args.test_batch_size,
+                                 num_workers=args.num_workers, shuffle=False,
+                                 pin_memory=(device == "cuda"))
 
     net = image_models[args.model](quality=3)
     net = net.to(device)
@@ -295,15 +291,8 @@ def main(argv):
     best_loss = float("inf")
     for epoch in range(last_epoch, args.epochs):
         print(f"Learning rate: {optimizer.param_groups[0]['lr']}")
-        train_one_epoch(
-            net,
-            criterion,
-            train_dataloader,
-            optimizer,
-            aux_optimizer,
-            epoch,
-            args.clip_max_norm,
-        )
+        train_one_epoch(net, criterion, train_dataloader, optimizer,
+                        aux_optimizer, epoch, args.clip_max_norm)
         loss = test_epoch(epoch, test_dataloader, net, criterion)
         lr_scheduler.step(loss)
 
@@ -312,30 +301,20 @@ def main(argv):
 
         if args.save:
             if args.savepath:
+                checkpoint = {
+                    "epoch": epoch,
+                    "state_dict": net.state_dict(),
+                    "loss": loss,
+                    "optimizer": optimizer.state_dict(),
+                    "aux_optimizer": aux_optimizer.state_dict(),
+                    "lr_scheduler": lr_scheduler.state_dict(),
+                }
                 save_checkpoint(
-                    {
-                        "epoch": epoch,
-                        "state_dict": net.state_dict(),
-                        "loss": loss,
-                        "optimizer": optimizer.state_dict(),
-                        "aux_optimizer": aux_optimizer.state_dict(),
-                        "lr_scheduler": lr_scheduler.state_dict(),
-                    },
-                    is_best,
-                    args.savepath + "/checkpoint.pth.tar"
-                )
+                    checkpoint, is_best,
+                    os.path.join(args.savepath, "checkpoint.pth.tar"),
+                    os.path.join(args.savepath, "checkpoint_best.pth.tar"))
             else:
-                save_checkpoint(
-                    {
-                        "epoch": epoch,
-                        "state_dict": net.state_dict(),
-                        "loss": loss,
-                        "optimizer": optimizer.state_dict(),
-                        "aux_optimizer": aux_optimizer.state_dict(),
-                        "lr_scheduler": lr_scheduler.state_dict(),
-                    },
-                    is_best,
-                )
+                save_checkpoint(checkpoint, is_best)
 
 
 if __name__ == "__main__":

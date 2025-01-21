@@ -329,7 +329,7 @@ if __name__ == "__main__":
     config = dict(
         job_id=job_id,
         dataset="Vimeo90K",
-        N_student=16,
+        N_student=112,
         M=192,
         epochs=1000,
         batch_size=16,

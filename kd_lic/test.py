@@ -178,7 +178,7 @@ dataset_imgs = [p for p in os.listdir(dataset_path) if p.endswith(".png")]
 
 for img_name in dataset_imgs:
     # Load image
-    img = Image.oimg = Image.open(os.path.join(dataset_path,
+    img = Image.open(os.path.join(dataset_path,
                                                img_name)).convert("RGB")
     # img = img.crop((0, 0, 768, 512)) # For CLIC dataset
     x = transforms.ToTensor()(img).unsqueeze(0).to(device)

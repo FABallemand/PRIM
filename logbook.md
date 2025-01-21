@@ -287,5 +287,14 @@
 - Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
   - 259787 (16)
 
+## 21/01/2025
+- Train ScaleHyperprior for balle_reproduction
+  - 260502
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+  - 260532 (112)
+
+
 ## TODO
+- Improve part_1
 - Remake pdf of first report (correct errors)
+- Use compressAI RateDistortionLoss for KD!!!
