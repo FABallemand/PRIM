@@ -226,7 +226,7 @@
 
 ## 12/01/2025
 - Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss KL)
-- Train TeacherAE and StudentAE models (image reconstruction, student KD)
+- Train StudentAE models (image reconstruction, student KD)
 
 ## 13/01/2025
 - Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss KL)
@@ -296,5 +296,6 @@
 
 ## TODO
 - Improve part_1
-- Remake pdf of first report (correct errors)
+- Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)
 - Use compressAI RateDistortionLoss for KD!!!
+- Remake pdf of first report (correct errors)

@@ -1,8 +1,14 @@
 \chapter{Knowledge Distillation for Image Compression}
 \label{part_2}
+\acrfull{kd} is one of the most popular techniques of frugal AI. Using the results of a large model at training time, a smaller model can achieve performances which tends towards that of the large model. This chapter focuses applying \acrshort{kd} to \acrshort{lic}. In order to do that, we first experiment with \acrshort{kd} on auto-encoders for image reconstruction. After achieving satisfactory results, we proceed in implementing \acrshort{kd} for \acrshort{lic}.
 
 \section{Knowledge Distillation for Auto-encoders}
+% Image reconstruction is similar but simpler than lic
+As explained by Ballé et al. in \cite{ballé2018variationalimagecompressionscale}, \acrshort{vae}s are very similar to \acrshort{lic} architectures in the sense that they both have some sort of analysis transformation to transfer the input signal to a low dimensional latent space and an approximate of this analysis transform (the synthesis transform) to transfer the latent representation back to the signal space. However, in \cite{minnen2018jointautoregressivehierarchicalpriors}, the authors explain the difference between the two. Compression consists in reducing the entropy of the representation under a prior probability model shared between the sender and the receiver, not only the dimensionality. Achieving performant image compression/decompression is thus more complex than doing standard image reconstruction.
+
+\subsection{Custom Auto-encoder}
+
+\subsection{Scale Hyperprior Model as Auto-encoder}
 
 \section{Knowledge Distillation for Image Compression}
-
-\section{Experiments}
+% Eventhough similar image reconstruction is different than image compression which requires min entropy

@@ -1,199 +1,139 @@
 import torch
 import torch.nn as nn
 
-###############################################################################
-## Big ########################################################################
-###############################################################################
+from compressai.entropy_models import EntropyBottleneck, GaussianConditional
+from compressai.layers import GDN
+from compressai.models.base import CompressionModel
+from compressai.models.utils import conv, deconv
 
-class BigEncoder(nn.Module):
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+class ScaleHyperprior(CompressionModel):
+    r"""Scale Hyperprior model from J. Balle, D. Minnen, S. Singh, S.J. Hwang,
+    N. Johnston: `"Variational Image Compression with a Scale Hyperprior"
+    <https://arxiv.org/abs/1802.01436>`_ Int. Conf. on Learning Representations
+    (ICLR), 2018.
 
-        self.big_encoder = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding="same"),    # Conv -> [256, 256, 32]
-            nn.ReLU(inplace=True),
-            nn.Conv2d(32, 32, 3, padding="same"),   # Conv -> [256, 256, 32]
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),             # Pool -> [128, 128, 32]
+    .. code-block:: none
 
-            nn.Conv2d(32, 64, 3, padding="same"),   # Conv -> [128, 128, 64]
-            nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, 3, padding="same"),   # Conv -> [128, 128, 64]
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),             # Pool -> [64, 64, 64]
+                  ┌───┐    y     ┌───┐  z  ┌───┐ z_hat      z_hat ┌───┐
+            x ──►─┤g_a├──►─┬──►──┤h_a├──►──┤ Q ├───►───·⋯⋯·───►───┤h_s├─┐
+                  └───┘    │     └───┘     └───┘        EB        └───┘ │
+                           ▼                                            │
+                         ┌─┴─┐                                          │
+                         │ Q │                                          ▼
+                         └─┬─┘                                          │
+                           │                                            │
+                     y_hat ▼                                            │
+                           │                                            │
+                           ·                                            │
+                        GC : ◄─────────────────────◄────────────────────┘
+                           ·                 scales_hat
+                           │
+                     y_hat ▼
+                           │
+                  ┌───┐    │
+        x_hat ──◄─┤g_s├────┘
+                  └───┘
 
-            nn.Conv2d(64, 128, 3, padding="same"),  # Conv -> [64, 64, 128]
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 128, 3, padding="same"), # Conv -> [64, 64, 128]
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),             # Pool -> [32, 32, 128]
-            
-            nn.Flatten(),
+        EB = Entropy bottleneck
+        GC = Gaussian conditional
 
-            nn.Linear(32 * 32 * 128, 1024), # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 256),           # FC -> [256]
-            nn.ReLU(inplace=True)
+    Args:
+        N (int): Number of channels
+        M (int): Number of channels in the expansion layers (last layer of the
+            encoder and last layer of the hyperprior decoder)
+    """
+
+    def __init__(self, N, M, **kwargs):
+        super().__init__(**kwargs)
+
+        self.entropy_bottleneck = EntropyBottleneck(N)
+
+        self.g_a = nn.Sequential(
+            conv(3, N),
+            GDN(N),
+            conv(N, N),
+            GDN(N),
+            conv(N, N),
+            GDN(N),
+            conv(N, M),
         )
 
-    def forward(self, x):
-        x = self.big_encoder(x)
-        return x
-    
-class BigDecoder(nn.Module):
+        self.g_s = nn.Sequential(
+            deconv(M, N),
+            GDN(N, inverse=True),
+            deconv(N, N),
+            GDN(N, inverse=True),
+            deconv(N, N),
+            GDN(N, inverse=True),
+            deconv(N, 3),
+        )
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        self.h_a = nn.Sequential(
+            conv(M, N, stride=1, kernel_size=3),
+            nn.ReLU(inplace=True),
+            conv(N, N),
+            nn.ReLU(inplace=True),
+            conv(N, N),
+        )
 
-        self.big_decoder = nn.Sequential(
-            nn.Linear(256, 1024),                         # FC -> [1024]
+        self.h_s = nn.Sequential(
+            deconv(N, N),
             nn.ReLU(inplace=True),
-            nn.Linear(1024, 32 * 32 * 128),               # FC -> [32 * 32 * 128]
+            deconv(N, N),
             nn.ReLU(inplace=True),
-
-            nn.Unflatten(1, (128, 32, 32)),
-
-            nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [64, 64, 128]
-            nn.ConvTranspose2d(128, 128, 3, padding=1),             # T Conv -> [64, 64, 128]
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(128, 64, 3, padding=1),              # T Conv -> [64, 64, 64]
-            nn.ReLU(inplace=True),
-
-            nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [128, 128, 64]
-            nn.ConvTranspose2d(64, 64, 3, padding=1),               # T Conv -> [128, 128, 64]
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(64, 32, 3, padding=1),               # T Conv -> [128, 128, 32]
-            nn.ReLU(inplace=True),
-
-            nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [256, 256, 32]
-            nn.ConvTranspose2d(32, 32, 3, padding=1),               # T Conv -> [256, 256, 32]
-            nn.ReLU(inplace=True),
-            nn.ConvTranspose2d(32, 3, 3, padding=1),               # T Conv -> [256, 256, 3]
+            conv(N, M, stride=1, kernel_size=3),
             nn.ReLU(inplace=True),
         )
 
-    def forward(self, x):
-        x = self.big_decoder(x)
-        return x
+        self.gaussian_conditional = GaussianConditional(None)
+        self.N = int(N)
+        self.M = int(M)
 
-###############################################################################
-## Small ######################################################################
-###############################################################################
-    
-class SmallEncoder(nn.Module):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        self.small_encoder = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding="same"),   # Conv -> [256, 256, 32]
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),                    # Pool -> [128, 128, 32]
-
-            nn.Conv2d(32, 64, 3, padding="same"),  # Conv -> [128, 128, 64]
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),                    # Pool -> [64, 64, 64]
-
-            nn.Conv2d(64, 128, 3, padding="same"), # Conv -> [64, 64, 128]
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),                    # Pool -> [32, 32, 128]
-            
-            nn.Flatten(),
-
-            nn.Linear(32 * 32 * 128, 1024),        # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 256),                  # FC -> [256]
-            nn.Sigmoid()
-        )
+    @property
+    def downsampling_factor(self) -> int:
+        return 2 ** (4 + 2)
 
     def forward(self, x):
-        x = self.small_encoder(x)
-        return x
-    
-class SmallDecoder(nn.Module):
+        y = self.g_a(x)
+        z = self.h_a(torch.abs(y))
+        z_hat, z_likelihoods = self.entropy_bottleneck(z)
+        scales_hat = self.h_s(z_hat)
+        y_hat, y_likelihoods = self.gaussian_conditional(y, scales_hat)
+        x_hat = self.g_s(y_hat)
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        return {
+            "x_hat": x_hat,
+            "y_hat": y_hat,
+            "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
+        }
 
-        self.small_decoder = nn.Sequential(
-            nn.Linear(256, 1024),                        # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 32 * 32 * 128),              # FC -> [32 * 32 * 128]
-            nn.ReLU(inplace=True),
+    @classmethod
+    def from_state_dict(cls, state_dict):
+        """Return a new model instance from `state_dict`."""
+        N = state_dict["g_a.0.weight"].size(0)
+        M = state_dict["g_a.6.weight"].size(0)
+        net = cls(N, M)
+        net.load_state_dict(state_dict)
+        return net
 
-            nn.Unflatten(1, (128, 32, 32)),
+    def compress(self, x):
+        y = self.g_a(x)
+        z = self.h_a(torch.abs(y))
 
-            nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [64, 64, 128]
-            nn.ConvTranspose2d(128, 64, 3, padding=1),   # T Conv -> [64, 64, 64]
-            nn.ReLU(inplace=True),
+        z_strings = self.entropy_bottleneck.compress(z)
+        z_hat = self.entropy_bottleneck.decompress(z_strings, z.size()[-2:])
 
-            nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [128, 128, 64]
-            nn.ConvTranspose2d(64, 32, 3, padding=1),    # T Conv -> [128, 128, 32]
-            nn.ReLU(inplace=True),
+        scales_hat = self.h_s(z_hat)
+        indexes = self.gaussian_conditional.build_indexes(scales_hat)
+        y_strings = self.gaussian_conditional.compress(y, indexes)
+        return {"strings": [y_strings, z_strings], "shape": z.size()[-2:]}
 
-            nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [256, 256, 32]
-            nn.ConvTranspose2d(32, 3, 3, padding=1),     # T Conv -> [256, 256, 3]
-            nn.Sigmoid(),
-        )
-
-    def forward(self, x):
-        x = self.small_decoder(x)
-        return x
-    
-###############################################################################
-## Teacher ####################################################################
-###############################################################################
-
-class TeacherAE(nn.Module):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        # Encoder
-        self.encoder = BigEncoder()
-
-        # Decoder
-        self.decoder = BigDecoder()
-
-    def forward(self, x):
-        latent = self.encoder(x)
-        y = self.decoder(latent)
-        return latent, y
-    
-###############################################################################
-## Student ####################################################################
-###############################################################################
-
-class StudentAE(nn.Module):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        # Encoder
-        self.encoder = SmallEncoder()
-
-        # Decoder
-        self.decoder = SmallDecoder()
-
-    def forward(self, x):
-        latent = self.encoder(x)
-        y = self.decoder(latent)
-        return latent, y
-    
-
-class StudentAE_decoder(nn.Module):
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        # Encoder
-        self.encoder = BigEncoder()
-
-        # Decoder
-        self.decoder = SmallDecoder()
-
-    def forward(self, x):
-        latent = self.encoder(x)
-        y = self.decoder(latent)
-        return latent, y
+    def decompress(self, strings, shape):
+        assert isinstance(strings, list) and len(strings) == 2
+        z_hat = self.entropy_bottleneck.decompress(strings[1], shape)
+        scales_hat = self.h_s(z_hat)
+        indexes = self.gaussian_conditional.build_indexes(scales_hat)
+        y_hat = self.gaussian_conditional.decompress(strings[0], indexes, z_hat.dtype)
+        x_hat = self.g_s(y_hat).clamp_(0, 1)
+        return {"x_hat": x_hat}
