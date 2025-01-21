@@ -40,7 +40,7 @@ After training the model is evaluated and compared to pre-trained models. First,
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/balle_repro_1.png}
-    \caption{Comparison of the reconstructed image with the original image. At first glance, the reconstructed image (middle) looks very similar to the original (left). Further inspection using the difference between the two images (right) unveils the loss of details attributed to lossy image compression/decompression. As expected, parts of the image containing details are the most affected whereas plain areas are untouched.}
+    \caption[Comparison of the reconstructed image with the original image.]{Comparison of the reconstructed image with the original image. At first glance, the reconstructed image (middle) looks very similar to the original (left). Further inspection using the difference between the two images (right) unveils the loss of details attributed to lossy image compression/decompression. As expected, parts of the image containing details are the most affected whereas plain areas are untouched.}
     \label{balle_repro_1}
 \end{figure}
 
@@ -49,7 +49,7 @@ Figure \ref{balle_repro_2} shows encoding of the image at the same bit-rate usin
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/balle_repro_2.png}
-    \caption{Comparison to classical codecs: quality coparison at similar bit-rate}
+    \caption{Comparison to classical codecs: quality comparison at similar bit-rate}
     \label{balle_repro_2}
 \end{figure}
 
@@ -102,7 +102,7 @@ Let us start by passing a single image through the networks. The image from the 
     \centering
     \subfloat[Our networks]{{\includegraphics[width=8.5cm]{../balle_bdpsnr/test_res/20250121_183151/networks_kodak_kodim14.png} \label{bdpsnr_1:a}}}
     \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{../balle_bdpsnr/test_res/20250121_183151/pretrained_networks_kodak_kodim14.png} \label{bdpsnr_1:b}}}
-    \caption{Reconstruction results on image 14 of the Kodak dataset. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
+    \caption[Reconstruction results on image 14 of the Kodak dataset.]{Reconstruction results on image 14 of the Kodak dataset. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
 
@@ -111,7 +111,7 @@ We can produce rate-distortion curve for this single image of the testing datase
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../balle_bdpsnr/test_res/20250121_183151/curve_kodak_kodim14.png}
-    \caption{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit-rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit-rates where our models do not manage to maintain the quality of the image.}
+    \caption[Rate-distortion curve for image 14 of the Kodak dataset.]{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit-rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit-rates where our models do not manage to maintain the quality of the image.}
     \label{bdpsnr_2}
 \end{figure}
 
@@ -120,7 +120,7 @@ It should be noted that the previous \acrshort{rd} curve corresponds to the resu
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../balle_bdpsnr/test_res/20250121_183151/avg_curve_kodak.png}
-    \caption{Average rate-distortion curve for the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit-rate for a lower measured image quality, especially for high bit-rates.}
+    \caption[Average rate-distortion curve for the Kodak dataset.]{Average rate-distortion curve for the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit-rate for a lower measured image quality, especially for high bit-rates.}
     \label{bdpsnr_3}
 \end{figure}
 
