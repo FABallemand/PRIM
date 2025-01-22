@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class AverageMeter:
@@ -19,7 +20,7 @@ class AverageMeter:
         self.avg = self.sum / self.count
 
 
-class KDLoss(nn.Module):
+class KDLoss_MSE(nn.Module):
 
     def __init__(self, latent=True):
         super().__init__()
@@ -33,8 +34,7 @@ class KDLoss(nn.Module):
             self.lmbda_2 = 0.4
             self.lmbda_3 = 0.6
 
-        # self.latent_kd_loss = nn.MSELoss()
-        self.latent_kd_loss = nn.KLDivLoss()
+        self.latent_kd_loss = nn.MSELoss()
         self.output_kd_loss = nn.MSELoss()
         self.output_loss = nn.MSELoss()
 
@@ -46,6 +46,45 @@ class KDLoss(nn.Module):
         latent_kd_loss = 0.0
         if self.latent:
             latent_kd_loss = self.latent_kd_loss(input_latent, latent_kd_target)
+        output_kd_loss = self.output_kd_loss(input, kd_target)
+        output_loss = self.output_loss(input, target)
+        loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * output_kd_loss + self.lmbda_3 * output_loss
+        loss_dict = {
+            "loss": loss,
+            "latent_kd_loss": latent_kd_loss,
+            "output_kd_loss": output_kd_loss,
+            "output_loss": output_loss}
+        return loss, loss_dict
+
+
+class KDLoss_KLD(nn.Module):
+
+    def __init__(self, latent=True):
+        super().__init__()
+        self.latent = latent
+        if self.latent:
+            self.lmbda_1 = 0.2
+            self.lmbda_2 = 0.2
+            self.lmbda_3 = 0.6
+        else:
+            self.lmbda_1 = 0.0
+            self.lmbda_2 = 0.4
+            self.lmbda_3 = 0.6
+
+        self.latent_kd_loss = nn.KLDivLoss(log_target=True)
+        self.output_kd_loss = nn.MSELoss()
+        self.output_loss = nn.MSELoss()
+
+    def __str__(self):
+        s = f"{self.lmbda_1} * {self.latent_kd_loss} + {self.lmbda_2} * {self.output_kd_loss} + {self.lmbda_3} * {self.output_loss}"
+        return s
+
+    def forward(self, input_latent, latent_kd_target, input, kd_target, target):
+        latent_kd_loss = 0.0
+        if self.latent:
+            log_input = F.log_softmax(input_latent)
+            log_target = F.log_softmax(latent_kd_target)
+            latent_kd_loss = self.latent_kd_loss(log_input, log_target)
         output_kd_loss = self.output_kd_loss(input, kd_target)
         output_loss = self.output_loss(input, target)
         loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * output_kd_loss + self.lmbda_3 * output_loss

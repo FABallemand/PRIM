@@ -28,7 +28,7 @@ from compressai.zoo.image import (
 import wandb
 
 from models import ScaleHyperprior, MeanScaleHyperprior, JointAutoregressiveHierarchicalPriors
-from losses import AverageMeter, KDLoss
+from losses import AverageMeter, KDLoss_MSE, KDLoss_KLD
 
 # Set seeds
 torch.backends.cudnn.deterministic = True
@@ -109,7 +109,14 @@ def make(config):
     student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
 
     # Create loss
-    criterion = KDLoss(latent=config.latent_loss)
+    if config.latent_loss == "MSE":
+        criterion = KDLoss_MSE(latent=True)
+    elif config.latent_loss == "KLD":
+        criterion = KDLoss_KLD(latent=True)
+    elif config.latent_loss == None:
+        criterion = KDLoss_MSE(latent=False)
+    else:
+        raise ValueError("Invalid latent loss")
 
     # Create optimizer
     optimizer = torch.optim.Adam(student_model.parameters(),
@@ -334,7 +341,7 @@ if __name__ == "__main__":
         epochs=1000,
         batch_size=16,
         learning_rate=1e-4,
-        latent_loss=True,
+        latent_loss="KLD",
         save_path=f"train_res/{job_id}"
     )
 

@@ -284,15 +284,28 @@
   - 259784 (64)
   - 259785 (96)
   - 259786 (112)
-- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
   - 259787 (16)
 
 ## 21/01/2025
 - Train ScaleHyperprior for balle_reproduction
   - 260502
-- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
   - 260532 (112)
 
+  ## 22/01/2025
+- Cancel train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+  - 259787 (16)
+  - 260532 (112)
+- Should have read doc: https://pytorch.org/docs/stable/generated/torch.nn.KLDivLoss.html
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss KL)
+  - 261095 (112)
+- Meeting:
+  - Need to use RateDistortionLoss
+  - Compute model energy consumption
+  - Do more experiments and send the code end of january for deeper training on super computer
+- Model visualisation (torchview, torchviz, NN SVG)
+- Compute energy consumption (https://pytorch.org/blog/zeus/)
 
 ## TODO
 - Improve part_1
