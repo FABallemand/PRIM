@@ -29,12 +29,12 @@ class BigEncoder(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),             # Pool -> [32, 32, 128]
             
-            nn.Flatten(),
+            # nn.Flatten(),
 
-            nn.Linear(32 * 32 * 128, 1024), # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 256),           # FC -> [256]
-            nn.ReLU(inplace=True)
+            # nn.Linear(32 * 32 * 128, 1024), # FC -> [1024]
+            # nn.ReLU(inplace=True),
+            # nn.Linear(1024, 256),           # FC -> [256]
+            # nn.ReLU(inplace=True)
         )
 
     def forward(self, x):
@@ -47,12 +47,12 @@ class BigDecoder(nn.Module):
         super().__init__(*args, **kwargs)
 
         self.big_decoder = nn.Sequential(
-            nn.Linear(256, 1024),                         # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 32 * 32 * 128),               # FC -> [32 * 32 * 128]
-            nn.ReLU(inplace=True),
+            # nn.Linear(256, 1024),                         # FC -> [1024]
+            # nn.ReLU(inplace=True),
+            # nn.Linear(1024, 32 * 32 * 128),               # FC -> [32 * 32 * 128]
+            # nn.ReLU(inplace=True),
 
-            nn.Unflatten(1, (128, 32, 32)),
+            # nn.Unflatten(1, (128, 32, 32)),
 
             nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [64, 64, 128]
             nn.ConvTranspose2d(128, 128, 3, padding=1),             # T Conv -> [64, 64, 128]
@@ -99,12 +99,12 @@ class SmallEncoder(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),                    # Pool -> [32, 32, 128]
             
-            nn.Flatten(),
+            # nn.Flatten(),
 
-            nn.Linear(32 * 32 * 128, 1024),        # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 256),                  # FC -> [256]
-            nn.Sigmoid()
+            # nn.Linear(32 * 32 * 128, 1024),        # FC -> [1024]
+            # nn.ReLU(inplace=True),
+            # nn.Linear(1024, 256),                  # FC -> [256]
+            # nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -117,12 +117,12 @@ class SmallDecoder(nn.Module):
         super().__init__(*args, **kwargs)
 
         self.small_decoder = nn.Sequential(
-            nn.Linear(256, 1024),                        # FC -> [1024]
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 32 * 32 * 128),              # FC -> [32 * 32 * 128]
-            nn.ReLU(inplace=True),
+            # nn.Linear(256, 1024),                        # FC -> [1024]
+            # nn.ReLU(inplace=True),
+            # nn.Linear(1024, 32 * 32 * 128),              # FC -> [32 * 32 * 128]
+            # nn.ReLU(inplace=True),
 
-            nn.Unflatten(1, (128, 32, 32)),
+            # nn.Unflatten(1, (128, 32, 32)),
 
             nn.Upsample(scale_factor=2, mode="nearest"), # Up -> [64, 64, 128]
             nn.ConvTranspose2d(128, 64, 3, padding=1),   # T Conv -> [64, 64, 64]

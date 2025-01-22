@@ -1,4 +1,4 @@
-\chapter{Knowledge Distillation for Image Compression}
+\chapter{Knowledge Distillation}
 \label{part_2}
 \acrfull{kd} is one of the most popular techniques of frugal AI. Using the results of a large model at training time, a smaller model can achieve performances which tends towards that of the large model. This chapter focuses applying \acrshort{kd} to \acrshort{lic}. In order to do that, we first experiment with \acrshort{kd} on auto-encoders for image reconstruction. After achieving satisfactory results, we proceed in implementing \acrshort{kd} for \acrshort{lic}.
 
@@ -6,9 +6,23 @@
 % Image reconstruction is similar but simpler than lic
 As explained by Ballé et al. in \cite{ballé2018variationalimagecompressionscale}, \acrshort{vae}s are very similar to \acrshort{lic} architectures in the sense that they both have some sort of analysis transformation to transfer the input signal to a low dimensional latent space and an approximate of this analysis transform (the synthesis transform) to transfer the latent representation back to the signal space. However, in \cite{minnen2018jointautoregressivehierarchicalpriors}, the authors explain the difference between the two. Compression consists in reducing the entropy of the representation under a prior probability model shared between the sender and the receiver, not only the dimensionality. Achieving performant image compression/decompression is thus more complex than doing standard image reconstruction.
 
+In the context of this study, applying \acrshort{kd} to auto-encoders for image reconstruction is a step in the right direction as it is a similar yet easier task than image compression. First, we become acquainted with this technique by implementing it on custom made \acrshort{ae}s. Following that, we apply the same technique to state-of-the-art image compression models used as \acrshort{ae}s.
+
 \subsection{Custom Auto-encoder}
+The goal of this experiment is straightforward: assessing the effect of \acrshort{kd}. To do so, we train a large model (the teacher model) and a small model with and without \acrshort{kd}. We expect the model trained with \acrshort{kd} (the student model) to achieve better image reconstruction performance then the other small model. In the best case scenario, the student model would give results similar to that of the teacher model.
+
+We design the teacher encoder with three stage each containing two convolutions with ReLU followed by a maximum pooling. This is followed by a two-layer fully connected network to achieve a latent space size of 256. The teacher decoder follows the same structure but reversed with transpose convolutions instead of convolutions and up-sampling to replace pooling. The small architecture is analogous with only one convolution (or transpose convolution) per stage.
+
+[TODO: retrain + results]
+
+An interesting experiment to perform would be to create another student architecture with the same encoder as the teacher and only a smaller decoder.This set-up would fit more the context of image compression with a single sender that compress the image with a powerful encoder and multiple resource constrained receivers using an efficient decoder.
 
 \subsection{Scale Hyperprior Model as Auto-encoder}
+With the previous section showing the benefits of \acrshort{kd} for auto-encoders, the hope for this technique to work for image compression increased. Following a step-by-step approach, we first tried to observe similar results with the architectures used for image compression. The goal of the following experiment is to use the state-of-the-art scale hyperprior model as an auto-encoder for image reconstruction. As discussed previously, image reconstruction is very similar to image compression but with no entropy constrain on the latent space. The scale hyperprior model, designed for \acrshort{lic} should reach satisfactory performances on this easier task. The additional benefit of this experiment being that the code used will form a foundation for future experiments focused on \acrshort{lic}.
+
+[TODO: results] % Use: 259782 -> 259786 for MSE and 261095 for KLDiv
 
 \section{Knowledge Distillation for Image Compression}
 % Eventhough similar image reconstruction is different than image compression which requires min entropy
+
+Our work on this topic can be summarised as follow: ...

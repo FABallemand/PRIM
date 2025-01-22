@@ -242,7 +242,7 @@
 - Update report 2
 - Train ScaleHyperPrior models (image reconstruction, student KD with and without latent loss MSE)
   - 257451 (no latent loss)
-  - 257451 (latent loss)
+  - 257452 (latent loss)
 
 ## 15/01/2025
 - Meeting:
@@ -304,8 +304,11 @@
   - Need to use RateDistortionLoss
   - Compute model energy consumption
   - Do more experiments and send the code end of january for deeper training on super computer
-- Model visualisation (torchview, torchviz, NN SVG)
+- Model visualisation (torchview, torchviz, NN SVG, PlotNeuralNet)
 - Compute energy consumption (https://pytorch.org/blog/zeus/)
+- Compute latency
+- Report:
+  - Begin part 2
 
 ## TODO
 - Improve part_1
