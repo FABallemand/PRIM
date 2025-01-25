@@ -28,7 +28,7 @@ from compressai.zoo.image import (
 import wandb
 
 from models import ScaleHyperprior, MeanScaleHyperprior, JointAutoregressiveHierarchicalPriors
-from losses import AverageMeter, KDLoss_MSE, KDLoss_KLD
+from losses import AverageMeter, KDLoss_MSE, KDLoss_KLD, KDLoss_RD_MSE
 
 # Set seeds
 torch.backends.cudnn.deterministic = True
@@ -109,14 +109,26 @@ def make(config):
     student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
 
     # Create loss
-    if config.latent_loss == "MSE":
-        criterion = KDLoss_MSE(latent=True)
-    elif config.latent_loss == "KLD":
-        criterion = KDLoss_KLD(latent=True)
-    elif config.latent_loss == None:
-        criterion = KDLoss_MSE(latent=False)
+    if config.loss == "MSE":
+        if config.latent_loss == "MSE":
+            criterion = KDLoss_MSE(latent=True)
+        elif config.latent_loss == "KLD":
+            criterion = KDLoss_KLD(latent=True)
+        elif config.latent_loss == None:
+            criterion = KDLoss_MSE(latent=False)
+        else:
+            raise ValueError("Invalid latent loss")
+    elif config.loss == "RD":
+        if config.latent_loss == "MSE":
+            criterion = KDLoss_RD_MSE(latent=True)
+        elif config.latent_loss == "KLD":
+            criterion = None
+        elif config.latent_loss == None:
+            criterion = KDLoss_RD_MSE(latent=False)
+        else:
+            raise ValueError("Invalid latent loss")
     else:
-        raise ValueError("Invalid latent loss")
+        raise ValueError("Invalid loss")
 
     # Create optimizer
     optimizer = torch.optim.Adam(student_model.parameters(),
@@ -144,9 +156,8 @@ def train_epoch(
         # Forward pass
         teacher_output = teacher_model(teacher_x)
         student_output = student_model(student_x)
-        loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
-                                    student_output["x_hat"], teacher_output["x_hat"].to(student_device),
-                                    student_x)
+        loss, loss_dict = criterion(student_output, teacher_output["y_hat"].to(student_device),
+                                    teacher_output["x_hat"].to(student_device), student_x)
 
         # Backward pass
         optimizer.zero_grad()
@@ -167,7 +178,7 @@ def train_epoch(
         f"Epoch {epoch}: ["
         f"{i*len(x)}/{len(train_loader.dataset)}"
         f" ({100. * i / len(train_loader):.0f}%)]"
-        f"{f"{[f'{k} = {v:.6f}' for k, v in loss_dict.items()]}"}"
+        f"{[f'{k} = {v:.6f}' for k, v in loss_dict.items()]}"
     )
 
 
@@ -220,7 +231,7 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion):
     }
     wandb.log(log_dict)
     print(
-        f"Validation: {f"{[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"}"
+        f"Validation: {[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"
     )
 
     return avg_loss.avg
@@ -303,13 +314,13 @@ def test(student_model, data_loader, config):
     }
     wandb.log(log_dict)
     print(
-        f"Test: {f"{[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"}"
+        f"Test: {[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"
     )
 
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd_experiments", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_kd_experiments_rd", config=config):
         # Access config
         config = wandb.config
         print(config)
@@ -341,7 +352,8 @@ if __name__ == "__main__":
         epochs=1000,
         batch_size=16,
         learning_rate=1e-4,
-        latent_loss="KLD",
+        loss="RD",
+        latent_loss="MSE",
         save_path=f"train_res/{job_id}"
     )
 

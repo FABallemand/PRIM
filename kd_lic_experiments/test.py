@@ -130,8 +130,15 @@ os.makedirs(output_folder)
 
 # Load networks
 M = 192
-Ns = [128, 16, 32, 64, 96]
-ids = [None, 258263, 258258, 258259, 258262]
+
+# Ns = [128, 16, 32, 64, 96, 112]
+# ids = [None, 258263, 258258, 258259, 258262]
+
+# Ns = [128, 16, 32, 64, 96, 112]
+# ids = [None, 259782, 259783, 259784, 259785, 259786]
+
+Ns = [128, 16, 32, 64, 96, 112, 112]
+ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
 
 networks = {
     "teacher": None,
@@ -139,6 +146,8 @@ networks = {
     "student_32": None,
     "student_64": None,
     "student_96": None,
+    "student_112": None,
+    "student_112_kl": None,
 }
 
 for name, N, id in zip(networks.keys(), Ns, ids):
@@ -230,7 +239,7 @@ for img_name in dataset_imgs:
                         for out in pretrained_outputs.values()]
     
     # Compare networks
-    fix, axes = plt.subplots((len(reconstructions) + 2) // 3, 3,
+    fix, axes = plt.subplots(math.ceil((len(reconstructions) + 1) / 3), 3,
                              figsize=(16, 12))
     for ax in axes.ravel():
         ax.axis("off")
@@ -316,13 +325,13 @@ for img_name in dataset_imgs:
 
     for name, m in pretrained_metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-        axes[0].grid()
+        axes[0].grid(True)
         axes[0].set_ylabel("PSNR [dB]")
         axes[0].set_xlabel("Bit-rate [bpp]")
         axes[0].title.set_text("PSNR comparison")
 
         axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-        axes[1].grid()
+        axes[1].grid(True)
         axes[1].set_ylabel("MS-SSIM [dB]")
         axes[1].set_xlabel("Bit-rate [bpp]")
         axes[1].title.set_text("MS-SSIM (log) comparison")
@@ -330,14 +339,14 @@ for img_name in dataset_imgs:
     for name, m in metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"],
                      "s" if name == "teacher" else "o", label=name)
-        axes[0].grid()
+        axes[0].grid(True)
         axes[0].set_ylabel("PSNR [dB]")
         axes[0].set_xlabel("Bit-rate [bpp]")
         axes[0].title.set_text("PSNR comparison")
 
         axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                      "s" if name == "teacher" else "o", label=name)
-        axes[1].grid()
+        axes[1].grid(True)
         axes[1].set_ylabel("MS-SSIM [dB]")
         axes[1].set_xlabel("Bit-rate [bpp]")
         axes[1].title.set_text("MS-SSIM (log) comparison")
@@ -401,13 +410,13 @@ axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidt
 
 for name, m in pretrained_avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    axes[0].grid()
+    axes[0].grid(True)
     axes[0].set_ylabel("PSNR [dB]")
     axes[0].set_xlabel("Bit-rate [bpp]")
     axes[0].title.set_text("PSNR comparison")
 
     axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    axes[1].grid()
+    axes[1].grid(True)
     axes[1].set_ylabel("MS-SSIM [dB]")
     axes[1].set_xlabel("Bit-rate [bpp]")
     axes[1].title.set_text("MS-SSIM (log) comparison")
@@ -415,14 +424,14 @@ for name, m in pretrained_avg_metrics.items():
 for name, m in avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[0].grid()
+    axes[0].grid(True)
     axes[0].set_ylabel("PSNR [dB]")
     axes[0].set_xlabel("Bit-rate [bpp]")
     axes[0].title.set_text("PSNR comparison")
 
     axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                  "s" if name == "teacher" else "o", label=name)
-    axes[1].grid()
+    axes[1].grid(True)
     axes[1].set_ylabel("MS-SSIM [dB]")
     axes[1].set_xlabel("Bit-rate [bpp]")
     axes[1].title.set_text("MS-SSIM (log) comparison")

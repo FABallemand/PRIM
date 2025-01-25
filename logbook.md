@@ -278,7 +278,7 @@
 - Report:
   - Update intro
   - Update SOTA
-- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
   - 259782 (16)
   - 259783 (32)
   - 259784 (64)
@@ -309,6 +309,20 @@
 - Compute latency
 - Report:
   - Begin part 2
+
+## 25/01/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with latent loss MSE)
+  - 259782 (16)
+  - 259783 (32)
+  - 259784 (64)
+  - 259785 (96)
+  - 259786 (112)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with RD loss and latent loss MSE)
+  - 263657 (16)
+  - 263658 (32)
+  - 263659 (64)
+  - 263660 (96)
+  - 263661 (112)
 
 ## TODO
 - Improve part_1

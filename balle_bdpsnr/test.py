@@ -280,26 +280,26 @@ for img_name in dataset_imgs:
     # plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
     for name, m in metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"], "o", color="red") # label=name
-        axes[0].grid()
+        axes[0].grid(True)
         axes[0].set_ylabel("PSNR [dB]")
         axes[0].set_xlabel("Bit-rate [bpp]")
         axes[0].title.set_text("PSNR comparison")
 
         axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="red")
-        axes[1].grid()
+        axes[1].grid(True)
         axes[1].set_ylabel("MS-SSIM [dB]")
         axes[1].set_xlabel("Bit-rate [bpp]")
         axes[1].title.set_text("MS-SSIM (log) comparison")
 
     for name, m in pretrained_metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-        axes[0].grid()
+        axes[0].grid(True)
         axes[0].set_ylabel("PSNR [dB]")
         axes[0].set_xlabel("Bit-rate [bpp]")
         axes[0].title.set_text("PSNR comparison")
 
         axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-        axes[1].grid()
+        axes[1].grid(True)
         axes[1].set_ylabel("MS-SSIM [dB]")
         axes[1].set_xlabel("Bit-rate [bpp]")
         axes[1].title.set_text("MS-SSIM (log) comparison")
@@ -313,7 +313,7 @@ for img_name in dataset_imgs:
     pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
     axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-    axes[0].grid()
+    axes[0].grid(True)
     axes[0].legend(loc="best")
 
     msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
@@ -322,7 +322,7 @@ for img_name in dataset_imgs:
     pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
     axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-    axes[1].grid()
+    axes[1].grid(True)
     axes[1].legend(loc="best")
 
     plt.savefig(os.path.join(output_folder,
@@ -374,38 +374,38 @@ fig, axes = plt.subplots(1, 2, figsize=(10, 5))
 # plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
 for name, m in avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"], "o", color="red") # label=name
-    axes[0].grid()
+    axes[0].grid(True)
     axes[0].set_ylabel("PSNR [dB]")
     axes[0].set_xlabel("Bit-rate [bpp]")
     axes[0].title.set_text("PSNR comparison")
 
     axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="red")
-    axes[1].grid()
+    axes[1].grid(True)
     axes[1].set_ylabel("MS-SSIM [dB]")
     axes[1].set_xlabel("Bit-rate [bpp]")
     axes[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in pretrained_avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    axes[0].grid()
+    axes[0].grid(True)
     axes[0].set_ylabel("PSNR [dB]")
     axes[0].set_xlabel("Bit-rate [bpp]")
     axes[0].title.set_text("PSNR comparison")
 
     axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    axes[1].grid()
+    axes[1].grid(True)
     axes[1].set_ylabel("MS-SSIM [dB]")
     axes[1].set_xlabel("Bit-rate [bpp]")
     axes[1].title.set_text("MS-SSIM (log) comparison")
 
 axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
-axes[0].grid()
+axes[0].grid(True)
 axes[0].legend(loc="best")
 
 axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
-axes[1].grid()
+axes[1].grid(True)
 axes[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,
