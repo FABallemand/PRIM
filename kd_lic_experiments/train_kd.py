@@ -182,7 +182,7 @@ def train_epoch(
     )
 
 
-def validation(epoch, data_loader, teacher_model, student_model, criterion):
+def validation(epoch, data_loader, teacher_model, student_model, criterion, config):
     # Set-up
     student_model.eval()
     student_device = next(student_model.parameters()).device
@@ -192,7 +192,12 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion):
     avg_loss = AverageMeter()
     avg_latent_kd_loss = AverageMeter()
     avg_output_kd_loss = AverageMeter()
-    avg_output_loss = AverageMeter()
+    if config.loss == "RD":
+        avg_rd_loss = AverageMeter()
+        avg_mse_loss = AverageMeter()
+        avg_bpp_loss = AverageMeter()
+    else:
+        avg_output_loss = AverageMeter()
     avg_psnr = AverageMeter()
     avg_msssim = AverageMeter()
     avg_bpp = AverageMeter()
@@ -206,29 +211,47 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion):
             # Forward pass
             teacher_output = teacher_model(teacher_x)
             student_output = student_model(student_x)
-            loss, loss_dict = criterion(student_output["y_hat"], teacher_output["y_hat"].to(student_device),
-                                        student_output["x_hat"], teacher_output["x_hat"].to(student_device),
-                                        student_x)
+            loss, loss_dict = criterion(student_output, teacher_output["y_hat"].to(student_device),
+                                        teacher_output["x_hat"].to(student_device), student_x)
             # Update measures
             avg_loss.update(loss_dict["loss"])
             avg_latent_kd_loss.update(loss_dict["latent_kd_loss"])
             avg_output_kd_loss.update(loss_dict["output_kd_loss"])
-            avg_output_loss.update(loss_dict["output_loss"])
+            if config.loss == "RD":
+                avg_rd_loss.update(loss_dict["rd_loss"])
+                avg_mse_loss.update(loss_dict["mse_loss"])
+                avg_bpp_loss.update(loss_dict["bpp_loss"])
+            else:
+                avg_output_loss.update(loss_dict["output_loss"])
             avg_psnr.update(compute_psnr(student_x, student_output["x_hat"]))
             avg_msssim.update(compute_msssim(student_x, student_output["x_hat"]))
             avg_bpp.update(compute_bpp(student_output))
 
     # Logging
-    log_dict = {
-        "epoch": epoch,
-        "validation_loss": avg_loss.avg,
-        "validation_latent_kd_loss": avg_latent_kd_loss.avg,
-        "validation_output_kd_loss": avg_output_kd_loss.avg,
-        "validation_output_loss": avg_output_loss.avg,
-        "validation_psnr": avg_psnr.avg,
-        "validation_msssim": avg_msssim.avg,
-        "validation_bpp": avg_bpp.avg
-    }
+    if config.loss == "RD":
+        log_dict = {
+            "epoch": epoch,
+            "validation_loss": avg_loss.avg,
+            "validation_latent_kd_loss": avg_latent_kd_loss.avg,
+            "validation_output_kd_loss": avg_output_kd_loss.avg,
+            "validation_rd_loss": avg_rd_loss.avg,
+            "validation_mse_loss": avg_mse_loss.avg,
+            "validation_bpp_loss": avg_bpp_loss.avg,
+            "validation_psnr": avg_psnr.avg,
+            "validation_msssim": avg_msssim.avg,
+            "validation_bpp": avg_bpp.avg
+        }
+    else:
+        log_dict = {
+            "epoch": epoch,
+            "validation_loss": avg_loss.avg,
+            "validation_latent_kd_loss": avg_latent_kd_loss.avg,
+            "validation_output_kd_loss": avg_output_kd_loss.avg,
+            "validation_output_loss": avg_output_loss.avg,
+            "validation_psnr": avg_psnr.avg,
+            "validation_msssim": avg_msssim.avg,
+            "validation_bpp": avg_bpp.avg
+        }
     wandb.log(log_dict)
     print(
         f"Validation: {[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"
@@ -252,7 +275,7 @@ def train(
         train_epoch(epoch, teacher_model, student_model, criterion, train_data_loader, optimizer)
 
         # Validation
-        loss = validation(epoch, validation_data_loader, teacher_model, student_model, criterion)
+        loss = validation(epoch, validation_data_loader, teacher_model, student_model, criterion, config)
 
         # Learning rate scheduler step
         lr_scheduler.step(loss)

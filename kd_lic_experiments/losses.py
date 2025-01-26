@@ -143,7 +143,7 @@ class KDLoss_RD_MSE(nn.Module):
             "latent_kd_loss": latent_kd_loss,
             "output_kd_loss": output_kd_loss,
             "rd_loss": rd_loss["loss"],
-            "output_mse_loss": rd_loss["mse_loss"],
-            "output_bpp_loss": rd_loss["bpp_loss"]
+            "mse_loss": rd_loss["mse_loss"],
+            "bpp_loss": rd_loss["bpp_loss"]
         }
         return loss, loss_dict

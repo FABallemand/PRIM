@@ -10,17 +10,16 @@
 DATE=$(date +'%Y%m%d_%H%M%S')
 echo $DATE
 
-mkdir test_res/$SLURM_JOB_ID
+# MODEL="bmshj2018-hyperprior"
 
-MODEL="bmshj2018-hyperprior"
+# DATASET=/home/ids/fallemand-24/PRIM/data/kodak
 
-DATASET=/home/ids/fallemand-24/PRIM/data/kodak
-
-CHECKPOINT=/home/ids/fallemand-24/PRIM/balle_reproduction/train_res/224584/checkpoint.pth.tar
+# CHECKPOINT=/home/ids/fallemand-24/PRIM/balle_reproduction/train_res/224584/checkpoint.pth.tar
 
 eval "$(conda shell.bash hook)"
 
 conda activate prim_env
 
 set -x
-srun python3 -u test.py checkpoint -a $MODEL --dataset $DATASET -p $CHECKPOINT --cuda -d test_res/$SLURM_JOB_ID -o $SLURM_JOB_ID.json
+# srun python3 -u test.py checkpoint -a $MODEL --dataset $DATASET -p $CHECKPOINT --cuda -d test_res/$SLURM_JOB_ID -o $SLURM_JOB_ID.json
+srun python3 -u test.py

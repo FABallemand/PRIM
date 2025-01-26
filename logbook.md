@@ -318,11 +318,16 @@
   - 259785 (96)
   - 259786 (112)
 - Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with RD loss and latent loss MSE)
-  - 263657 (16)
-  - 263658 (32)
-  - 263659 (64)
-  - 263660 (96)
-  - 263661 (112)
+  - 263674 (16)
+  - 263687 (32)
+  - 263688 (64)
+  - 263690 (96)
+  - 263691 (112)
+
+## 26/01/2025
+- Test ScaleHyperprior for balle_reproduction
+  - 260502
+- Report update part 1
 
 ## TODO
 - Improve part_1

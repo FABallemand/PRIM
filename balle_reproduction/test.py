@@ -23,8 +23,6 @@ from compressai.zoo.image import (
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from models import ScaleHyperprior
-
 plt.rcParams["axes.prop_cycle"] = plt.rcParams["axes.prop_cycle"][1:]
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -121,7 +119,7 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 
 # Create output directory
 time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-output_folder = f"/home/ids/fallemand-24/PRIM/kd_lic_experiments/test_res/{time_stamp}"
+output_folder = f"/home/ids/fallemand-24/PRIM/balle_reproduction/test_res/{time_stamp}"
 os.makedirs(output_folder)
 
 ###############################################################################
@@ -132,13 +130,13 @@ os.makedirs(output_folder)
 ids = [260502]
 
 networks = {
-    "net": None
+    "our": None
 }
 
 for name, id in zip(networks.keys(), ids):
-    net = bmshj2018_hyperprior(quality=3, pretrained=True)
+    net = bmshj2018_hyperprior(quality=3, pretrained=False)
     checkpoint = torch.load(f"train_res/{id}/checkpoint_best.pth.tar",
-        weights_only=True, map_location=torch.device("cpu"))
+                            weights_only=True, map_location=torch.device("cpu"))
     net.load_state_dict(checkpoint["state_dict"])
     networks[name] = net.eval().to(device)
 
@@ -284,7 +282,6 @@ for img_name in dataset_imgs:
 
     # Plot rate-distortion curves
     fig, axes = plt.subplots(1, 2, figsize=(13, 5))
-    plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
 
     brs = [m["bit-rate"] for _, m in metrics.items()]
     pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
@@ -378,7 +375,6 @@ with open(os.path.join(output_folder,
 
 # Plot average rate-distortion curves
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
-plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
 
 # axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
