@@ -327,7 +327,8 @@
 ## 26/01/2025
 - Test ScaleHyperprior for balle_reproduction
   - 260502
-- Report update part 1
+- Report:
+  - Update part 1
 
 ## TODO
 - Improve part_1
