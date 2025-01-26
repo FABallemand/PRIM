@@ -215,7 +215,7 @@ for img_name in dataset_imgs:
                         for out in pretrained_outputs.values()]
     
     # Compare networks
-    fix, axes = plt.subplots((len(reconstructions) + 2) // 3, 3,
+    fig, axes = plt.subplots((len(reconstructions) + 2) // 3, 3,
                              figsize=(16, 12))
     for ax in axes.ravel():
         ax.axis("off")
@@ -226,6 +226,8 @@ for img_name in dataset_imgs:
     for i, (name, rec) in enumerate(reconstructions.items()):
         axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
         axes.ravel()[i + 1].title.set_text(name)
+
+    fig.tight_layout()
 
     plt.savefig(os.path.join(output_folder,
                              f"networks_{dataset_name}_{img_name}.png"))
@@ -329,6 +331,8 @@ for img_name in dataset_imgs:
     axes[0].legend(loc="best")
     axes[1].legend(loc="best")
 
+    fig.tight_layout()
+
     plt.savefig(os.path.join(output_folder,
                              f"curve_{dataset_name}_{img_name}.png"))
     plt.close()
@@ -412,6 +416,8 @@ for name, m in avg_metrics.items():
 
 axes[0].legend(loc="best")
 axes[1].legend(loc="best")
+
+fig.tight_layout()
 
 plt.savefig(os.path.join(output_folder,
                          f"avg_curve_{dataset_name}.png"))
