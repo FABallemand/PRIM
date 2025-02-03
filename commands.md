@@ -45,5 +45,5 @@ scancel <jobid>
 scp -r /path/to/local/dir user@remotehost:/path/to/remote/dir
 scp -r /path/to/local/dir fallemand-24@gpu-gw.enst.fr:/path/to/remote/dir
 
-scp -r fallemand-24@gpu-gw.enst.fr:/home/ids/fallemand-24/PRIM/balle_bdpsnr/test_res/20250126_174547 /home/fabien/TSP/3A/PRIM/balle_bdpsnr/test_res/20250126_174547
+scp -r fallemand-24@gpu-gw.enst.fr:/home/ids/fallemand-24/PRIM/kd_lic_experiments/test_res/20250203_155954 /home/fabien/TSP/3A/PRIM/kd_lic_experiments/test_res/20250203_155954
 ```

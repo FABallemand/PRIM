@@ -101,9 +101,9 @@ Let us start by passing a single image through the networks. The image from the 
 
 \begin{figure}[H]
     \centering
-    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{../balle_bdpsnr/test_res/20250126_174547/networks_kodak_kodim14.png} \label{bdpsnr_1:a}}}
-    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{../balle_bdpsnr/test_res/20250126_174547/pretrained_networks_kodak_kodim14.png} \label{bdpsnr_1:b}}}
-    \caption[Reconstruction results on image 14 of the Kodak dataset.]{Reconstruction results on image 14 of the Kodak dataset. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
+    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_1.png} \label{bdpsnr_1:a}}}
+    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_2.png} \label{bdpsnr_1:b}}}
+    \caption[Reconstruction results on image 14 of the Kodak dataset for different rate-distortion tradeoffs.]{Reconstruction results on image 14 of the Kodak dataset for different rate-distortion tradeoffs. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
 
@@ -111,7 +111,7 @@ We can produce rate-distortion curve for this single image of the testing datase
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{../balle_bdpsnr/test_res/20250126_174547/curve_kodak_kodim14.png}
+    \includegraphics[width=15cm]{img/bdpsnr_3.png}
     \caption[Rate-distortion curve for image 14 of the Kodak dataset.]{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit-rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit-rates where our models do not manage to maintain the quality of the image.}
     \label{bdpsnr_2}
 \end{figure}
@@ -120,7 +120,7 @@ It should be noted that the previous \acrshort{rd} curve corresponds to the resu
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{../balle_bdpsnr/test_res/20250126_174547/avg_curve_kodak.png}
+    \includegraphics[width=15cm]{img/bdpsnr_4.png}
     \caption[Average rate-distortion curve for the Kodak dataset.]{Average rate-distortion curve for the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit-rate for a lower measured image quality, especially for high bit-rates.}
     \label{bdpsnr_3}
 \end{figure}
