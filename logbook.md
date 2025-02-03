@@ -341,6 +341,11 @@
   - 274457 (32)
   - 274461 (64)
   - 274464 (96)
+- Train TeacherAE and StudentAE models (image reconstruction, teacher and no KD)
+  - 274518 (Teacher)
+  - 274520 (Student no KD)
+- Report:
+  - Update part 2
 
 ## TODO
 - Improve part_1

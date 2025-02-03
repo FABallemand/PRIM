@@ -234,7 +234,7 @@ for img_name in dataset_imgs:
     plt.close()
 
     # Compare pre-trained networks
-    # fix, axes = plt.subplots((len(pretrained_reconstructions) + 2) // 3, 3,
+    # fig, axes = plt.subplots((len(pretrained_reconstructions) + 2) // 3, 3,
     #                          figsize=(16, 12))
     # for ax in axes.ravel():
     #     ax.axis("off")
