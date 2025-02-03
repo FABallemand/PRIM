@@ -210,7 +210,7 @@ for img_name in dataset_imgs:
     # Compare networks
     n_rows = (len(reconstructions) + 2) // 3
     n_cols = 3
-    fix, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
     for ax in axes.ravel():
         ax.axis("off")
     
@@ -221,6 +221,8 @@ for img_name in dataset_imgs:
         axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
         axes.ravel()[i + 1].title.set_text(name)
 
+    fig.tight_layout()
+
     plt.savefig(os.path.join(output_folder,
                              f"networks_{dataset_name}_{img_name}.png"))
     plt.close()
@@ -228,7 +230,7 @@ for img_name in dataset_imgs:
     # Compare pre-trained networks
     n_rows = (len(pretrained_reconstructions) + 2) // 3
     n_cols = 3
-    fix, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
     for ax in axes.ravel():
         ax.axis("off")
     
@@ -238,6 +240,8 @@ for img_name in dataset_imgs:
     for i, (name, rec) in enumerate(pretrained_reconstructions.items()):
         axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
         axes.ravel()[i + 1].title.set_text(name)
+
+    fig.tight_layout()
 
     plt.savefig(os.path.join(output_folder,
                              f"pretrained_networks_{dataset_name}_{img_name}.png"))
@@ -276,8 +280,7 @@ for img_name in dataset_imgs:
         json.dump(all_metrics, f)
 
     # Plot rate-distortion curves
-    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-    # plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
     for name, m in metrics.items():
         axes[0].plot(m["bit-rate"], m["psnr"], "o", color="red") # label=name
         axes[0].grid(True)
@@ -325,6 +328,8 @@ for img_name in dataset_imgs:
     axes[1].grid(True)
     axes[1].legend(loc="best")
 
+    fig.tight_layout()
+
     plt.savefig(os.path.join(output_folder,
                              f"curve_{dataset_name}_{img_name}.png"))
     plt.close()
@@ -370,8 +375,7 @@ with open(os.path.join(output_folder,
     json.dump(avg_bd_metrics, f)
 
 # Plot average rate-distortion curves
-fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-# plt.figtext(.5, 0., "(upper-left is better)", fontsize=12, ha="center")
+fig, axes = plt.subplots(1, 2, figsize=(13, 5))
 for name, m in avg_metrics.items():
     axes[0].plot(m["bit-rate"], m["psnr"], "o", color="red") # label=name
     axes[0].grid(True)
@@ -407,6 +411,8 @@ axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 axes[1].grid(True)
 axes[1].legend(loc="best")
+
+fig.tight_layout()
 
 plt.savefig(os.path.join(output_folder,
                          f"avg_curve_{dataset_name}.png"))
