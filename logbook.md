@@ -330,6 +330,18 @@
 - Report:
   - Update part 1
 
+## 03/02/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with RD loss and latent loss MSE)
+  - 263674 (16)
+  - 263687 (32)(112??)
+  - 263688 (64)(112??)
+  - 263690 (96)(112??)
+  - 263691 (112)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with RD loss and latent loss MSE)
+  - 274457 (32)
+  - 274461 (64)
+  - 274464 (96)
+
 ## TODO
 - Improve part_1
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)

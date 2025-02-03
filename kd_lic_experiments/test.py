@@ -137,8 +137,11 @@ M = 192
 # Ns = [128, 16, 32, 64, 96, 112]
 # ids = [None, 259782, 259783, 259784, 259785, 259786]
 
+# Ns = [128, 16, 32, 64, 96, 112, 112]
+# ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
+
 Ns = [128, 16, 32, 64, 96, 112, 112]
-ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
+ids = [None, 263674, 263687, 263688, 263690, 263691]
 
 networks = {
     "teacher": None,
@@ -147,7 +150,7 @@ networks = {
     "student_64": None,
     "student_96": None,
     "student_112": None,
-    "student_112_kl": None,
+    # "student_112_kl": None,
 }
 
 for name, N, id in zip(networks.keys(), Ns, ids):
