@@ -347,8 +347,13 @@
 - Report:
   - Update part 2
 
+## 04/02/2025
+- Report:
+  - Update part 2
+- Estimate memory footprint (https://discuss.pytorch.org/t/finding-model-size/130275/2)
+
 ## TODO
-- Improve part_1
+- Name figures properly
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)
-- Use compressAI RateDistortionLoss for KD!!!
 - Remake pdf of first report (correct errors)
+- Do article (Our work on this topic can be summarised as follow: ...)
