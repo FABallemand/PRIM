@@ -352,6 +352,14 @@
   - Update part 2
 - Estimate memory footprint (https://discuss.pytorch.org/t/finding-model-size/130275/2)
 
+## 07/02/2025
+- Train ScaleHyperPrior models (image compression, pre-trained teacher, student KD with RD loss and latent loss MSE, 64 channels, different lambda)
+  - 280392 (0.0018)
+  - x (0.0035)
+  - x (0.0067)
+  - x (0.013)
+  - x (0.025) (reuse 274461)
+
 ## TODO
 - Name figures properly
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)

@@ -120,7 +120,7 @@ def make(config):
             raise ValueError("Invalid latent loss")
     elif config.loss == "RD":
         if config.latent_loss == "MSE":
-            criterion = KDLoss_RD_MSE(latent=True)
+            criterion = KDLoss_RD_MSE(latent=True, rd_lmbda=config.rd_lmbda)
         elif config.latent_loss == "KLD":
             criterion = None
         elif config.latent_loss == None:
@@ -343,7 +343,7 @@ def test(student_model, data_loader, config):
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd_experiments_rd", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_kd_experiments_kd_bd", config=config):
         # Access config
         config = wandb.config
         print(config)
@@ -370,12 +370,13 @@ if __name__ == "__main__":
     config = dict(
         job_id=job_id,
         dataset="Vimeo90K",
-        N_student=96,
+        N_student=64,
         M=192,
         epochs=1000,
         batch_size=16,
         learning_rate=1e-4,
         loss="RD",
+        rd_lmbda=0.0018,
         latent_loss="MSE",
         save_path=f"train_res/{job_id}"
     )

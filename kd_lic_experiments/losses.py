@@ -107,7 +107,7 @@ class KDLoss_KLD(nn.Module):
 
 class KDLoss_RD_MSE(nn.Module):
 
-    def __init__(self, latent=True):
+    def __init__(self, latent=True, rd_lmbda=0.025):
         super().__init__()
         self.latent = latent
         if self.latent:
@@ -121,7 +121,7 @@ class KDLoss_RD_MSE(nn.Module):
 
         self.latent_kd_loss = nn.MSELoss()
         self.output_kd_loss = nn.MSELoss()
-        self.rd_loss = RateDistortionLoss(lmbda=0.025, metric="mse")
+        self.rd_loss = RateDistortionLoss(lmbda=rd_lmbda, metric="mse")
 
     def __str__(self):
         s = f"{self.lmbda_1} * {self.latent_kd_loss} + {self.lmbda_2} * {self.output_kd_loss} + {self.lmbda_3} * {self.rd_loss}"
