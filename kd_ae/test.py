@@ -252,59 +252,60 @@ for img_name in dataset_imgs:
         # Truen off flops computation
         compute_flops = False
 
-    # Inference with networks
+    # Inference and metrics for networks
     outputs = {}
+    metrics = {}
     with torch.no_grad():
         for name, net in networks.items():
+            # Run inference
             start = time.time()
-            rv = net(x)
+            out = net(x)
             stop = time.time()
-            rv["x_hat"].clamp_(0, 1)
-            outputs[name] = rv
+            out["x_hat"].clamp_(0, 1)
 
-    # Compute metrics for networks
-    metrics = {}
-    for name, out in outputs.items():
-        metrics[name] = {
-            "inference-time": stop - start,
-            "mse": criterion(out["x_hat"], x).item(),
-            "psnr": compute_psnr(out["x_hat"], x),
-            "ms-ssim": compute_msssim(out["x_hat"], x),
-            "bit-rate": compute_bpp(out),
-        }
+            # Save output
+            outputs[name] = out
 
-        avg_metrics[name]["inference-time"].append(metrics[name]["inference-time"])
-        avg_metrics[name]["mse"].append(metrics[name]["mse"])
-        avg_metrics[name]["psnr"].append(metrics[name]["psnr"])
-        avg_metrics[name]["ms-ssim"].append(metrics[name]["ms-ssim"])
-        avg_metrics[name]["bit-rate"].append(metrics[name]["bit-rate"])
+            # Compute metrics
+            metrics[name] = {
+                "inference-time": stop - start,
+                "mse": criterion(out["x_hat"], x).item(),
+                "psnr": compute_psnr(out["x_hat"], x),
+                "ms-ssim": compute_msssim(out["x_hat"], x),
+                "bit-rate": compute_bpp(out),
+            }
+            avg_metrics[name]["inference-time"].append(metrics[name]["inference-time"])
+            avg_metrics[name]["mse"].append(metrics[name]["mse"])
+            avg_metrics[name]["psnr"].append(metrics[name]["psnr"])
+            avg_metrics[name]["ms-ssim"].append(metrics[name]["ms-ssim"])
+            avg_metrics[name]["bit-rate"].append(metrics[name]["bit-rate"])
 
-    # Inference with pre-trained networks
+    # Inference and metrics for pre-trained networks
     pretrained_outputs = {}
+    pretrained_metrics = {}
     with torch.no_grad():
         for name, net in pretrained_networks.items():
+            # Run inference
             start = time.time()
-            rv = net(x)
+            out = net(x)
             stop = time.time()
-            rv["x_hat"].clamp_(0, 1)
-            pretrained_outputs[name] = rv
+            out["x_hat"].clamp_(0, 1)
 
-    # Compute metrics for pre-trained networks
-    pretrained_metrics = {}
-    for name, out in pretrained_outputs.items():
-        pretrained_metrics[name] = {
-            "inference-time": stop - start,
-            "mse": criterion(out["x_hat"], x).item(),
-            "psnr": compute_psnr(out["x_hat"], x),
-            "ms-ssim": compute_msssim(out["x_hat"], x),
-            "bit-rate": compute_bpp(out),
-        }
+            pretrained_outputs[name] = out
+            
+            pretrained_metrics[name] = {
+                "inference-time": stop - start,
+                "mse": criterion(out["x_hat"], x).item(),
+                "psnr": compute_psnr(out["x_hat"], x),
+                "ms-ssim": compute_msssim(out["x_hat"], x),
+                "bit-rate": compute_bpp(out),
+            }
 
-        pretrained_avg_metrics[name]["inference-time"].append(pretrained_metrics[name]["inference-time"])
-        pretrained_avg_metrics[name]["mse"].append(pretrained_metrics[name]["mse"])
-        pretrained_avg_metrics[name]["psnr"].append(pretrained_metrics[name]["psnr"])
-        pretrained_avg_metrics[name]["ms-ssim"].append(pretrained_metrics[name]["ms-ssim"])
-        pretrained_avg_metrics[name]["bit-rate"].append(pretrained_metrics[name]["bit-rate"])
+            pretrained_avg_metrics[name]["inference-time"].append(pretrained_metrics[name]["inference-time"])
+            pretrained_avg_metrics[name]["mse"].append(pretrained_metrics[name]["mse"])
+            pretrained_avg_metrics[name]["psnr"].append(pretrained_metrics[name]["psnr"])
+            pretrained_avg_metrics[name]["ms-ssim"].append(pretrained_metrics[name]["ms-ssim"])
+            pretrained_avg_metrics[name]["bit-rate"].append(pretrained_metrics[name]["bit-rate"])
 
     # Save metrics
     all_metrics = metrics | pretrained_metrics

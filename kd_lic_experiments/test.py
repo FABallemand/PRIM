@@ -142,17 +142,22 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 M = 192
 
 # Load networks
+
+# Wrong set of parameters
 # Ns = [128, 16, 32, 64, 96, 112]
 # ids = [None, 258263, 258258, 258259, 258262]
 
-Ns = [128, 16, 32, 64, 96, 112]
-ids = [None, 259782, 259783, 259784, 259785, 259786]
+# No RD loss
+# Ns = [128, 16, 32, 64, 96, 112]
+# ids = [None, 259782, 259783, 259784, 259785, 259786]
 
+# No RD loss
 # Ns = [128, 16, 32, 64, 96, 112, 112]
 # ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
 
-# Ns = [128, 16, 32, 64, 96, 112, 112]
-# ids = [None, 263674, 263687, 263688, 263690, 263691]
+# RD loss
+Ns = [128, 16, 32, 64, 96, 112, 112]
+ids = [None, 263674, 274457, 274461, 274464, 263691]
 
 networks = {
     "teacher": None,
@@ -254,7 +259,7 @@ for img_name in dataset_imgs:
     x = transforms.ToTensor()(img).unsqueeze(0).to(device)
     img_name = img_name.split(".")[0]
 
-    # Flops computation
+    # FLOPs computation
     if compute_flops:
         # Networks flops computation
         with torch.no_grad():
@@ -268,62 +273,63 @@ for img_name in dataset_imgs:
                 flops = FlopCountAnalysis(pretrained_networks[model], x)
                 pretrained_avg_metrics[model]["flops"] = flops.total()
 
-        # Truen off flops computation
+        # Turn off FLOPs computation
         compute_flops = False
 
-    # Inference with networks
+    # Inference and metrics for networks
     outputs = {}
+    metrics = {}
     with torch.no_grad():
         for name, net in networks.items():
+            # Run inference
             start = time.time()
-            rv = net(x)
+            out = net(x)
             stop = time.time()
-            rv["x_hat"].clamp_(0, 1)
-            outputs[name] = rv
+            out["x_hat"].clamp_(0, 1)
 
-    # Compute metrics for networks
-    metrics = {}
-    for name, out in outputs.items():
-        metrics[name] = {
-            "inference-time": stop - start,
-            "mse": criterion(out["x_hat"], x).item(),
-            "psnr": compute_psnr(out["x_hat"], x),
-            "ms-ssim": compute_msssim(out["x_hat"], x),
-            "bit-rate": compute_bpp(out),
-        }
+            # Save output
+            outputs[name] = out
 
-        avg_metrics[name]["inference-time"].append(metrics[name]["inference-time"])
-        avg_metrics[name]["mse"].append(metrics[name]["mse"])
-        avg_metrics[name]["psnr"].append(metrics[name]["psnr"])
-        avg_metrics[name]["ms-ssim"].append(metrics[name]["ms-ssim"])
-        avg_metrics[name]["bit-rate"].append(metrics[name]["bit-rate"])
+            # Compute metrics
+            metrics[name] = {
+                "inference-time": stop - start,
+                "mse": criterion(out["x_hat"], x).item(),
+                "psnr": compute_psnr(out["x_hat"], x),
+                "ms-ssim": compute_msssim(out["x_hat"], x),
+                "bit-rate": compute_bpp(out),
+            }
+            avg_metrics[name]["inference-time"].append(metrics[name]["inference-time"])
+            avg_metrics[name]["mse"].append(metrics[name]["mse"])
+            avg_metrics[name]["psnr"].append(metrics[name]["psnr"])
+            avg_metrics[name]["ms-ssim"].append(metrics[name]["ms-ssim"])
+            avg_metrics[name]["bit-rate"].append(metrics[name]["bit-rate"])
 
-    # Inference with pre-trained networks
+    # Inference and metrics for pre-trained networks
     pretrained_outputs = {}
+    pretrained_metrics = {}
     with torch.no_grad():
         for name, net in pretrained_networks.items():
+            # Run inference
             start = time.time()
-            rv = net(x)
+            out = net(x)
             stop = time.time()
-            rv["x_hat"].clamp_(0, 1)
-            pretrained_outputs[name] = rv
+            out["x_hat"].clamp_(0, 1)
 
-    # Compute metrics for pre-trained networks
-    pretrained_metrics = {}
-    for name, out in pretrained_outputs.items():
-        pretrained_metrics[name] = {
-            "inference-time": stop - start,
-            "mse": criterion(out["x_hat"], x).item(),
-            "psnr": compute_psnr(out["x_hat"], x),
-            "ms-ssim": compute_msssim(out["x_hat"], x),
-            "bit-rate": compute_bpp(out),
-        }
+            pretrained_outputs[name] = out
+            
+            pretrained_metrics[name] = {
+                "inference-time": stop - start,
+                "mse": criterion(out["x_hat"], x).item(),
+                "psnr": compute_psnr(out["x_hat"], x),
+                "ms-ssim": compute_msssim(out["x_hat"], x),
+                "bit-rate": compute_bpp(out),
+            }
 
-        pretrained_avg_metrics[name]["inference-time"].append(pretrained_metrics[name]["inference-time"])
-        pretrained_avg_metrics[name]["mse"].append(pretrained_metrics[name]["mse"])
-        pretrained_avg_metrics[name]["psnr"].append(pretrained_metrics[name]["psnr"])
-        pretrained_avg_metrics[name]["ms-ssim"].append(pretrained_metrics[name]["ms-ssim"])
-        pretrained_avg_metrics[name]["bit-rate"].append(pretrained_metrics[name]["bit-rate"])
+            pretrained_avg_metrics[name]["inference-time"].append(pretrained_metrics[name]["inference-time"])
+            pretrained_avg_metrics[name]["mse"].append(pretrained_metrics[name]["mse"])
+            pretrained_avg_metrics[name]["psnr"].append(pretrained_metrics[name]["psnr"])
+            pretrained_avg_metrics[name]["ms-ssim"].append(pretrained_metrics[name]["ms-ssim"])
+            pretrained_avg_metrics[name]["bit-rate"].append(pretrained_metrics[name]["bit-rate"])
 
     # Save metrics
     all_metrics = metrics | pretrained_metrics
@@ -623,7 +629,7 @@ plt.savefig(os.path.join(output_folder,
                          f"avg_param_curve_{dataset_name}.png"))
 plt.close()
 
-# Plot energy and RD performance
+# Plot inference time and RD performance
 fig, axes = plt.subplots(1, 2, figsize=(13, 5))
 
 times = [m["inference-time"] for _, m in avg_metrics.items()]
