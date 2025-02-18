@@ -35,10 +35,13 @@ With the recent progress of machine learning, new compression algorithms appeare
 
 ### Tools
 - [CompressAI](https://interdigitalinc.github.io/CompressAI/zoo.html)
+- [STF](https://github.com/Googolxx/STF) (GitHub reposirotry of "The Devil Is in the Details")
 - [Bjontegaard_metric](https://github.com/Anserw/Bjontegaard_metric/tree/master)
 - [Weights and Biases](https://wandb.ai/site/)
 - [fvcore](https://github.com/facebookresearch/fvcore/tree/main)
 - [zeus](https://ml.energy/zeus/)
+- [pynvml](https://pypi.org/project/pynvml/)
+- [Measuring GPU Energy: Best Practices](https://ml.energy/blog/energy/measurement/measuring-gpu-energy-best-practices/#__tabbed_1_1)
 - [Télécom Paris GPU Cluster Doc](https://docs.google.com/document/d/1lXykfpEUJCrbNh22D2f2kxNS0gV6t-j9A_juWFdiEnI/edit?tab=t.0)
 
 ## 👥 Authors

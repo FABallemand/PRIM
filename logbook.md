@@ -368,6 +368,29 @@
   - 274464 (96)
   - 263691 (112)
 
+## 12/02/2025
+- Meeting:
+  - Use energy per frame
+  - Energy for decoder only
+  - Use pynvml for energy consumption
+  - Use GigaFLOPs instead of FLOPs
+  - Look how energy consumption is computed with Zeus (sparse matrix multiplication, set all weights to zero)
+  - For the report, explain why 64 channels is a good choice (reasonable, good tradeoff)
+
+## 13/02/2025
+- Improve testing:  
+  - Use energy per frame
+
+## 18/02/2025
+- Improve testing:
+  - Fix bugs
+- Test ScaleHyperPrior models (image compression, pre-trained teacher, student KD with RD loss and latent loss MSE, 64 channels, different lambda)
+  - 280392 (0.0018)
+  - 281662 (0.0035)
+  - 281976 (0.0067)
+  - 281979 (0.013)
+  - x (0.025) (reuse 274461)
+
 ## TODO
 - Name figures properly
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)

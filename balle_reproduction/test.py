@@ -215,17 +215,17 @@ for img_name in dataset_imgs:
                         for out in pretrained_outputs.values()]
     
     # Compare networks
-    fig, axes = plt.subplots((len(reconstructions) + 2) // 3, 3,
+    fig, axs = plt.subplots((len(reconstructions) + 2) // 3, 3,
                              figsize=(16, 12))
-    for ax in axes.ravel():
+    for ax in axs.ravel():
         ax.axis("off")
     
-    axes.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
-    axes.ravel()[0].title.set_text("Original")
+    axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
+    axs.ravel()[0].title.set_text("Original")
         
     for i, (name, rec) in enumerate(reconstructions.items()):
-        axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
-        axes.ravel()[i + 1].title.set_text(name)
+        axs.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
+        axs.ravel()[i + 1].title.set_text(name)
 
     fig.tight_layout()
 
@@ -234,17 +234,17 @@ for img_name in dataset_imgs:
     plt.close()
 
     # Compare pre-trained networks
-    # fig, axes = plt.subplots((len(pretrained_reconstructions) + 2) // 3, 3,
+    # fig, axs = plt.subplots((len(pretrained_reconstructions) + 2) // 3, 3,
     #                          figsize=(16, 12))
-    # for ax in axes.ravel():
+    # for ax in axs.ravel():
     #     ax.axis("off")
     
-    # axes.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
-    # axes.ravel()[0].title.set_text("Original")
+    # axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
+    # axs.ravel()[0].title.set_text("Original")
         
     # for i, (name, rec) in enumerate(pretrained_reconstructions.items()):
-    #     axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
-    #     axes.ravel()[i + 1].title.set_text(name)
+    #     axs.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
+    #     axs.ravel()[i + 1].title.set_text(name)
 
     # plt.savefig(os.path.join(output_folder,
     #                          f"pretrained_networks_{dataset_name}_{img_name}.png"))
@@ -283,53 +283,53 @@ for img_name in dataset_imgs:
         json.dump(all_metrics, f)
 
     # Plot rate-distortion curves
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
     brs = [m["bit-rate"] for _, m in metrics.items()]
     pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
     psnrs = [m["psnr"] for _, m in metrics.items()]
-    # axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+    # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 
     pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
-    axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+    axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
     msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    # axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+    # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 
     pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
-    axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+    axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
     for name, m in pretrained_metrics.items():
-        axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-        axes[0].grid(True)
-        axes[0].set_ylabel("PSNR [dB]")
-        axes[0].set_xlabel("Bit-rate [bpp]")
-        axes[0].title.set_text("PSNR comparison")
+        axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+        axs[0].grid(True)
+        axs[0].set_ylabel("PSNR [dB]")
+        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].title.set_text("PSNR comparison")
 
-        axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-        axes[1].grid(True)
-        axes[1].set_ylabel("MS-SSIM [dB]")
-        axes[1].set_xlabel("Bit-rate [bpp]")
-        axes[1].title.set_text("MS-SSIM (log) comparison")
+        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+        axs[1].grid(True)
+        axs[1].set_ylabel("MS-SSIM [dB]")
+        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].title.set_text("MS-SSIM (log) comparison")
     
     for name, m in metrics.items():
-        axes[0].plot(m["bit-rate"], m["psnr"],
+        axs[0].plot(m["bit-rate"], m["psnr"],
                      "s" if name == "teacher" else "o", label=name)
-        axes[0].grid(True)
-        axes[0].set_ylabel("PSNR [dB]")
-        axes[0].set_xlabel("Bit-rate [bpp]")
-        axes[0].title.set_text("PSNR comparison")
+        axs[0].grid(True)
+        axs[0].set_ylabel("PSNR [dB]")
+        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].title.set_text("PSNR comparison")
 
-        axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
+        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                      "s" if name == "teacher" else "o", label=name)
-        axes[1].grid(True)
-        axes[1].set_ylabel("MS-SSIM [dB]")
-        axes[1].set_xlabel("Bit-rate [bpp]")
-        axes[1].title.set_text("MS-SSIM (log) comparison")
+        axs[1].grid(True)
+        axs[1].set_ylabel("MS-SSIM [dB]")
+        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].title.set_text("MS-SSIM (log) comparison")
 
-    axes[0].legend(loc="best")
-    axes[1].legend(loc="best")
+    axs[0].legend(loc="best")
+    axs[1].legend(loc="best")
 
     fig.tight_layout()
 
@@ -378,44 +378,44 @@ with open(os.path.join(output_folder,
     json.dump(avg_bd_metrics, f)
 
 # Plot average rate-distortion curves
-fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-# axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-# axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
-axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Bit-rate [bpp]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    axes[1].grid(True)
-    axes[1].set_ylabel("MS-SSIM [dB]")
-    axes[1].set_xlabel("Bit-rate [bpp]")
-    axes[1].title.set_text("MS-SSIM (log) comparison")
+    axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+    axs[1].grid(True)
+    axs[1].set_ylabel("MS-SSIM [dB]")
+    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in avg_metrics.items():
-    axes[0].plot(m["bit-rate"], m["psnr"],
+    axs[0].plot(m["bit-rate"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Bit-rate [bpp]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
+    axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                  "s" if name == "teacher" else "o", label=name)
-    axes[1].grid(True)
-    axes[1].set_ylabel("MS-SSIM [dB]")
-    axes[1].set_xlabel("Bit-rate [bpp]")
-    axes[1].title.set_text("MS-SSIM (log) comparison")
+    axs[1].grid(True)
+    axs[1].set_ylabel("MS-SSIM [dB]")
+    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].title.set_text("MS-SSIM (log) comparison")
 
-axes[0].legend(loc="best")
-axes[1].legend(loc="best")
+axs[0].legend(loc="best")
+axs[1].legend(loc="best")
 
 fig.tight_layout()
 

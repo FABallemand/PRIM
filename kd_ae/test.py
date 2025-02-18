@@ -330,87 +330,87 @@ for img_name in dataset_imgs:
                         for out in pretrained_outputs.values()]
     
     # Compare networks
-    fig, axes = plt.subplots(math.ceil((len(reconstructions) + 1) / 3), 3,
+    fig, axs = plt.subplots(math.ceil((len(reconstructions) + 1) / 3), 3,
                              figsize=(16, 12))
-    for ax in axes.ravel():
+    for ax in axs.ravel():
         ax.axis("off")
     
-    axes.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
-    axes.ravel()[0].title.set_text("Original")
+    axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
+    axs.ravel()[0].title.set_text("Original")
         
     for i, (name, rec) in enumerate(reconstructions.items()):
-        axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
-        axes.ravel()[i + 1].title.set_text(name)
+        axs.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
+        axs.ravel()[i + 1].title.set_text(name)
 
     plt.savefig(os.path.join(output_folder,
                              f"networks_{dataset_name}_{img_name}.png"))
     plt.close()
 
     # Compare pre-trained networks
-    # fig, axes = plt.subplots((len(pretrained_reconstructions) + 2) // 3, 3,
+    # fig, axs = plt.subplots((len(pretrained_reconstructions) + 2) // 3, 3,
     #                          figsize=(16, 12))
-    # for ax in axes.ravel():
+    # for ax in axs.ravel():
     #     ax.axis("off")
     
-    # axes.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
-    # axes.ravel()[0].title.set_text("Original")
+    # axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
+    # axs.ravel()[0].title.set_text("Original")
         
     # for i, (name, rec) in enumerate(pretrained_reconstructions.items()):
-    #     axes.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
-    #     axes.ravel()[i + 1].title.set_text(name)
+    #     axs.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
+    #     axs.ravel()[i + 1].title.set_text(name)
 
     # plt.savefig(os.path.join(output_folder,
     #                          f"pretrained_networks_{dataset_name}_{img_name}.png"))
     # plt.close()
 
     # Plot rate-distortion curves
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
     brs = [m["bit-rate"] for _, m in metrics.items()]
     pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
     psnrs = [m["psnr"] for _, m in metrics.items()]
-    # axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+    # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 
     pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
-    axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+    axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
     msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    # axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+    # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 
     pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
-    axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+    axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
     for name, m in pretrained_metrics.items():
-        axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-        axes[0].grid(True)
-        axes[0].set_ylabel("PSNR [dB]")
-        axes[0].set_xlabel("Bit-rate [bpp]")
-        axes[0].title.set_text("PSNR comparison")
+        axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+        axs[0].grid(True)
+        axs[0].set_ylabel("PSNR [dB]")
+        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].title.set_text("PSNR comparison")
 
-        axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-        axes[1].grid(True)
-        axes[1].set_ylabel("MS-SSIM [dB]")
-        axes[1].set_xlabel("Bit-rate [bpp]")
-        axes[1].title.set_text("MS-SSIM (log) comparison")
+        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+        axs[1].grid(True)
+        axs[1].set_ylabel("MS-SSIM [dB]")
+        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].title.set_text("MS-SSIM (log) comparison")
     
     for name, m in metrics.items():
-        axes[0].plot(m["bit-rate"], m["psnr"],
+        axs[0].plot(m["bit-rate"], m["psnr"],
                      "s" if name == "teacher" else "o", label=name)
-        axes[0].grid(True)
-        axes[0].set_ylabel("PSNR [dB]")
-        axes[0].set_xlabel("Bit-rate [bpp]")
-        axes[0].title.set_text("PSNR comparison")
+        axs[0].grid(True)
+        axs[0].set_ylabel("PSNR [dB]")
+        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].title.set_text("PSNR comparison")
 
-        axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
+        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                      "s" if name == "teacher" else "o", label=name)
-        axes[1].grid(True)
-        axes[1].set_ylabel("MS-SSIM [dB]")
-        axes[1].set_xlabel("Bit-rate [bpp]")
-        axes[1].title.set_text("MS-SSIM (log) comparison")
+        axs[1].grid(True)
+        axs[1].set_ylabel("MS-SSIM [dB]")
+        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].title.set_text("MS-SSIM (log) comparison")
 
-    axes[0].legend(loc="best")
-    axes[1].legend(loc="best")
+    axs[0].legend(loc="best")
+    axs[1].legend(loc="best")
 
     plt.savefig(os.path.join(output_folder,
                              f"curve_{dataset_name}_{img_name}.png"))
@@ -503,185 +503,185 @@ with open(os.path.join(output_folder,
 ###############################################################################
 
 # Plot average rate-distortion curves
-fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-# axes[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-# axes[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
-axes[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axes[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Bit-rate [bpp]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    axes[1].grid(True)
-    axes[1].set_ylabel("MS-SSIM [dB]")
-    axes[1].set_xlabel("Bit-rate [bpp]")
-    axes[1].title.set_text("MS-SSIM (log) comparison")
+    axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+    axs[1].grid(True)
+    axs[1].set_ylabel("MS-SSIM [dB]")
+    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in avg_metrics.items():
-    axes[0].plot(m["bit-rate"], m["psnr"],
+    axs[0].plot(m["bit-rate"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Bit-rate [bpp]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
+    axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                  "s" if name == "teacher" else "o", label=name)
-    axes[1].grid(True)
-    axes[1].set_ylabel("MS-SSIM [dB]")
-    axes[1].set_xlabel("Bit-rate [bpp]")
-    axes[1].title.set_text("MS-SSIM (log) comparison")
+    axs[1].grid(True)
+    axs[1].set_ylabel("MS-SSIM [dB]")
+    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].title.set_text("MS-SSIM (log) comparison")
 
-axes[0].legend(loc="best")
-axes[1].legend(loc="best")
+axs[0].legend(loc="best")
+axs[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,
                          f"avg_rd_curve_{dataset_name}.png"))
 plt.close()
 
 # Plot number of parameters and RD performance
-fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
 params = [m["params"] for _, m in avg_metrics.items()]
 pretrained_params = [m["params"] for _, m in pretrained_avg_metrics.items()]
 
-# axes[0].plot(params, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[0].plot(pretrained_params, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[0].plot(params, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[0].plot(pretrained_params, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-# axes[1].plot(params, brs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[1].plot(pretrained_params, pretrained_brs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[1].plot(params, brs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(pretrained_params, pretrained_brs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axes[0].plot(m["params"], m["psnr"], "o", color="blue")
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Number of parameters")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].plot(m["params"], m["psnr"], "o", color="blue")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Number of parameters")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["params"], m["bit-rate"], "o", color="blue")
-    axes[1].grid(True)
-    axes[1].set_ylabel("Bit-rate [bpp]")
-    axes[1].set_xlabel("Number of parameters")
-    axes[1].title.set_text("Bit-rate comparison")
+    axs[1].plot(m["params"], m["bit-rate"], "o", color="blue")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Number of parameters")
+    axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axes[0].plot(m["params"], m["psnr"],
+    axs[0].plot(m["params"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Number of parameters")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Number of parameters")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["params"], m["bit-rate"],
+    axs[1].plot(m["params"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[1].grid(True)
-    axes[1].set_ylabel("Bit-rate [bpp]")
-    axes[1].set_xlabel("Number of parameters")
-    axes[1].title.set_text("Bit-rate comparison")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Number of parameters")
+    axs[1].title.set_text("Bit-rate comparison")
 
-axes[0].legend(loc="best")
-axes[1].legend(loc="best")
+axs[0].legend(loc="best")
+axs[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,
                          f"avg_param_curve_{dataset_name}.png"))
 plt.close()
 
 # Plot energy and RD performance
-fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
 times = [m["inference-time"] for _, m in avg_metrics.items()]
 pretrained_times = [m["inference-time"] for _, m in pretrained_avg_metrics.items()]
 
-# axes[0].plot(params, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[0].plot(pretrained_times, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[0].plot(params, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[0].plot(pretrained_times, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-# axes[1].plot(params, brs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[1].plot(pretrained_times, pretrained_brs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[1].plot(params, brs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(pretrained_times, pretrained_brs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axes[0].plot(m["inference-time"], m["psnr"], "o", color="blue")
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Inference time [s]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].plot(m["inference-time"], m["psnr"], "o", color="blue")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Inference time [s]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["inference-time"], m["bit-rate"], "o", color="blue")
-    axes[1].grid(True)
-    axes[1].set_ylabel("Bit-rate [bpp]")
-    axes[1].set_xlabel("Inference time [s]")
-    axes[1].title.set_text("Bit-rate comparison")
+    axs[1].plot(m["inference-time"], m["bit-rate"], "o", color="blue")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Inference time [s]")
+    axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axes[0].plot(m["inference-time"], m["psnr"],
+    axs[0].plot(m["inference-time"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Inference time [s]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Inference time [s]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["inference-time"], m["bit-rate"],
+    axs[1].plot(m["inference-time"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[1].grid(True)
-    axes[1].set_ylabel("Bit-rate [bpp]")
-    axes[1].set_xlabel("Inference time [s]")
-    axes[1].title.set_text("Bit-rate comparison")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Inference time [s]")
+    axs[1].title.set_text("Bit-rate comparison")
 
-axes[0].legend(loc="best")
-axes[1].legend(loc="best")
+axs[0].legend(loc="best")
+axs[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,
                          f"avg_time_curve_{dataset_name}.png"))
 plt.close()
 
 # Plot energy and RD performance
-fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
 energies = [m["energy"] for _, m in avg_metrics.items()]
 pretrained_energies = [m["energy"] for _, m in pretrained_avg_metrics.items()]
 
-# axes[0].plot(params, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[0].plot(pretrained_energies, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[0].plot(params, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[0].plot(pretrained_energies, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
-# axes[1].plot(params, brs, "red", linestyle="--", linewidth=1, label="proposed")
-axes[1].plot(pretrained_energies, pretrained_brs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+# axs[1].plot(params, brs, "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(pretrained_energies, pretrained_brs, "blue", linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axes[0].plot(m["energy"], m["psnr"], "o", color="blue")
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Energy [J]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].plot(m["energy"], m["psnr"], "o", color="blue")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Energy [J]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["energy"], m["bit-rate"], "o", color="blue")
-    axes[1].grid(True)
-    axes[1].set_ylabel("Bit-rate [bpp]")
-    axes[1].set_xlabel("Energy [J]")
-    axes[1].title.set_text("Bit-rate comparison")
+    axs[1].plot(m["energy"], m["bit-rate"], "o", color="blue")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Energy [J]")
+    axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axes[0].plot(m["energy"], m["psnr"],
+    axs[0].plot(m["energy"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[0].grid(True)
-    axes[0].set_ylabel("PSNR [dB]")
-    axes[0].set_xlabel("Energy [J]")
-    axes[0].title.set_text("PSNR comparison")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Energy [J]")
+    axs[0].title.set_text("PSNR comparison")
 
-    axes[1].plot(m["energy"], m["bit-rate"],
+    axs[1].plot(m["energy"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
-    axes[1].grid(True)
-    axes[1].set_ylabel("Bit-rate [bpp]")
-    axes[1].set_xlabel("Energy [J]")
-    axes[1].title.set_text("Bit-rate comparison")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Energy [J]")
+    axs[1].title.set_text("Bit-rate comparison")
 
-axes[0].legend(loc="best")
-axes[1].legend(loc="best")
+axs[0].legend(loc="best")
+axs[1].legend(loc="best")
 
 plt.savefig(os.path.join(output_folder,
                          f"avg_energy_curve_{dataset_name}.png"))

@@ -41,6 +41,10 @@ scancel <jobid>
 
 ## Other Commands
 ```bash
+# Get info on partitions
+sacctmgr show User fallemand-24 --associations
+sinfo -a
+
 # Copy folder/file from local to server
 scp -r /path/to/local/dir user@remotehost:/path/to/remote/dir
 scp -r /path/to/local/dir fallemand-24@gpu-gw.enst.fr:/path/to/remote/dir
