@@ -393,11 +393,15 @@
 
 ## 19/02/2025
 - Improve testing
-- Meeting:
+- Meeting
+- Report:
+  - Update part 2
 
 
 ## TODO
+- Train students N=64, varying lambda and teacher quality=1
 - Name figures properly
+- Add BD metrics
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)
 - Remake pdf of first report (correct errors)
 - Do article (Our work on this topic can be summarised as follow: ...)

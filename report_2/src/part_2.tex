@@ -31,7 +31,7 @@ The following experiment consists in training five students models with differen
     \label{loss_1}
 \end{equation}
 
-We use the following parameters: \(\lambda_{1} = 0.2\), \(\lambda_{2} = 0.2\), \(\lambda_{3} = 0.6\) and train the models with the same methodology as in Chapter \ref{part_1}, meaning: 1000 epochs on the Vimeo90K dataset with a base learning rate of \(10^{-4}\).
+We use the following parameters: \(\lambda_{1} = 0.2\), \(\lambda_{2} = 0.2\), \(\lambda_{3} = 0.6\) and train the models with the same method as in Chapter \ref{part_1}, meaning: 1000 epochs on the Vimeo90K dataset with a base learning rate of \(10^{-4}\).
 
 Figure \ref{kd_ae_1:a} shows reconstructions of image 14 of the Kodak dataset with the teacher and all student networks. As axpected, the teacher (a pre-trained model) propose a reconstructed image virtually undistinguishable from the orignal one. As for the students, eventhough they give visually satisfying results, the models with less parameters do not retain as much details. The reconstructed image appears a little bit blurry. As expected, the more the student architecture is similar to the teacher (that is to say, larger), the more it is able to reach the same performance as the teacher. This is quantitatively measured using MSE on Figure \ref{kd_ae_1:b}.
 
@@ -39,7 +39,7 @@ Figure \ref{kd_ae_1:a} shows reconstructions of image 14 of the Kodak dataset wi
     \centering
     \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=8cm]{img/kd_ae_1.png} \label{kd_ae_1:a}}
     \qquad
-    \subfloat[Pre-trained networks]{\includegraphics[width=8cm]{img/kd_ae_2.png} \label{kd_ae_1:b}}
+    \subfloat[TODO]{\includegraphics[width=8cm]{img/kd_ae_2.png} \label{kd_ae_1:b}}
     \caption[]{}
     \label{kd_ae_1}
 \end{figure}
@@ -49,29 +49,62 @@ For reference, we show in Figure \ref{kd_ae_2} the \acrshort{rd} performances of
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/kd_ae_3.png}
-    \caption[]{}
+    \caption[Average rate-distortion curve on the Kodak dataset for students with different number of channels.]{Average rate-distortion curve on the Kodak dataset for students with different number of channels.}
     \label{kd_ae_2}
 \end{figure}
 
 \section{Knowledge Distillation for Image Compression}
-Having assessed the effectiveness of \acrshort{kd} for computer vision tasks similar to image compression, we investigate the success of this frugal \acrshort{ai} technique on image compression as defined by Ballé et al. in \cite{ballé2016endtoendoptimizationnonlineartransform}. Still using the scale hyperprior model introduced in \cite{ballé2018variationalimagecompressionscale}, we train a serie of student models with \acrshort{kd} to evaluate both their \acrshort{rd} perofrmance and their ability to be deployed on resource constrained platforms.
+Having assessed the effectiveness of \acrshort{kd} for computer vision tasks similar to image compression, we investigate the success of this frugal \acrshort{ai} technique on image compression as defined by Ballé et al. in \cite{ballé2016endtoendoptimizationnonlineartransform}. Still using the scale hyperprior model introduced in \cite{ballé2018variationalimagecompressionscale}, we train a serie of student models with \acrshort{kd} to evaluate both their \acrshort{rd} performance and their ability to be deployed on resource constrained platforms.
 
 \subsection{Rate-Distortion Performance}
 This part of the study focuses on training scale hyperprior models with \acrshort{kd} in order to achieve good \acrshort{rd} performance. We first explain our method then we present our results.
 
-\acrshort{lic} distinguish itself from other computer vision tasks (such as dimensionality reduction) by minimising the entropy of the latent representation. In dimensionality reduction, the latent representation has no practical application. When it comes to image compression, it is the latent representation of the image that will be stored or transmitted. Having the smallest possible entropy allows for a smaller entropy coding which means less bits to handle during practical applications. This is why the rate-distortion loss is used in \acrshort{lic} as it allows to find the correct tradeoff between image quality and bit-rate according to the requirements of the application. In order to have similar results with \acrshort{lic}, the previous loss function (Equation \eqref{loss_1}) is updated as follow:
+\acrshort{lic} distinguish itself from other computer vision tasks (such as dimensionality reduction) by minimising the entropy of the latent representation. In dimensionality reduction, the latent representation has no practical application. When it comes to image compression, it is the latent representation of the image that will be stored or transmitted. Having the smallest possible entropy allows for a smaller entropy coding which means less bits to handle during practical applications. This is why the rate-distortion loss is used in \acrshort{lic} as it allows to find the correct tradeoff between image quality and bit-rate according to the requirements of the application. In order to have similar results with \acrshort{lic}, the previous loss function introduced in Equation \eqref{loss_1} is updated as follow:
 
 \begin{align}
-    L &= \lambda_{1} MSE(z_{student}, z_{teacher}) + \lambda_{2} MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3} RD(z_{student}, \hat{x}_{student}, x)\\
+    L &= \lambda_{1} MSE(z_{student}, z_{teacher}) + \lambda_{2} MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3} RD(z_{student}, \hat{x}_{student}, x)\label{loss_2}\\
       &= \lambda_{1} MSE(z_{student}, z_{teacher}) + \lambda_{2} MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3} (-E[\log_{2}P_{q}] + \lambda MSE(\hat{x}_{student}, x)) \nonumber
 \end{align}
 
-Following the exact same methodology as in Section \ref{part_2:hyperprior}, we train five new models using \acrshort{kd}. We use \(\lambda = 0.025\) in the \acrshort{rd} part of the loss, the same value used by the teacher model during its training.
+\subsubsection{Architecture Size Tradeoff}
+As \acrshort{KD} is a technique to increase the performance of small models using a large one, we started by experimenting with the size of the models. Following the exact same method as in Section \ref{part_2:hyperprior}, we train five new models using \acrshort{kd} and the loss function from Equation \ref{loss_2}. We use \(\lambda = 0.025\) in the \acrshort{rd} part of the loss, the same value used by the teacher model during its training. The five models have different sizes. We modify their architecture by changing the number of channels. The smallest deals with as few as 16 channels while the largest student has 112. It should be noted that the size of the latent space remains the same accross all models, teacher and students.
 
-[TODO: results] % Use 263674, 274457, 274461, 274464, 263691
+Results depicted in Figure \ref{kd_lic_1} follow our intuition. Students with larger number of channels (i.e. 64, 96 and 112) take full advantage of \acrshort{kd} and reach roughly the same \acrshort{bpp} and \acrshort{psnr} as the teacher. Models with 16 and 32 channels cannot reach the same level of \acrshort{rd} performance. Eventhough they produce visually impressive results (see Figure \ref{kd_lic_2:a}) for models with so few parameters, they are not relevant candidates when taking into account only \acrshort{rd} performance. Both of them end up behind pre-trained models in Figure \ref{kd_lic_1} and results in higher \acrshort{mse} error in Figure \ref{kd_lic_2:b}. TODO talk about training more, loss functions, look at wnb curves...
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/kd_lic_1.png}
+    \caption[Average rate-distortion curve on the Kodak dataset for students with different number of channels.]{Average rate-distortion curve on the Kodak dataset for students with different number of channels. TODO}
+    \label{kd_lic_1}
+\end{figure}
+% Use 263674, 274457, 274461, 274464, 263691
+
+\begin{figure}[H]
+    \centering
+    \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=8cm]{img/kd_lic_2.png} \label{kd_lic_2:a}}
+    \qquad
+    \subfloat[TODO]{\includegraphics[width=8cm]{img/kd_lic_3.png} \label{kd_lic_2:b}}
+    \caption[]{}
+    \label{kd_lic_2}
+\end{figure}
+
+\subsubsection{Rate-Distortion Tradeoff}
+Once again following the exact same method as in Section \ref{part_2:hyperprior}, we train five new models using \acrshort{kd} and the loss function from Equation \ref{loss_2}. This time, we fix the number of channels accross all models (i.e. 64) but we use different values of \(\lambda\) in the \acrshort{rd} part of the loss. For easier comparison and because our study focuses on low bit-rate image compression, we use the values of \(\lambda\) corresponding to the five lowest values of \textsf{quality} (see Table \ref{tab_quality_lambda}). We use the pre-trained models corresponding to the same values of \(\lambda\) as a baseline to compare our results.
+
+As a reminder, the pre-trained models in Figure \ref{kd_lic_4} all have 128 channels. This means that our student models all have half as many channels as the pre-trained models do. Still, all students models have similar or higher \acrshort{psnr} than their pre-trained counter-part. More precisely, when quality is prioritised (student 4 and 5), \acrshort{kd} is not the ideal solution: the models performs better than what they would have trained alone but they are still limited by their number of parameters. However, smaller models (student 1, 2 and 3) trained to prioritise bit-rate reach better \acrshort{psnr} thanks to the teacher model (trained to favorise image quality) pulling them toward the top of the chart. Another interesting experiment would be to use a teacher trained to prioritize bit-rate. In that case, we would expect all students to be pushed toward the left of the chart. TODO
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/kd_lic_4.png}
+    \caption[Average rate-distortion curve on the Kodak dataset for students with different rate-distortion tradeoffs.]{Average rate-distortion curve on the Kodak dataset for students with different rate-distortion tradeoffs.}
+    \label{kd_lic_4}
+\end{figure}
+% Use 280392, 281662, 281976, 281979, 274461
 
 \subsection{Application to Resource Constrained Platfroms}
 Having proved the effectiveness of \acrshort{kd} for \acrshort{lic} tasks in terms of \acrshort{rd} performance, let us dive into the second apsect of this study: making \acrshort{lic} possible on resource-limited platforms. We have access to small models which \acrshort{rd} performances are on par with larger models. This section analyses these models from a resource stand point accross three main axis: memory, computing power and energy consumption.
+
+% OK, previous results were not great in terms of RD but let's put that into perspective...
 
 Most resource constrained computers deal with a limited amount of memory. This limiting factor sometimes make them unsuitable for tasks requiring large models. As discussed previously, \acrshort{kd} applied to image compression models allows to use smaller models without degrading \acrshort{rd} performance. % Analyse number of parameters and memory footprint
 
