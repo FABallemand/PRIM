@@ -36,6 +36,7 @@ With the recent progress of machine learning, new compression algorithms appeare
 ### Tools
 - [CompressAI](https://interdigitalinc.github.io/CompressAI/zoo.html)
 - [STF](https://github.com/Googolxx/STF) (GitHub reposirotry of "The Devil Is in the Details")
+- [Bjøntegaard Delta (BD): A Tutorial Overview of the Metric, Evolution, Challenges, and Recommendations](https://arxiv.org/abs/2401.04039)
 - [Bjontegaard_metric](https://github.com/Anserw/Bjontegaard_metric/tree/master)
 - [Weights and Biases](https://wandb.ai/site/)
 - [fvcore](https://github.com/facebookresearch/fvcore/tree/main)

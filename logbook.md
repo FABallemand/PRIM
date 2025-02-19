@@ -391,6 +391,11 @@
   - 281979 (0.013)
   - x (0.025) (reuse 274461)
 
+## 19/02/2025
+- Improve testing
+- Meeting:
+
+
 ## TODO
 - Name figures properly
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)

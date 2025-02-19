@@ -576,23 +576,26 @@ with open(os.path.join(output_folder,
 # Plot average rate-distortion curves
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
+axs[0].plot(pretrained_brs[:-3], pretrained_psnrs[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
-axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
+axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(pretrained_brs[:-3], pretrained_msssim[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
+axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="proposed")
 
 for name, m in pretrained_avg_metrics.items():
-    axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    axs[0].grid(True)
-    axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Bit-rate [bpp]")
-    axs[0].title.set_text("PSNR comparison")
+    if name in ["1", "2", "3", "4", "5"]:
+        axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+        axs[0].grid(True)
+        axs[0].set_ylabel("PSNR [dB]")
+        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    axs[1].grid(True)
-    axs[1].set_ylabel("MS-SSIM [dB]")
-    axs[1].set_xlabel("Bit-rate [bpp]")
-    axs[1].title.set_text("MS-SSIM (log) comparison")
+        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+        axs[1].grid(True)
+        axs[1].set_ylabel("MS-SSIM [dB]")
+        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["bit-rate"], m["psnr"],
