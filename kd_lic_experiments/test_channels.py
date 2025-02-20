@@ -44,6 +44,22 @@ os.makedirs(output_folder)
 ## Utils ######################################################################
 ###############################################################################
 
+def model_nb_param(model):
+    return sum(p.numel() for p in model.parameters())
+
+
+def model_memory_size(model):
+    param_size = 0
+    for param in model.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in model.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024**2
+    return size_all_mb
+
+
 def compute_psnr(a, b):
     mse = torch.mean((a - b)**2).item()
     return -10 * math.log10(mse)
@@ -184,12 +200,13 @@ for name, N, id_ in zip(networks.keys(), Ns, ids):
 avg_metrics = {}
 for name, net in networks.items():
     avg_metrics[name] = {
-            "params": sum(p.numel() for p in net.parameters()),
+            "params": model_nb_param(net),
+            "memory": model_memory_size(net),
             "flops": None,
             "inference-time": [],
-            "zeus-energy-time": [],
+            "zeus-time": [],
             "zeus-energy": [],
-            "pynvml-energy-time": [],
+            "pynvml-time": [],
             "pynvml-energy": [],
             "mse": [],
             "psnr": [],
@@ -210,12 +227,13 @@ for quality in range(1, 9):
 pretrained_avg_metrics = {}
 for name, net in pretrained_networks.items():
     pretrained_avg_metrics[name] = {
-            "params": sum(p.numel() for p in net.parameters()),
+            "params": model_nb_param(net),
+            "memory": model_memory_size(net),
             "flops": None,
             "inference-time": [],
-            "zeus-energy-time": [],
+            "zeus-time": [],
             "zeus-energy": [],
-            "pynvml-energy-time": [],
+            "pynvml-time": [],
             "pynvml-energy": [],
             "mse": [],
             "psnr": [],
@@ -330,11 +348,11 @@ for img_name in dataset_imgs:
             pretrained_avg_metrics[name]["bit-rate"].append(pretrained_metrics[name]["bit-rate"])
 
     # Save metrics
-    all_metrics = metrics | pretrained_metrics
-    with open(os.path.join(output_folder,
-                           f"metrics_{dataset_name}_{img_name}.json"),
-                           "w", encoding="utf-8") as f:
-        json.dump(all_metrics, f)
+    # all_metrics = metrics | pretrained_metrics
+    # with open(os.path.join(output_folder,
+    #                        f"metrics_{dataset_name}_{img_name}.json"),
+    #                        "w", encoding="utf-8") as f:
+    #     json.dump(all_metrics, f)
 
 ###############################################################################
 ## Plots (single image) #######################################################
@@ -393,105 +411,106 @@ for img_name in dataset_imgs:
     # plt.close()
 
     # Plot rate-distortion curves
-    fig, axs = plt.subplots(1, 2, figsize=(13, 5))
+    # fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-    brs = [m["bit-rate"] for _, m in metrics.items()]
-    pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
+    # brs = [m["bit-rate"] for _, m in metrics.items()]
+    # pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
-    psnrs = [m["psnr"] for _, m in metrics.items()]
-    # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+    # psnrs = [m["psnr"] for _, m in metrics.items()]
+    # # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 
-    pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
-    axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
-                linewidth=1, label="pre-trained")
+    # pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
+    # axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
+    #             linewidth=1, label="pre-trained")
 
-    msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+    # msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
+    # # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 
-    pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
-    axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
-                linewidth=1, label="pre-trained")
+    # pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
+    # axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
+    #             linewidth=1, label="pre-trained")
 
-    for name, m in pretrained_metrics.items():
-        axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-        axs[0].grid(True)
-        axs[0].set_ylabel("PSNR [dB]")
-        axs[0].set_xlabel("Bit-rate [bpp]")
-        axs[0].title.set_text("PSNR comparison")
+    # for name, m in pretrained_metrics.items():
+    #     axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+    #     axs[0].grid(True)
+    #     axs[0].set_ylabel("PSNR [dB]")
+    #     axs[0].set_xlabel("Bit-rate [bpp]")
+    #     axs[0].title.set_text("PSNR comparison")
 
-        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-        axs[1].grid(True)
-        axs[1].set_ylabel("MS-SSIM [dB]")
-        axs[1].set_xlabel("Bit-rate [bpp]")
-        axs[1].title.set_text("MS-SSIM (log) comparison")
+    #     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+    #     axs[1].grid(True)
+    #     axs[1].set_ylabel("MS-SSIM [dB]")
+    #     axs[1].set_xlabel("Bit-rate [bpp]")
+    #     axs[1].title.set_text("MS-SSIM (log) comparison")
 
-    for name, m in metrics.items():
-        axs[0].plot(m["bit-rate"], m["psnr"],
-                     "s" if name == "teacher" else "o", label=name)
-        axs[0].grid(True)
-        axs[0].set_ylabel("PSNR [dB]")
-        axs[0].set_xlabel("Bit-rate [bpp]")
-        axs[0].title.set_text("PSNR comparison")
+    # for name, m in metrics.items():
+    #     axs[0].plot(m["bit-rate"], m["psnr"],
+    #                  "s" if name == "teacher" else "o", label=name)
+    #     axs[0].grid(True)
+    #     axs[0].set_ylabel("PSNR [dB]")
+    #     axs[0].set_xlabel("Bit-rate [bpp]")
+    #     axs[0].title.set_text("PSNR comparison")
 
-        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
-                     "s" if name == "teacher" else "o", label=name)
-        axs[1].grid(True)
-        axs[1].set_ylabel("MS-SSIM [dB]")
-        axs[1].set_xlabel("Bit-rate [bpp]")
-        axs[1].title.set_text("MS-SSIM (log) comparison")
+    #     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
+    #                  "s" if name == "teacher" else "o", label=name)
+    #     axs[1].grid(True)
+    #     axs[1].set_ylabel("MS-SSIM [dB]")
+    #     axs[1].set_xlabel("Bit-rate [bpp]")
+    #     axs[1].title.set_text("MS-SSIM (log) comparison")
 
-    axs[0].legend(loc="best")
-    axs[1].legend(loc="best")
+    # axs[0].legend(loc="best")
+    # axs[1].legend(loc="best")
 
-    fig.tight_layout()
+    # fig.tight_layout()
 
-    plt.savefig(os.path.join(output_folder,
-                             f"curve_{dataset_name}_{img_name}.png"))
-    plt.close()
+    # plt.savefig(os.path.join(output_folder,
+    #                          f"curve_{dataset_name}_{img_name}.png"))
+    # plt.close()
 
 ###############################################################################
 ## Metrics (average) ##########################################################
 ###############################################################################
 
+DATASET_ITER = 50
+
+loaded_dataset_imgs = []
+for img_name in dataset_imgs:
+    # Load image
+    img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
+    if dataset_name == "clic":
+        img = img.crop((0, 0, 768, 512)) # For CLIC dataset
+    x = transforms.ToTensor()(img).unsqueeze(0).to(DEVICE)
+    loaded_dataset_imgs.append(x)
+
 # Zeus energy consumption
 # zeus_monitor = ZeusMonitor(gpu_indices=[torch.cuda.current_device()])
-zeus_monitor = ZeusMonitor(approx_instant_energy=True)
+zeus_monitor = ZeusMonitor(approx_instant_energy=False)
 
 # Iterate over networks
 for name, net in networks.items():
     # Iterate over images
     zeus_monitor.begin_window("inference")
-    for img_name in dataset_imgs:
-        # Load image
-        img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
-        if dataset_name == "clic":
-            img = img.crop((0, 0, 768, 512)) # For CLIC dataset
-        x = transforms.ToTensor()(img).unsqueeze(0).to(DEVICE)
-
-        # Inference
-        out = net(x)
+    for _ in range(DATASET_ITER):
+        for x in loaded_dataset_imgs:
+            # Inference
+            out = net(x)
     mes = zeus_monitor.end_window("inference")
 
-    avg_metrics[name]["zeus-energy-time"] = mes.time
-    avg_metrics[name]["zeus-energy"] = mes.total_energy
+    avg_metrics[name]["zeus-time"] = (1000 * mes.time) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to ms/frame
+    avg_metrics[name]["zeus-energy"] = (1000 * mes.total_energy) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to mJ/frame
 
 # Iterate over pre-trained networks
 for name, net in pretrained_networks.items():
     # Iterate over images
-    zeus_monitor.begin_window("inference")
-    for img_name in dataset_imgs:
-        # Load image
-        img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
-        if dataset_name == "clic":
-            img = img.crop((0, 0, 768, 512)) # For CLIC dataset
-        x = transforms.ToTensor()(img).unsqueeze(0).to(DEVICE)
+    zeus_monitor.begin_window("pretrained-inference")
+    for _ in range(DATASET_ITER):
+        for x in loaded_dataset_imgs:
+            # Inference
+            out = net(x)
+    mes = zeus_monitor.end_window("pretrained-inference")
 
-        # Inference
-        out = net(x)
-    mes = zeus_monitor.end_window("inference")
-
-    pretrained_avg_metrics[name]["zeus-energy-time"] = mes.time
-    pretrained_avg_metrics[name]["zeus-energy"] = mes.total_energy
+    pretrained_avg_metrics[name]["zeus-time"] = (1000 * mes.time) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to ms/frame
+    pretrained_avg_metrics[name]["zeus-energy"] = (1000 * mes.total_energy) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to mJ/frame
 
 # pynvml energy consumption
 pynvml.nvmlInit()
@@ -502,42 +521,32 @@ for name, net in networks.items():
     start_time = time.time()
     start_energy = pynvml.nvmlDeviceGetTotalEnergyConsumption(handle)
     # Iterate over images
-    for img_name in dataset_imgs:
-        # Load image
-        img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
-        if dataset_name == "clic":
-            img = img.crop((0, 0, 768, 512)) # For CLIC dataset
-        x = transforms.ToTensor()(img).unsqueeze(0).to(DEVICE)
-
-        # Inference
-        out = net(x)
+    for _ in range(DATASET_ITER):
+        for x in loaded_dataset_imgs:
+            # Inference
+            out = net(x)
     torch.cuda.synchronize()  # Synchronizes CPU and GPU time.
     elapsed_time = time.time() - start_time
     consumed_energy = pynvml.nvmlDeviceGetTotalEnergyConsumption(handle) - start_energy
 
-    avg_metrics[name]["pynvml-energy-time"] = elapsed_time
-    avg_metrics[name]["pynvml-energy"] = consumed_energy * 1000 # Convert to J
+    avg_metrics[name]["pynvml-time"] = (1000 * elapsed_time) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to ms/frame
+    avg_metrics[name]["pynvml-energy"] = consumed_energy / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to mJ/frame
 
 # Iterate over pre-trained networks
 for name, net in pretrained_networks.items():
     start_time = time.time()
     start_energy = pynvml.nvmlDeviceGetTotalEnergyConsumption(handle)
     # Iterate over images
-    for img_name in dataset_imgs:
-        # Load image
-        img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
-        if dataset_name == "clic":
-            img = img.crop((0, 0, 768, 512)) # For CLIC dataset
-        x = transforms.ToTensor()(img).unsqueeze(0).to(DEVICE)
-
-        # Inference
-        out = net(x)
+    for _ in range(DATASET_ITER):
+        for x in loaded_dataset_imgs:
+            # Inference
+            out = net(x)
     torch.cuda.synchronize()  # Synchronizes CPU and GPU time.
     elapsed_time = time.time() - start_time
     consumed_energy = pynvml.nvmlDeviceGetTotalEnergyConsumption(handle) - start_energy
 
-    pretrained_avg_metrics[name]["pynvml-energy-time"] = elapsed_time
-    pretrained_avg_metrics[name]["pynvml-energy"] = consumed_energy * 1000 # Convert to J
+    pretrained_avg_metrics[name]["pynvml-time"] = (1000 * elapsed_time) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to ms/frame
+    pretrained_avg_metrics[name]["pynvml-energy"] = consumed_energy / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to mJ/frame
 
 # Compute average metrics
 for name in networks:
@@ -678,6 +687,54 @@ plt.savefig(os.path.join(output_folder,
                          f"avg_param_curve_{dataset_name}.png"))
 plt.close()
 
+# Plot memory footprint and RD performance
+fig, axs = plt.subplots(1, 2, figsize=(13, 5))
+
+memory = [m["memory"] for _, m in avg_metrics.items()]
+pretrained_memory = [m["memory"] for _, m in pretrained_avg_metrics.items()]
+
+axs[0].plot(pretrained_memory, pretrained_psnrs, "blue", linestyle="--",
+            linewidth=1, label="pre-trained")
+axs[1].plot(pretrained_memory, pretrained_brs, "blue", linestyle="--",
+            linewidth=1, label="pre-trained")
+
+for name, m in pretrained_avg_metrics.items():
+    axs[0].plot(m["memory"], m["psnr"], "o", color="blue")
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Memory footprint [MB]")
+    axs[0].title.set_text("PSNR comparison")
+
+    axs[1].plot(m["memory"], m["bit-rate"], "o", color="blue")
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Memory footprint [MB]")
+    axs[1].title.set_text("Bit-rate comparison")
+
+for name, m in avg_metrics.items():
+    axs[0].plot(m["memory"], m["psnr"],
+                 "s" if name == "teacher" else "o", label=name)
+    axs[0].grid(True)
+    axs[0].set_ylabel("PSNR [dB]")
+    axs[0].set_xlabel("Memory footprint [MB]")
+    axs[0].title.set_text("PSNR comparison")
+
+    axs[1].plot(m["memory"], m["bit-rate"],
+                 "s" if name == "teacher" else "o", label=name)
+    axs[1].grid(True)
+    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Memory footprint [MB]")
+    axs[1].title.set_text("Bit-rate comparison")
+
+axs[0].legend(loc="best")
+axs[1].legend(loc="best")
+
+fig.tight_layout()
+
+plt.savefig(os.path.join(output_folder,
+                         f"avg_memory_curve_{dataset_name}.png"))
+plt.close()
+
 # Plot inference time and RD performance
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
@@ -693,13 +750,13 @@ for name, m in pretrained_avg_metrics.items():
     axs[0].plot(m["inference-time"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Inference time per frame [s]")
+    axs[0].set_xlabel("Inference time [ms/frame]")
     axs[0].title.set_text("PSNR comparison")
 
     axs[1].plot(m["inference-time"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Inference time per frame [s]")
+    axs[1].set_xlabel("Inference time [ms/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
@@ -707,14 +764,14 @@ for name, m in avg_metrics.items():
                  "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Inference time [s]")
+    axs[0].set_xlabel("Inference time [ms/frame]")
     axs[0].title.set_text("PSNR comparison")
 
     axs[1].plot(m["inference-time"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Inference time per frame [s]")
+    axs[1].set_xlabel("Inference time [ms/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 axs[0].legend(loc="best")
@@ -726,11 +783,11 @@ plt.savefig(os.path.join(output_folder,
                          f"avg_time_curve_{dataset_name}.png"))
 plt.close()
 
-# Plot zeus-energy-time and RD performance
+# Plot zeus-time and RD performance
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-zeus_energy_times = [m["zeus-energy-time"] / len(dataset_imgs) for _, m in avg_metrics.items()]
-zeus_pretrained_energy_times = [m["zeus-energy-time"] / len(dataset_imgs) for _, m in pretrained_avg_metrics.items()]
+zeus_energy_times = [m["zeus-time"] for _, m in avg_metrics.items()]
+zeus_pretrained_energy_times = [m["zeus-time"] for _, m in pretrained_avg_metrics.items()]
 
 axs[0].plot(zeus_pretrained_energy_times, pretrained_psnrs, "blue",
             linestyle="--", linewidth=1, label="pre-trained")
@@ -738,31 +795,31 @@ axs[1].plot(zeus_pretrained_energy_times, pretrained_brs, "blue",
             linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axs[0].plot(m["zeus-energy-time"] / len(dataset_imgs), m["psnr"], "o", color="blue")
+    axs[0].plot(m["zeus-time"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Time per frame [s]")
+    axs[0].set_xlabel("Inference time [ms/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["zeus-energy-time"] / len(dataset_imgs), m["bit-rate"], "o", color="blue")
+    axs[1].plot(m["zeus-time"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Time per frame [s]")
+    axs[1].set_xlabel("Inference time [ms/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axs[0].plot(m["zeus-energy-time"] / len(dataset_imgs), m["psnr"],
+    axs[0].plot(m["zeus-time"], m["psnr"],
                 "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Time per frame [s]")
+    axs[0].set_xlabel("Inference time [ms/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["zeus-energy-time"] / len(dataset_imgs), m["bit-rate"],
+    axs[1].plot(m["zeus-time"], m["bit-rate"],
                 "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Time per frame [s]")
+    axs[1].set_xlabel("Inference time [ms/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 axs[0].legend(loc="best")
@@ -771,14 +828,14 @@ axs[1].legend(loc="best")
 fig.tight_layout()
 
 plt.savefig(os.path.join(output_folder,
-                         f"avg_zeus_energy_time_curve_{dataset_name}.png"))
+                         f"avg_zeus_time_curve_{dataset_name}.png"))
 plt.close()
 
 # Plot zeus-energy and RD performance
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-zeus_energies = [m["zeus-energy"] / len(dataset_imgs) for _, m in avg_metrics.items()]
-zeus_pretrained_energies = [m["zeus-energy"] / len(dataset_imgs) for _, m in pretrained_avg_metrics.items()]
+zeus_energies = [m["zeus-energy"] for _, m in avg_metrics.items()]
+zeus_pretrained_energies = [m["zeus-energy"] for _, m in pretrained_avg_metrics.items()]
 
 axs[0].plot(zeus_pretrained_energies, pretrained_psnrs, "blue", linestyle="--",
             linewidth=1, label="pre-trained")
@@ -786,31 +843,31 @@ axs[1].plot(zeus_pretrained_energies, pretrained_brs, "blue", linestyle="--",
             linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axs[0].plot(m["zeus-energy"] / len(dataset_imgs), m["psnr"], "o", color="blue")
+    axs[0].plot(m["zeus-energy"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Energy per frame [J]")
+    axs[0].set_xlabel("Inference energy [mJ/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["zeus-energy"] / len(dataset_imgs), m["bit-rate"], "o", color="blue")
+    axs[1].plot(m["zeus-energy"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Energy per frame [J]")
+    axs[1].set_xlabel("Inference energy [mJ/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axs[0].plot(m["zeus-energy"] / len(dataset_imgs), m["psnr"],
+    axs[0].plot(m["zeus-energy"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Energy per frame [J]")
+    axs[0].set_xlabel("Inference energy [mJ/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["zeus-energy"] / len(dataset_imgs), m["bit-rate"],
+    axs[1].plot(m["zeus-energy"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Energy per frame [J]")
+    axs[1].set_xlabel("Inference energy [mJ/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 axs[0].legend(loc="best")
@@ -822,11 +879,11 @@ plt.savefig(os.path.join(output_folder,
                          f"avg_zeus_energy_curve_{dataset_name}.png"))
 plt.close()
 
-# Plot pynvml-energy-time and RD performance
+# Plot pynvml-time and RD performance
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-pynvml_energy_times = [m["pynvml-energy-time"] / len(dataset_imgs) for _, m in avg_metrics.items()]
-pynvml_pretrained_energy_times = [m["pynvml-energy-time"] / len(dataset_imgs) for _, m in pretrained_avg_metrics.items()]
+pynvml_energy_times = [m["pynvml-time"] for _, m in avg_metrics.items()]
+pynvml_pretrained_energy_times = [m["pynvml-time"] for _, m in pretrained_avg_metrics.items()]
 
 axs[0].plot(pynvml_pretrained_energy_times, pretrained_psnrs, "blue",
             linestyle="--", linewidth=1, label="pre-trained")
@@ -834,31 +891,31 @@ axs[1].plot(pynvml_pretrained_energy_times, pretrained_brs, "blue",
             linestyle="--", linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axs[0].plot(m["pynvml-energy-time"] / len(dataset_imgs), m["psnr"], "o", color="blue")
+    axs[0].plot(m["pynvml-time"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Time per frame [s]")
+    axs[0].set_xlabel("Inference time [ms/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["pynvml-energy-time"] / len(dataset_imgs), m["bit-rate"], "o", color="blue")
+    axs[1].plot(m["pynvml-time"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Time per frame [s]")
+    axs[1].set_xlabel("Inference time [ms/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axs[0].plot(m["pynvml-energy-time"] / len(dataset_imgs), m["psnr"],
+    axs[0].plot(m["pynvml-time"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Time per frame [s]")
+    axs[0].set_xlabel("Inference time [ms/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["pynvml-energy-time"] / len(dataset_imgs), m["bit-rate"],
+    axs[1].plot(m["pynvml-time"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Time per frame [s]")
+    axs[1].set_xlabel("Inference time [ms/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 axs[0].legend(loc="best")
@@ -867,14 +924,14 @@ axs[1].legend(loc="best")
 fig.tight_layout()
 
 plt.savefig(os.path.join(output_folder,
-                         f"avg_pynvml_energy_time_curve_{dataset_name}.png"))
+                         f"avg_pynvml_time_curve_{dataset_name}.png"))
 plt.close()
 
 # Plot pynvml-energy and RD performance
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-pynvml_energies = [m["pynvml-energy"] / len(dataset_imgs) for _, m in avg_metrics.items()]
-pynvml_pretrained_energies = [m["pynvml-energy"] / len(dataset_imgs) for _, m in pretrained_avg_metrics.items()]
+pynvml_energies = [m["pynvml-energy"] for _, m in avg_metrics.items()]
+pynvml_pretrained_energies = [m["pynvml-energy"] for _, m in pretrained_avg_metrics.items()]
 
 axs[0].plot(pynvml_pretrained_energies, pretrained_psnrs, "blue", linestyle="--",
             linewidth=1, label="pre-trained")
@@ -882,31 +939,31 @@ axs[1].plot(pynvml_pretrained_energies, pretrained_brs, "blue", linestyle="--",
             linewidth=1, label="pre-trained")
 
 for name, m in pretrained_avg_metrics.items():
-    axs[0].plot(m["pynvml-energy"] / len(dataset_imgs), m["psnr"], "o", color="blue")
+    axs[0].plot(m["pynvml-energy"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Energy per frame [J]")
+    axs[0].set_xlabel("Inference energy [mJ/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["pynvml-energy"] / len(dataset_imgs), m["bit-rate"], "o", color="blue")
+    axs[1].plot(m["pynvml-energy"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Energy per frame [J]")
+    axs[1].set_xlabel("Inference energy [mJ/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 for name, m in avg_metrics.items():
-    axs[0].plot(m["pynvml-energy"] / len(dataset_imgs), m["psnr"],
+    axs[0].plot(m["pynvml-energy"], m["psnr"],
                  "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Energy per frame [J]")
+    axs[0].set_xlabel("Inference energy [mJ/frame]")
     axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["pynvml-energy"] / len(dataset_imgs), m["bit-rate"],
+    axs[1].plot(m["pynvml-energy"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("Bit-rate [bpp]")
-    axs[1].set_xlabel("Energy per frame [J]")
+    axs[1].set_xlabel("Inference energy [mJ/frame]")
     axs[1].title.set_text("Bit-rate comparison")
 
 axs[0].legend(loc="best")
@@ -969,7 +1026,7 @@ plt.close()
 # Plot mse and channel
 fig, axs = plt.subplots(1, 1, figsize=(6, 5))
 
-axs.plot(Ns, [m["mse"] for _, m in avg_metrics.items()], "red", linestyle="--", linewidth=1)
+axs.plot(Ns[1:], [m["mse"] for _, m in avg_metrics.items()][1:], "red", linestyle="--", linewidth=1)
 for i, (name, m) in enumerate(avg_metrics.items()):
     axs.plot(Ns[i], m["mse"],
               "s" if name == "teacher" else "o", label=name)

@@ -102,7 +102,7 @@ def make(config):
     # Create models
     # teacher_model = bmshj2018_hyperprior(quality=5, # Best quality with (N, M) = (128, 192)
     #                                      pretrained=True).eval().to(teacher_device)
-    url = model_urls["bmshj2018-hyperprior"]["mse"][5]
+    url = model_urls["bmshj2018-hyperprior"]["mse"][config.teacher_quality]
     state_dict = load_state_dict_from_url(url, progress=False)
     state_dict = load_pretrained(state_dict)
     teacher_model = ScaleHyperprior.from_state_dict(state_dict).eval().to(teacher_device)
@@ -372,11 +372,12 @@ if __name__ == "__main__":
         dataset="Vimeo90K",
         N_student=64,
         M=192,
+        teacher_quality=1,
         epochs=1000,
         batch_size=16,
         learning_rate=1e-4,
         loss="RD",
-        rd_lmbda=0.013,
+        rd_lmbda=0.0018,
         latent_loss="MSE",
         save_path=f"train_res/{job_id}"
     )

@@ -44,6 +44,22 @@ os.makedirs(output_folder)
 ## Utils ######################################################################
 ###############################################################################
 
+def model_nb_param(model):
+    return sum(p.numel() for p in model.parameters())
+
+
+def model_memory_size(model):
+    param_size = 0
+    for param in model.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in model.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024**2
+    return size_all_mb
+
+
 def compute_psnr(a, b):
     mse = torch.mean((a - b)**2).item()
     return -10 * math.log10(mse)
@@ -172,7 +188,8 @@ for name, id_ in zip(networks.keys(), ids):
 avg_metrics = {}
 for name, net in networks.items():
     avg_metrics[name] = {
-            "params": sum(p.numel() for p in net.parameters()),
+            "params": model_nb_param(net),
+            "memory": model_memory_size(net),
             "flops": None,
             "inference-time": [],
             "zeus-energy-time": [],
@@ -198,7 +215,8 @@ for quality in range(1, 9):
 pretrained_avg_metrics = {}
 for name, net in pretrained_networks.items():
     pretrained_avg_metrics[name] = {
-            "params": sum(p.numel() for p in net.parameters()),
+            "params": model_nb_param(net),
+            "memory": model_memory_size(net),
             "flops": None,
             "inference-time": [],
             "zeus-energy-time": [],
