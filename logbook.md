@@ -408,6 +408,20 @@
 - Report:
   - Update part 2
 
+## 26/02/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher quality 1, student KD with RD loss and latent loss MSE, 64 channels, different lambda)
+  - 289751 (0.0018)
+  - x (0.0035)
+  - 289745 (0.0067)
+  - x (0.013)
+  - 289742 (0.025)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 1, student KD with RD loss and latent loss MSE, 64 channels, different lambda)
+  - 289751 (0.0018)
+  - 295889 (0.0035)
+  - 289745 (0.0067)
+  - x (0.013)
+  - 289742 (0.025)
+
 ## TODO
 - Train students N=64, varying lambda and teacher quality=1
 - Name figures properly

@@ -377,7 +377,7 @@ if __name__ == "__main__":
         batch_size=16,
         learning_rate=1e-4,
         loss="RD",
-        rd_lmbda=0.0018,
+        rd_lmbda=0.0035,
         latent_loss="MSE",
         save_path=f"train_res/{job_id}"
     )
