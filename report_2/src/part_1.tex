@@ -39,7 +39,7 @@ First, we try a single inference with this newly trained model. Figure \ref{ball
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_1.png}
+    \includegraphics[width=15cm]{img/balle_repro_diff.png}
     \caption[Comparison of the reconstructed image with the original image.]{Comparison of the reconstructed image with the original image. At first glance, the reconstructed image (middle) looks very similar to the original (left). Further inspection using the difference between the two images (right) unveils the loss of details attributed to lossy image compression/decompression. As expected, parts of the image containing details are the most affected whereas plain areas are mostly untouched.}
     \label{balle_repro_1}
 \end{figure}
@@ -48,7 +48,7 @@ We proceed to compare our model to traditional methods. In the following paragra
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_2.png}
+    \includegraphics[width=15cm]{img/balle_repro_bpp.png}
     \caption[Comparison to classical codecs (quality comparison at similar bit-rate).]{Comparison to classical codecs (quality comparison at similar bit-rate). Both qualitative and quantitative analysis show that the \acrshort{nn} based approach is better than JPEG and Webp at a given bit-rate.}
     \label{balle_repro_2}
 \end{figure}
@@ -57,7 +57,7 @@ For the same distortion rate, our model manages has the smallest bit-rate out of
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_3.png}
+    \includegraphics[width=15cm]{img/balle_repro_psnr.png}
     \caption[Comparison to classical codecs (bit-rate coparison at similar PSNR).]{Comparison to classical codecs (bit-rate coparison at similar PSNR). This experiment highlights the clear advantage of \acrshort{lic} when models are trained to prioritise rate. For the same image quality (\acrshort{psnr}), JPEG and Webp results require more \acrshort{bpp}.}
     \label{balle_repro_3}
 \end{figure}
@@ -68,14 +68,14 @@ Finally, we compare our model to other \acrshort{lic} models accessbible in the 
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_4.png}
+    \includegraphics[width=15cm]{img/balle_repro_models.png}
     \caption[Comparison to other \acrshort{lic} models (image reconstruction).]{Comparison to other \acrshort{lic} models (image reconstruction). Our model retains more details from the original image than the other pre-trained models.}
     \label{balle_repro_4}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_5.png}
+    \includegraphics[width=15cm]{img/balle_repro_rd_1.png}
     \caption[Comparison to other \acrshort{lic} models (rate-distortion).]{Comparison to other \acrshort{lic} models (rate-distortion). Our version of the scale hyperprior model outperforms all other models in terms of image quality. However, when it comes to \acrshort{bpp}, it delivers poor performance on this specific image.}
     \label{balle_repro_5}
 \end{figure}
@@ -84,7 +84,7 @@ As evaluation on a single image is not representative, we also compared our scal
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_6.png}
+    \includegraphics[width=15cm]{img/balle_repro_rd_2.png}
     \caption[Comparison to pre-trained scale hyperprior models (rate-distortion).]{Comparison to pre-trained scale hyperprior models (rate-distortion). When properly compared to compressAI similar pre-trained models, our model reaches state-of-the-art \acrshort{rd} performance.}
     \label{balle_repro_6}
 \end{figure}
@@ -101,8 +101,8 @@ Let us start by passing a single image through the networks. The image from the 
 
 \begin{figure}[H]
     \centering
-    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_1.png} \label{bdpsnr_1:a}}}
-    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_2.png} \label{bdpsnr_1:b}}}
+    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_kodak_14.png} \label{bdpsnr_1:a}}}
+    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_kodak_14_pretrained.png} \label{bdpsnr_1:b}}}
     \caption[Reconstruction results on image 14 of the Kodak dataset for different rate-distortion tradeoffs.]{Reconstruction results on image 14 of the Kodak dataset for different rate-distortion tradeoffs. For a given \acrshort{RD} tradeoff, our models produce results visually similar to the pre-trained models. The level of ddetail increses with the value of \(\lambda\), highlighting the \acrshort{RD} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
@@ -111,7 +111,7 @@ We can produce rate-distortion curve for this single image of the testing datase
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/bdpsnr_3.png}
+    \includegraphics[width=15cm]{img/bdpsnr_rd_kodak_14.png}
     \caption[Rate-distortion curve for image 14 of the Kodak dataset.]{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit-rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit-rates where our models do not manage to maintain the quality of the image.}
     \label{bdpsnr_2}
 \end{figure}
@@ -120,7 +120,7 @@ It should be noted that the previous \acrshort{rd} curve corresponds to the resu
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/bdpsnr_4.png}
+    \includegraphics[width=15cm]{img/bdpsnr_rd.png}
     \caption[Average rate-distortion curve on the Kodak dataset.]{Average rate-distortion curve on the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit-rate for a lower measured image quality, especially for high bit-rates.}
     \label{bdpsnr_3}
 \end{figure}
