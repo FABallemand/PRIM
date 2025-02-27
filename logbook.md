@@ -426,7 +426,7 @@
   - Update figures
 
 ## TODO
-- Train students N=64, varying lambda and teacher quality=1
+- Do LIC chapter 1
 - Name figures properly
 - Add BD metrics
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)
