@@ -426,6 +426,7 @@
   - Update figures
 
 ## TODO
+- Do bar plot
 - Do LIC chapter 1
 - Name figures properly
 - Add BD metrics
