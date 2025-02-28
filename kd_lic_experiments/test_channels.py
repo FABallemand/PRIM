@@ -285,13 +285,13 @@ for img_name in dataset_imgs:
         with torch.no_grad():
             for name, net in networks.items():
                 flops = FlopCountAnalysis(net, x)
-                avg_metrics[name]["flops"] = flops.total()
+                avg_metrics[name]["flops"] = flops.total() / 1_000_000_000 # Convert to Giga-FLOP
 
         # Pre-trained networks flops computation
         with torch.no_grad():
             for name, net in pretrained_networks.items():
                 flops = FlopCountAnalysis(net, x)
-                pretrained_avg_metrics[name]["flops"] = flops.total()
+                pretrained_avg_metrics[name]["flops"] = flops.total() / 1_000_000_000 # Convert to Giga-FLOP
 
         # Turn off FLOPs computation
         COMPUTE_FLOP = False
@@ -500,8 +500,9 @@ for name, net in networks.items():
             out = net(x)
     mes = zeus_monitor.end_window("inference")
 
-    avg_metrics[name]["zeus-time"] = (1000 * mes.time) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to ms/frame
-    avg_metrics[name]["zeus-fps"] = 1 / avg_metrics[name]["zeus-time"] # Convert to FPS
+    sec_per_frame = (mes.time / (DATASET_ITER * len(loaded_dataset_imgs)))
+    avg_metrics[name]["zeus-time"] = 1000 * sec_per_frame # Convert to ms/frame
+    avg_metrics[name]["zeus-fps"] = 1 / sec_per_frame # Convert to FPS
     avg_metrics[name]["zeus-energy"] = (1000 * mes.total_energy) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to mJ/frame
 
 # Iterate over pre-trained networks
@@ -514,8 +515,9 @@ for name, net in pretrained_networks.items():
             out = net(x)
     mes = zeus_monitor.end_window("pretrained-inference")
 
-    pretrained_avg_metrics[name]["zeus-time"] = (1000 * mes.time) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to ms/frame
-    pretrained_avg_metrics[name]["zeus-fps"] = 1 / pretrained_avg_metrics[name]["zeus-time"] # Convert to FPS
+    sec_per_frame = (mes.time / (DATASET_ITER * len(loaded_dataset_imgs)))
+    pretrained_avg_metrics[name]["zeus-time"] = 1000 * sec_per_frame # Convert to ms/frame
+    pretrained_avg_metrics[name]["zeus-fps"] = 1 / sec_per_frame # Convert to FPS
     pretrained_avg_metrics[name]["zeus-energy"] = (1000 * mes.total_energy) / (DATASET_ITER * len(loaded_dataset_imgs)) # Convert to mJ/frame
 
 # pynvml energy consumption
@@ -584,8 +586,14 @@ avg_gains = {}
 for name in networks:
     avg_gains[name] = {}
     for metric in avg_metrics[name]:
-        avg_gains[name][metric] = 0 # TODO
+        diff = avg_metrics[name][metric] - avg_metrics["teacher"][metric]
+        avg_gains[name][metric] = (100 * diff) / avg_metrics["teacher"][metric]
 
+# Save gains
+with open(os.path.join(output_folder,
+                       f"avg_gains_{dataset_name}.json"),
+                       "w", encoding="utf-8") as f:
+    json.dump(avg_gains, f)
 
 # Retrieve average metrics as lists
 brs = [m["bit-rate"] for _, m in avg_metrics.items()]
