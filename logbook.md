@@ -425,8 +425,19 @@
   - Update part 2
   - Update figures
 
+## 27/02/2025
+- Report:
+  - Update part 1
+
+## 28/02/2025
+- Report:
+  - Update part 1
+  - Update part 2
+  - Update figures
+- Train TeacherAE and StudentAE models (image reconstruction, student KD)
+  - 298315
+
 ## TODO
-- Do bar plot
 - Do LIC chapter 1
 - Name figures properly
 - Add BD metrics
