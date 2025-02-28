@@ -179,7 +179,7 @@ def parse_args(argv):
         dest="lmbda",
         type=float,
         default=1e-2,
-        help="Bit-rate distortion parameter (default: %(default)s)",
+        help="Bit rate distortion parameter (default: %(default)s)",
     )
     parser.add_argument(
         "--batch-size", type=int, default=16, help="Batch size (default: %(default)s)"

@@ -438,13 +438,13 @@ for img_name in dataset_imgs:
     #     axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
     #     axs[0].grid(True)
     #     axs[0].set_ylabel("PSNR [dB]")
-    #     axs[0].set_xlabel("Bit-rate [bpp]")
+    #     axs[0].set_xlabel("Bit rate [bpp]")
     #     axs[0].title.set_text("PSNR comparison")
 
     #     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
     #     axs[1].grid(True)
     #     axs[1].set_ylabel("MS-SSIM [dB]")
-    #     axs[1].set_xlabel("Bit-rate [bpp]")
+    #     axs[1].set_xlabel("Bit rate [bpp]")
     #     axs[1].title.set_text("MS-SSIM (log) comparison")
 
     # for name, m in metrics.items():
@@ -452,14 +452,14 @@ for img_name in dataset_imgs:
     #                  "s" if name == "teacher" else "o", label=name)
     #     axs[0].grid(True)
     #     axs[0].set_ylabel("PSNR [dB]")
-    #     axs[0].set_xlabel("Bit-rate [bpp]")
+    #     axs[0].set_xlabel("Bit rate [bpp]")
     #     axs[0].title.set_text("PSNR comparison")
 
     #     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
     #                  "s" if name == "teacher" else "o", label=name)
     #     axs[1].grid(True)
     #     axs[1].set_ylabel("MS-SSIM [dB]")
-    #     axs[1].set_xlabel("Bit-rate [bpp]")
+    #     axs[1].set_xlabel("Bit rate [bpp]")
     #     axs[1].title.set_text("MS-SSIM (log) comparison")
 
     # axs[0].legend(loc="best")
@@ -622,13 +622,13 @@ for name, m in pretrained_avg_metrics.items():
     axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].set_xlabel("Bit rate [bpp]")
     axs[0].title.set_text("PSNR comparison")
 
     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("MS-SSIM [dB]")
-    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Bit rate [bpp]")
     axs[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in avg_metrics.items():
@@ -636,14 +636,14 @@ for name, m in avg_metrics.items():
                  "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].set_xlabel("Bit rate [bpp]")
     axs[0].title.set_text("PSNR comparison")
 
     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("MS-SSIM [dB]")
-    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Bit rate [bpp]")
     axs[1].title.set_text("MS-SSIM (log) comparison")
 
 axs[0].legend(loc="best")
@@ -675,9 +675,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["params"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Number of parameters [M]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["params"], m["psnr"],
@@ -690,9 +690,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["params"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Number of parameters [M]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -723,9 +723,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["memory"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Memory footprint [MB]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["memory"], m["psnr"],
@@ -738,9 +738,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["memory"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Memory footprint [MB]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -771,9 +771,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["inference-time"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference time [ms/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["inference-time"], m["psnr"],
@@ -786,9 +786,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["inference-time"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference time [ms/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -819,9 +819,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["zeus-time"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference time [ms/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["zeus-time"], m["psnr"],
@@ -834,9 +834,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["zeus-time"], m["bit-rate"],
                 "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference time [ms/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -867,9 +867,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["zeus-fps"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Throughput [FPS]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["zeus-fps"], m["psnr"],
@@ -882,9 +882,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["zeus-fps"], m["bit-rate"],
                 "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Throughput [FPS]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -915,9 +915,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["zeus-energy"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference energy [mJ/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["zeus-energy"], m["psnr"],
@@ -930,9 +930,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["zeus-energy"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference energy [mJ/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -963,9 +963,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["pynvml-time"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference time [ms/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["pynvml-time"], m["psnr"],
@@ -978,9 +978,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["pynvml-time"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference time [ms/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -1011,9 +1011,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["pynvml-fps"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Throughput [FPS]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["pynvml-fps"], m["psnr"],
@@ -1026,9 +1026,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["pynvml-fps"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Throughput [FPS]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -1059,9 +1059,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["pynvml-energy"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference energy [mJ/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["pynvml-energy"], m["psnr"],
@@ -1074,9 +1074,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["pynvml-energy"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("Inference energy [mJ/frame]")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")
@@ -1107,9 +1107,9 @@ for name, m in pretrained_avg_metrics.items():
 
     axs[1].plot(m["flops"], m["bit-rate"], "o", color="blue")
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("FLOPs")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["flops"], m["psnr"],
@@ -1122,9 +1122,9 @@ for name, m in avg_metrics.items():
     axs[1].plot(m["flops"], m["bit-rate"],
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
-    axs[1].set_ylabel("Bit-rate [bpp]")
+    axs[1].set_ylabel("Bit rate [bpp]")
     axs[1].set_xlabel("FLOPs")
-    axs[1].title.set_text("Bit-rate comparison")
+    axs[1].title.set_text("Bit rate comparison")
 
 axs[0].legend(loc="best")
 axs[1].legend(loc="best")

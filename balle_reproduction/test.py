@@ -304,13 +304,13 @@ for img_name in dataset_imgs:
         axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
         axs[0].grid(True)
         axs[0].set_ylabel("PSNR [dB]")
-        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].set_xlabel("Bit rate [bpp]")
         axs[0].title.set_text("PSNR comparison")
 
         axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
         axs[1].grid(True)
         axs[1].set_ylabel("MS-SSIM [dB]")
-        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].set_xlabel("Bit rate [bpp]")
         axs[1].title.set_text("MS-SSIM (log) comparison")
     
     for name, m in metrics.items():
@@ -318,14 +318,14 @@ for img_name in dataset_imgs:
                      "s" if name == "teacher" else "o", label=name)
         axs[0].grid(True)
         axs[0].set_ylabel("PSNR [dB]")
-        axs[0].set_xlabel("Bit-rate [bpp]")
+        axs[0].set_xlabel("Bit rate [bpp]")
         axs[0].title.set_text("PSNR comparison")
 
         axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                      "s" if name == "teacher" else "o", label=name)
         axs[1].grid(True)
         axs[1].set_ylabel("MS-SSIM [dB]")
-        axs[1].set_xlabel("Bit-rate [bpp]")
+        axs[1].set_xlabel("Bit rate [bpp]")
         axs[1].title.set_text("MS-SSIM (log) comparison")
 
     axs[0].legend(loc="best")
@@ -390,13 +390,13 @@ for name, m in pretrained_avg_metrics.items():
     axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].set_xlabel("Bit rate [bpp]")
     axs[0].title.set_text("PSNR comparison")
 
     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
     axs[1].grid(True)
     axs[1].set_ylabel("MS-SSIM [dB]")
-    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Bit rate [bpp]")
     axs[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in avg_metrics.items():
@@ -404,14 +404,14 @@ for name, m in avg_metrics.items():
                  "s" if name == "teacher" else "o", label=name)
     axs[0].grid(True)
     axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Bit-rate [bpp]")
+    axs[0].set_xlabel("Bit rate [bpp]")
     axs[0].title.set_text("PSNR comparison")
 
     axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]),
                  "s" if name == "teacher" else "o", label=name)
     axs[1].grid(True)
     axs[1].set_ylabel("MS-SSIM [dB]")
-    axs[1].set_xlabel("Bit-rate [bpp]")
+    axs[1].set_xlabel("Bit rate [bpp]")
     axs[1].title.set_text("MS-SSIM (log) comparison")
 
 axs[0].legend(loc="best")
