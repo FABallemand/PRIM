@@ -1161,3 +1161,85 @@ fig.tight_layout()
 plt.savefig(os.path.join(output_folder,
                          f"avg_mse_{dataset_name}.png"))
 plt.close()
+
+# Bar graphs
+labels_default = [
+	("params", "Number of parameters [M]"),
+	("memory", "Memory footprint [MB]"),
+	("flops", "Floating point\noperations\n[GFLOP/frame]"),
+	("zeus-fps", "Throughput [FPS]"),
+	("zeus-energy", "Energy [J/frame]"),
+	("psnr", "PSNR"),
+	("bit-rate", "Bit rate [bpp]"),
+]
+
+labels_size = [
+	("params", "Number of parameters [M]"),
+	("memory", "Memory footprint [MB]"),
+	("psnr", "PSNR"),
+	("bit-rate", "Bit rate [bpp]"),
+]
+
+labels_compute = [
+	("flops", "Floating point\noperations\n[GFLOP/frame]"),
+	("zeus-fps", "Throughput [FPS]"),
+	("psnr", "PSNR"),
+	("bit-rate", "Bit rate [bpp]"),
+]
+
+labels_energy = [
+	("zeus-energy", "Energy [J/frame]"),
+	("psnr", "PSNR"),
+	("bit-rate", "Bit rate [bpp]"),
+]
+
+all_labels = [
+    (labels_default, "all_metrics"),
+    (labels_size, "size"),
+    (labels_compute, "compute"),
+    (labels_energy, "energy"),
+]
+
+for labels, file_name in all_labels:
+    n_labels = len(labels) # Number of metrics
+    n_models = len(list(avg_metrics.keys())) # Number of models
+    x = np.arange(n_labels) # Label locations
+    mid = int(n_models / 2) # Mid label index
+    width = 1 / (2 * mid + 0.5) # Width of the bars
+
+    fig, ax = plt.subplots(figsize=(16,9))
+
+    rects = []
+    for i, name in enumerate(avg_metrics):
+        if i < mid:
+            r = ax.bar(x - (mid -i - 0.5) * width, [avg_metrics[name][m] for m, _ in labels], width, label=name)
+        else:
+            r = ax.bar(x + (i - mid + 0.5) * width, [avg_metrics[name][m] for m, _ in labels], width, label=name)
+        rects.append(r)
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel("")
+    ax.set_xticks(x)
+    ax.set_xticklabels([m for _, m in labels])
+    ax.grid(True)
+    ax.legend()
+    ax.set_title("Metrics for teacher and student models")
+
+    def autolabel(rects):
+        """Attach a text label above each bar in *rects*, displaying its height."""
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate("{:.2f}".format(height),
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3), # 3 points vertical offset
+                        textcoords="offset points",
+                        ha="center", va="bottom",
+                        rotation="horizontal", fontsize="medium") # Text settings
+
+    for r in rects:
+        autolabel(r)
+
+    fig.tight_layout()
+
+    plt.savefig(os.path.join(output_folder,
+                             f"bargraph_{file_name}.png"))
