@@ -419,11 +419,15 @@
   - 289751 (0.0018)
   - 295889 (0.0035)
   - 289745 (0.0067)
-  - x (0.013)
+  - 296544 (0.013)
   - 289742 (0.025)
+- Report:
+  - Update part 2
+  - Update figures
 
 ## TODO
-- Train students N=64, varying lambda and teacher quality=1
+- Do bar plot
+- Do LIC chapter 1
 - Name figures properly
 - Add BD metrics
 - Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)

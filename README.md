@@ -5,7 +5,7 @@ With the recent progress of machine learning, new compression algorithms appeare
 
 ## 🗂️ Reporistory Organisation
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.
-- The second step was to reproduce state-of-the-art results for different bit-rate/quality tradeoffs, this is contained in the `balle_bdpsnr` folder.
+- The second step was to reproduce state-of-the-art results for different bit rate/quality tradeoffs, this is contained in the `balle_bdpsnr` folder.
 - I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae_test`. Results are not impressive to say the least...
 - Next, I proceeded in implementing knowledge distillation on state-of-the-art image reconstruction model but using them as auto-encoders. Training teacher and student model from scratch produced great visual results. The code and results can be found in `kd_ae`.
 - Finally, I adapted the previous code to perform LIC. I experimented with different student architectures (number of channels) and loss functions (...). Code and results are in the `kd_lic_experiments` folder.
@@ -45,5 +45,5 @@ With the recent progress of machine learning, new compression algorithms appeare
 - [Measuring GPU Energy: Best Practices](https://ml.energy/blog/energy/measurement/measuring-gpu-energy-best-practices/#__tabbed_1_1)
 - [Télécom Paris GPU Cluster Doc](https://docs.google.com/document/d/1lXykfpEUJCrbNh22D2f2kxNS0gV6t-j9A_juWFdiEnI/edit?tab=t.0)
 
-## 👥 Authors
+## 👥 Author
 - Fabien ALLEMAND
