@@ -4,11 +4,27 @@
 With the recent progress of machine learning, new compression algorithms appeared. These probabilistic algorithms are based on neural networks that can learn a better way to encode data with a minimum number of bits. The only issue being that these methods require way more processing power than previous state of the art compression algorithms. The goal of this project is to achieve real-time image compression on resource constrained platforms using frugal machine learning techniques such as pruning, quantisation and knowledge distillation.
 
 ## 🗂️ Reporistory Organisation
+```
+PRIM/
+    ├── balle_bdpsnr/       # Reproducing SOTA results
+    ├── balle_reproduction/ # Reproducing SOTA results
+    ├── data/               # Datasets
+    ├── kd_ae/              # Experiments with KD for image reconstruction
+    ├── kd_ae_test/         # Experiments with KD for image reconstruction
+    ├── kd_lic_experiments/ # Experiments with KD for LIC
+    ├── report_1/           # Intermediate report
+    ├── report_2/           # Final report
+    ├── commands.md         # Useful commands
+    ├── logbook.md          # Logbook
+    ├── reading_notes.md    # Notes for understanding papers
+    └── README.md           # README
+```
+
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.
 - The second step was to reproduce state-of-the-art results for different bit rate/quality tradeoffs, this is contained in the `balle_bdpsnr` folder.
 - I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae_test`. Results are not impressive to say the least...
 - Next, I proceeded in implementing knowledge distillation on state-of-the-art image reconstruction model but using them as auto-encoders. Training teacher and student model from scratch produced great visual results. The code and results can be found in `kd_ae`.
-- Finally, I adapted the previous code to perform LIC. I experimented with different student architectures (number of channels) and loss functions (...). Code and results are in the `kd_lic_experiments` folder.
+- Finally, I adapted the previous code to perform LIC. I experimented with different student architectures (number of channels). Code and results are in the `kd_lic_experiments` folder.
 
 ## 🔗 Related Links
 

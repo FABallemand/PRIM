@@ -34,6 +34,7 @@ _minted-main/
 *.ist
 *.lof
 *.log
+*.lot
 *.out
 *.pdf
 *.run.xml

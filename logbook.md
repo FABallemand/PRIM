@@ -435,7 +435,7 @@
   - Update part 2
   - Update figures
 - Train TeacherAE and StudentAE models (image reconstruction, student KD)
-  - 298315
+  - 298339
 
 ## TODO
 - Do LIC chapter 1
