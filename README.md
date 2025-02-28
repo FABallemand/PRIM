@@ -17,7 +17,8 @@ PRIM/
     ├── commands.md         # Useful commands
     ├── logbook.md          # Logbook
     ├── reading_notes.md    # Notes for understanding papers
-    └── README.md           # README
+    ├── README.md           # README
+    └── requirements.txt    # Requirements
 ```
 
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.
