@@ -1,11 +1,11 @@
 \chapter{Knowledge Distillation}
 \label{part_2}
-Frugal \acrshort{ai} is an emerging concept that aims to develop models capable of "doing more with less". Frugal models consume less resources while providing great results. \acrfull{kd} is a frugal \acrshort{ai} technique that consists in using the results of a large model to help a smaller model during its training. This model's performance tends towards that of the large model. This chapter focuses on applying \acrshort{kd} to \acrshort{lic}. In order to do that, we first experiment with \acrshort{kd} on auto-encoders for image reconstruction. After achieving satisfactory results, we proceed in implementing \acrshort{kd} for \acrshort{lic}.
+Frugal \acrfull{ai} is an emerging concept that aims to develop models capable of "doing more with less". Frugal models consume less resources while providing great results. \acrfull{kd} is a frugal \acrshort{ai} technique that consists in using the results of a large model to help a smaller model during its training. This model's performance tends towards that of the large model. This chapter focuses on applying \acrshort{kd} to \acrshort{lic}. In order to do that, we first experiment with \acrshort{kd} on auto-encoders for image reconstruction. After achieving satisfactory results, we proceed in implementing \acrshort{kd} for \acrshort{lic}.
 
 \section{Knowledge Distillation for Image Reconstrution}
 As explained by Ballé et al. in \cite{ballé2018variationalimagecompressionscale}, \acrshort{vae}s are very similar to \acrshort{lic} architectures in the sense that they both have an analysis transformation to transfer the input signal to a low dimensional latent space and an approximate inverse of this analysis transform (the synthesis transform) to transfer the latent representation back to the signal space. However, in \cite{minnen2018jointautoregressivehierarchicalpriors}, the authors explain the difference between the two. Compression consists in reducing the entropy of the representation under a prior probability model shared between the sender and the receiver, not only the dimensionality. Achieving performant image compression/decompression is thus more complex than doing standard image reconstruction.
 
-In the context of this study, applying \acrshort{kd} to auto-encoders for image reconstruction is a step in the right direction as it is a similar, yet easier task than image compression. First, we become acquainted with this technique by implementing it on custom made \acrshort{ae}s. Following that, we apply the same technique to state-of-the-art image compression models used as \acrshort{ae}s.
+In the context of this study, applying \acrshort{kd} to auto-encoders for image reconstruction is a step in the right direction as it is a similar, yet easier task than image compression. First, we become acquainted with this technique by implementing it on custom made \acrfull{ae}s. Following that, we apply the same technique to state-of-the-art image compression models used as \acrshort{ae}s.
 
 \subsection{Custom Auto-encoder}
 This experiment focuses on experimenting \acrshort{kd} on known architectures such as convolutional \acrshort{ae} and assessing the effect of \acrshort{kd}. To do so, we train a large model (the teacher model) and a small model with and without \acrshort{kd}. We expect the model trained with \acrshort{kd} (the student model) to achieve better image reconstruction performance than the other small model. In the best case scenario, the student model would give results similar to that of the teacher model.
@@ -52,6 +52,8 @@ For reference, we show in Figure \ref{kd_ae_2} the \acrshort{rd} performance of 
     \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels.]{Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels. Eventhough they were guided by a \acrshort{lic} model during their training, the student models poorly compares to state-of-the-art models in \acrshort{rd}.}
     \label{kd_ae_2}
 \end{figure}
+
+Whether it is for custom convolutional \acrshort{ae} or models specifically designed for \acrshort{lic}, there is no denial that \acrshort{kd} positively influence the performance of small models. This section certify this result for image reconstruction, we now transfer this technique to \acrshort{lic} domain.
 
 \section{Knowledge Distillation for Image Compression}
 Having assessed the effectiveness of \acrshort{kd} for computer vision tasks similar to image compression, we investigate the success of this frugal \acrshort{ai} technique on \acrshort{nn} based image compression. Still using the scale hyperprior model introduced in \cite{ballé2018variationalimagecompressionscale}, we train a serie of student models with \acrshort{kd} to evaluate both their \acrshort{rd} performance and their ability to be deployed on resource constrained platforms.
@@ -112,12 +114,12 @@ Real life applications for \acrshort{lic} do not only focus on \acrshort{rd} per
 
 In this section, we use the models first introduced in Section \ref{architecture_size_tradeoff}. There are five student architectures with 16, 32, 64, 96 and 112 channels and a latent space of size 192. We compare our models to pre-trained models from the compressAI zoo (with \textsf{quality} ranging from 1 to 5).
 
-Most resource constrained computers deal with a limited amount of memory. This limiting factor sometimes makes them unsuitable for tasks requiring large models. In \acrshort{lic}, \acrshort{kd} allows to use smaller models without degrading \acrshort{rd} performance. Our student models can have as few as 265,667 parameters while standard models have 5,075,843 parameters. This is a reduction of up to 95 \% in terms of parameters or memory size. Values for each student model are presented in Table \ref{tab_size}. While the number of parameters definitely impact \acrshort{rd} capabilities of \acrshort{nn}, Figures \ref{kd_lic_parameters} and \ref{appendix:kd_lic_memory} show that student models with 64 channels and above are quite close to their teacher in both \acrshort{psnr} and bit rate. In other words, this model could be used instead of the teacher on devices with limited memory without noticeably degrading the user experience.
+Most resource constrained computers deal with a limited amount of memory. This limiting factor sometimes makes them unsuitable for tasks requiring large models. In \acrshort{lic}, \acrshort{kd} allows to use smaller models without degrading \acrshort{rd} performance. Our student models can have as few as 0.27 M parameters while standard models have 5 M parameters. This is a reduction of up to 95 \% in terms of parameters or memory size. Values for each student model are presented in Table \ref{tab_size}. While the number of parameters definitely impact \acrshort{rd} capabilities of \acrshort{nn}, Figures \ref{kd_lic_parameters} and \ref{appendix:kd_lic_memory} show that student models with 64 channels and above are quite close to their teacher in both \acrshort{psnr} and bit rate. In other words, these model could be used instead of the teacher on devices with limited memory without noticeably degrading the user experience. The student with 64 channels is particularly valuable as it offers \acrshort{psnr} and bit rate inline with the teacher while reducing the memory footprint by 68 \%.
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/kd_lic_parameters.png}
-    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students number of parameters.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students number of parameters.}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students number of parameters.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students number of parameters. Reducing the number of parameters graduatly decrease \acrshort{rd} results. Similar results are observed for memory footprint. In our testing, a fair balance between \acrshort{rd} and memory footprint is using 64 channels as it virtually does not degrade performance while reducing the memory footprint by 68 \%.}
     \label{kd_lic_parameters}
 \end{figure}
 
@@ -137,19 +139,19 @@ Most resource constrained computers deal with a limited amount of memory. This l
     \label{tab_size}
 \end{table}
 
-Computers can only perform a certain amount of operations per unit of time. When using with mainstream hardware, the computing power required to use an image compression model like the scale hyperprior model is sufficient. However, when dealing with resource constrained devices, the latency might increase which goes against the objective of real-time decompression. With too much latency, it is impossible too extend image decompression to video decompression. Here, we focus on two metrics: the number of \acrfull{flop}s (i.e. the number of floating-point operations carried out to run an inference) and the model throughput (i.e. the number of frames that can process the model in one second). According to our results, the student with 16 channels only requires 3 \% of the teacher \acrshort{flop}s to perform the inference which translates to a 25 \% increase in throughput (see Table \ref{tab_compute}). It should be noted that all our models present a throughput that exceeds all requirements for video streaming. This headroom can be used in different ways: we can either increase the stream resolution to enhance user experience or reduce the inference frequency to save energy.
+Computers can only perform a certain amount of operations per unit of time. When using with mainstream hardware, the computing power required to use an image compression model like the scale hyperprior model is sufficient. However, when dealing with resource constrained devices, the latency might increase which goes against the objective of real-time decompression. With too much latency, it is impossible too extend image decompression to video decompression. Here, we focus on two metrics: the number of \acrfull{flop}s (i.e. the number of floating-point operations carried out to run an inference) and the model throughput (i.e. the number of frames that can process the model in one second). According to our results, the student with 16 channels only requires 3 \% of the teacher \acrshort{flop}s to perform the inference which translates to a 25 \% increase in throughput (see Table \ref{tab_compute}). Figures \ref{kd_lic_flop} and \ref{kd_lic_fps} show that once again, the student with 64 channels represents the best compromise between \acrshort{rd} and \acrshort{flop}s or throughput. It should also be noted that all our models present a throughput that exceeds all requirements for video streaming. This headroom can be used in different ways: we can either increase the stream resolution to enhance user experience or reduce the inference frequency to save energy. 
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/kd_lic_flop.png}
-    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students \acrshort{flop}s.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students \acrshort{flop}s.}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students \acrshort{flop}s.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students \acrshort{flop}s. Our knowledge distilled models are good candidates for devices with limited compute power. They all offer lower \acrshort{flop} counts than standard models. However, this comes at a non-negligeable cost in image quality and bit rate for the smallest models.}
     \label{kd_lic_flop}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/kd_lic_fps.png}
-    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students throughput.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students throughput.}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students throughput.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students throughput. All models, exceed standard frame rate. With, higher throughput than pre-trained models, our knowledge distilled models have more headroom for higher resolution frames or lower energy consumption depending the real world application.}
     \label{kd_lic_fps}
 \end{figure}
 
@@ -169,12 +171,12 @@ Computers can only perform a certain amount of operations per unit of time. When
     \label{tab_compute}
 \end{table}
 
-Most edge devices also have access to a limited amount of energy whether it is in time because they run on battery like smartphones or because they are \acrshort{iot} devices that run 24/7 and thus should not consume a lot of energy. This is why we focus on the energy required to process a single frame. Table \ref{tab_energy} shows that we can save up to 60 \% of the energy used by the teacher model by using the student with 16 channels. Using Figure \ref{kd_lic_energy}, that the model that offers the best tradeoff between \acrshort{psnr} and energy consumption in the student model with 64 channels. By using this model we keep the same image quality while reducing our energy consumption by 35 \%.
+Most edge devices also have access to a limited amount of energy whether it is in time because they run on battery like smartphones or because they are \acrfull{iot} devices that run 24/7 and thus should not consume a lot of energy. This is why we focus on the energy required to process a single frame. Table \ref{tab_energy} shows that we can save up to 60 \% of the energy used by the teacher model by using the student with 16 channels. Using Figure \ref{kd_lic_energy}, that the model that offers the best tradeoff between \acrshort{psnr} and energy consumption in the student model with 64 channels. By using this model we keep the same image quality while reducing our energy consumption by 35 \%.
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{img/kd_lic_energy.png}
-    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students consumed energy.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students consumed energy.}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students consumed energy.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students consumed energy. \acrshort{kd} is a great method to create energy friendly \acrshort{lic} models. If energy consumption is not too restricted, we recommand using the student with 64 channels that consumes 35 \% less energy per frame and achieve image compression on par with the teacher model.}
     \label{kd_lic_energy}
 \end{figure}
 
@@ -194,4 +196,6 @@ Most edge devices also have access to a limited amount of energy whether it is i
     \label{tab_energy}
 \end{table}
 
-% TODO: conclusion
+This section is a deep dive into the resource consumption of standard and knowledge distilled models. Based on measures of memory usage, required computing power and energy consumption on students architectures with varying number of channels, we prove that \acrshort{kd} indeed create frugal models. In all experiments, our \acrshort{kd} models consume less resources that standard models at a (sometimes negligeable) cost in \acrshort{rd} performance. On a not-too-constrained platform, we would recommand the use of the student with 64 channels. It has a limited use of resources without noticeable impact on image compression.
+
+This chapter is a step in the right direction for \acrshort{lic} on resource constrained platforms. We first assess the effectiveness of \acrshort{kd} on well known models and tasks then transfer this frugal \acrshort{ai} technique to \acrshort{lic}. \acrshort{rd} results are impressive, showing models with as low as half as many channels in the same operational region as their teacher. We also experiment with different teachers and find that we can train student models adapted for any image compression/resource consumption tradeoff possible. Other settings like the loss function definitely impact the student performances, leaving room for other research work. Most importantly, we measure a significant reduction in the model resource consumption (memory, compute, and energy) without too much degradation of the image compression \acrhsort{rd}. We observe that \acrshort{kd} is a valuable training paradigm in order to achieve real-time image compression on resource limited devices.

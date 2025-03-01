@@ -20,9 +20,30 @@ Here is a list of useful details regarding our implementation:
 
 \begin{figure}
     \centering
+    \includegraphics[width=15cm]{img/bdpsnr_kodak_14_pretrained.png}
+    \caption[econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (pre-trained models).]{econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (pre-trained models).}
+    \label{appendix:bdpsnr_1:a}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/bdpsnr_kodak_14.png}
+    \caption[econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (our models).]{econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (our models).}
+    \label{appendix:bdpsnr_1:b}
+\end{figure}
+
+\begin{figure}
+    \centering
     \includegraphics[width=15cm]{img/kd_ae_kodak_14.png}
+    \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image reconstruction: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image reconstruction: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.}
+    \label{appendix:kd_ae_1:a}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/kd_lic_kodak_14.png}
     \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.}
-    \label{appendix:kd_ae_1}
+    \label{appendix:kd_lic_2:a}
 \end{figure}
 
 \begin{figure}
@@ -51,6 +72,6 @@ Here is a list of useful details regarding our implementation:
                                   & 32                         & {\color[HTML]{656565} -87.46 \%}                         & 0.64                         & {\color[HTML]{656565} -87.97 \%}                         & 2.43                         & {\color[HTML]{656565} -91.31 \%}                         & 2.98                         & {\color[HTML]{656565} +25.89 \%}                         & 231.90                         & {\color[HTML]{656565} -60.45 \%}                         & 699.18                          & {\color[HTML]{656565} -5.25 \%}                         & 32.71                         & {\color[HTML]{656565} -10.73 \%}                        & 0.60                         \\ \cline{2-16} 
         \multirow{-5}{*}{Student} & 16                         & {\color[HTML]{656565} -94.77 \%}                         & 0.27                         & {\color[HTML]{656565} -94.98 \%}                         & 1.01                         & {\color[HTML]{656565} -97.01 \%}                         & 1.02                         & {\color[HTML]{656565} +26.83 \%}                         & 233.63                         & {\color[HTML]{656565} -61.28 \%}                         & 684.45                          & {\color[HTML]{656565} -13.17 \%}                        & 29.98                         & {\color[HTML]{656565} -32.44 \%}                        & 0.45                         \\ \hline
     \end{tabular}
-    \caption{}
+    \caption[Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.]{Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.}
     \label{appendix:tab_resources}
 \end{sidewaystable}

@@ -47,7 +47,7 @@ Visual inspection is the first method that comes to mind. When dealing with loss
 
 Visual inspection is subjective and should always be crossed with quantitative measures. Several metrics can be used. Based on what is used in the litterature, we opted for the following metrics.
 
-Image compression deals with two caracteristics: image quality and bit rate. In our study, image quality is measured with \acrfull{psnr} (and \acrfull{msssim}) and bit rate in \acrfull{bpp}. Together, they define the \acrfull{rd} performance of a compression method.
+Image compression deals with two caracteristics: image quality and bit rate. In our study, image quality is measured with \acrfull{psnr} (and \acrfull{msssim}) and bit rate in \acrfull{bpp}. Together, they define the \acrshort{rd} performance of a compression method.
 
 \acrshort{rd} curves are a common tool to compare compression codecs and \acrshort{nn} architectures in \acrshort{lic}. It consists in plotting the average distortion in function of the average bit rate evaluated on a set of images. Using a range of \acrshort{rd} tradeoffs allows to easily evaluate and compare the overall \acrshort{rd} performance of an architecture.
 
@@ -113,10 +113,10 @@ As evaluation on a single image is not representative, we also evaluate our scal
     \label{balle_repro_6}
 \end{figure}
 
-This section shows that we are able to train a \acrshort{lic} \acrshort{nn} able to compress and decompress images while mostly preserving its content. Our model performs better than deterministic codecs like JPEG or Webp and produces results that are on par with other pre-trained \acrshort{nn}. Next section focuses on the model hyperparameters and the impact on the rate/distortion tradeoff.
+This section shows that we are able to train a \acrshort{lic} \acrshort{nn} able to compress and decompress images while mostly preserving their content. Our model performs better than deterministic codecs like JPEG or Webp and produces results that are on par with other pre-trained \acrshort{nn}. Next section focuses on the model hyperparameters and the impact on the rate/distortion tradeoff.
 
 \subsection{Rate-Distortion Tradeoff}
-Different applications require different tradeoffs in terms of bit rate and image quality. While bandwith limited video calls require low bit rate at the expense of image quality, transferring a single high resolution picture is more focused on image quality than limiting bandwidth use. Traditional codecs have settings to target bit rates values and \acrshort{lic} models can be trained with different \acrshort{rd} objectives in mind. In this section, we explore the range of \acrshort{rd} tradeoffs that can be achieved with \acrshort{lic} models.
+Different applications require different compromises in terms of bit rate and image quality. While bandwith limited video calls require low bit rate at the expense of image quality, transferring a single high resolution picture is more focused on image quality than limiting bandwidth use. Traditional codecs have settings to target bit rates values and \acrshort{lic} models can be trained with different \acrshort{rd} objectives in mind. In this section, we explore the range of \acrshort{rd} tradeoffs that can be achieved with \acrshort{lic} models.
 
 Following the method presented in Section \ref{training_method}, we train eight different models: one for each value of the compressAI \textsf{quality} argument. That is to say, one for each couple of value of \(\lambda\) and corresponding model architecture. However, to quickly achieve comparable results, we limit the number of epochs to 65, just under what the GPU cluster is able to compute in 24 hours.
 
@@ -126,7 +126,7 @@ Let us start by passing a single image through the networks. The image from the 
     \centering
     \subfloat[Our networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_kodak_14.png} \label{bdpsnr_1:a}}}
     \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_kodak_14_pretrained.png} \label{bdpsnr_1:b}}}
-    \caption[Reconstruction results on image 14 of the Kodak dataset for different \acrshort{rd} tradeoffs.]{Reconstruction results on image 14 of the Kodak dataset for different \acrshort{rd} tradeoffs. For a given \acrshort{rd} tradeoff, our models produce results visually similar to the pre-trained models. The level of detail increases with the value of \(\lambda\), highlighting the \acrshort{rd} tradeoff.}
+    \caption[Reconstruction results on image 14 of the Kodak dataset for different \acrshort{rd} tradeoffs.]{Reconstruction results on image 14 of the Kodak dataset for different \acrshort{rd} tradeoffs. For a given \acrshort{rd} compromise, our models produce results visually similar to the pre-trained models. The level of detail increases with the value of \(\lambda\), highlighting the \acrshort{rd} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
 
