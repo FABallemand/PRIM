@@ -219,7 +219,7 @@ for name, net in networks.items():
 # Load pre-trained networks
 pretrained_networks = {}
 
-for quality in range(1, 9):
+for quality in range(1, 6):
     net = bmshj2018_hyperprior(quality=quality,
                                pretrained=True).eval().to(DEVICE)
 

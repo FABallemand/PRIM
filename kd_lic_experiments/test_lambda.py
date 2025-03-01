@@ -609,7 +609,8 @@ fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
 axs[0].plot(pretrained_brs[:-3], pretrained_psnrs[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
-axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1, label="proposed")
+axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1,
+            label=f"proposed\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
 axs[1].plot(pretrained_brs[:-3], pretrained_msssim[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
 axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="proposed")

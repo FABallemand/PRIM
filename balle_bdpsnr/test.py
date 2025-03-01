@@ -310,20 +310,20 @@ for img_name in dataset_imgs:
     brs = [m["bit-rate"] for _, m in metrics.items()]
     pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
-    psnrs = [m["psnr"] for _, m in metrics.items()]
-    axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
-
     pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
     axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+
+    psnrs = [m["psnr"] for _, m in metrics.items()]
+    axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 
     axs[0].grid(True)
     axs[0].legend(loc="best")
 
-    msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
-
     pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
     axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+
+    msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
+    axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 
     axs[1].grid(True)
     axs[1].legend(loc="best")
@@ -339,13 +339,13 @@ for img_name in dataset_imgs:
 ###############################################################################
 
 # Compute average metrics
-for name in networks.keys():
+for name in networks:
     avg_metrics[name]["psnr"] = np.average(avg_metrics[name]["psnr"])
     avg_metrics[name]["ms-ssim"] = np.average(avg_metrics[name]["ms-ssim"])
     avg_metrics[name]["bit-rate"] = np.average(avg_metrics[name]["bit-rate"])
 
 # Compute pre-trained average metrics
-for name in pretrained_networks.keys():
+for name in pretrained_networks:
     pretrained_avg_metrics[name]["psnr"] = np.average(pretrained_avg_metrics[name]["psnr"])
     pretrained_avg_metrics[name]["ms-ssim"] = np.average(pretrained_avg_metrics[name]["ms-ssim"])
     pretrained_avg_metrics[name]["bit-rate"] = np.average(pretrained_avg_metrics[name]["bit-rate"])
@@ -353,7 +353,8 @@ for name in pretrained_networks.keys():
 # Save average metrics
 all_avg_metrics = {"proposed": avg_metrics, "pretrained": pretrained_avg_metrics}
 with open(os.path.join(output_folder,
-                       f"avg_metrics_{dataset_name}.json"), "w") as f:
+                       f"avg_metrics_{dataset_name}.json"),
+                       "w", encoding="utf-8") as f:
     json.dump(all_metrics, f)
 
 # Retrieve average metrics as lists
@@ -371,7 +372,8 @@ avg_bd_metrics["bd_psnr"] = BD_PSNR(pretrained_brs, pretrained_psnrs, brs, psnrs
 
 # Save average BD metrics
 with open(os.path.join(output_folder,
-                       f"avg_bd_metrics_{dataset_name}.json"), "w") as f:
+                       f"avg_bd_metrics_{dataset_name}.json"),
+                       "w", encoding="utf-8") as f:
     json.dump(avg_bd_metrics, f)
 
 # Plot average rate-distortion curves
@@ -402,13 +404,14 @@ for name, m in pretrained_avg_metrics.items():
     axs[1].set_xlabel("Bit rate [bpp]")
     axs[1].title.set_text("MS-SSIM (log) comparison")
 
-axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
 axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1,
+            label=f"proposed\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
 axs[0].grid(True)
 axs[0].legend(loc="best")
 
-axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
 axs[1].grid(True)
 axs[1].legend(loc="best")
 

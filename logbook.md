@@ -437,6 +437,12 @@
 - Train TeacherAE and StudentAE models (image reconstruction, student KD)
   - 298339
 
+## 01/03/2025
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss KLD)
+  - 299061 (16)
+  - 299062 (64)
+  - 299063 (112)
+
 ## TODO
 - Do LIC chapter 1
 - Name figures properly

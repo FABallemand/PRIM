@@ -9,7 +9,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from pytorch_msssim import ms_ssim
@@ -19,16 +18,12 @@ from compressai.zoo.image import (
     model_urls,
     load_state_dict_from_url,
     load_pretrained,
-    _load_model,
-    bmshj2018_hyperprior,
-    mbt2018_mean,
-    mbt2018
 )
 
 import wandb
 
-from models import ScaleHyperprior, MeanScaleHyperprior, JointAutoregressiveHierarchicalPriors
-from losses import AverageMeter, KDLoss_MSE, KDLoss_KLD, KDLoss_RD_MSE
+from models import ScaleHyperprior
+from losses import AverageMeter, KDLoss_MSE, KDLoss_KLD, KDLoss_RD_MSE, KDLoss_RD_KLD
 
 # Set seeds
 torch.backends.cudnn.deterministic = True
@@ -122,7 +117,7 @@ def make(config):
         if config.latent_loss == "MSE":
             criterion = KDLoss_RD_MSE(latent=True, rd_lmbda=config.rd_lmbda)
         elif config.latent_loss == "KLD":
-            criterion = None
+            criterion = KDLoss_RD_KLD(latent=True, rd_lmbda=config.rd_lmbda)
         elif config.latent_loss == None:
             criterion = KDLoss_RD_MSE(latent=False)
         else:
@@ -343,7 +338,7 @@ def test(student_model, data_loader, config):
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd_experiments_kd_bd", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_kd_experiments_kd_kld", config=config):
         # Access config
         config = wandb.config
         print(config)
@@ -382,4 +377,19 @@ if __name__ == "__main__":
         save_path=f"train_res/{job_id}"
     )
 
-    model_pipeline(config)
+    config_kld = dict(
+        job_id=job_id,
+        dataset="Vimeo90K",
+        N_student=112,
+        M=192,
+        teacher_quality=5,
+        epochs=100,
+        batch_size=16,
+        learning_rate=1e-4,
+        loss="RD",
+        rd_lmbda=0.025,
+        latent_loss="KLD",
+        save_path=f"train_res/{job_id}"
+    )
+
+    model_pipeline(config_kld) # Check config and wand project name

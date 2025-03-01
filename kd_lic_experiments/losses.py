@@ -147,3 +147,49 @@ class KDLoss_RD_MSE(nn.Module):
             "bpp_loss": rd_loss["bpp_loss"]
         }
         return loss, loss_dict
+
+
+class KDLoss_RD_KLD(nn.Module):
+
+    def __init__(self, latent=True, rd_lmbda=0.025):
+        super().__init__()
+        self.latent = latent
+        if self.latent:
+            self.lmbda_1 = 0.2
+            self.lmbda_2 = 0.2
+            self.lmbda_3 = 0.6
+        else:
+            self.lmbda_1 = 0.0
+            self.lmbda_2 = 0.4
+            self.lmbda_3 = 0.6
+
+        self.latent_kd_loss = nn.KLDivLoss(log_target=True)
+        self.output_kd_loss = nn.MSELoss()
+        self.rd_loss = RateDistortionLoss(lmbda=rd_lmbda, metric="mse")
+
+    def __str__(self):
+        s = f"{self.lmbda_1} * {self.latent_kd_loss} + {self.lmbda_2} * {self.output_kd_loss} + {self.lmbda_3} * {self.rd_loss}"
+        return s
+
+    def forward(self, student_output, latent_kd_target, kd_target, target):
+        
+        input_latent = student_output["y_hat"]
+        input = student_output["x_hat"]
+
+        latent_kd_loss = 0.0
+        if self.latent:
+            log_input = F.log_softmax(input_latent)
+            log_target = F.log_softmax(latent_kd_target)
+            latent_kd_loss = self.latent_kd_loss(log_input, log_target)
+        output_kd_loss = self.output_kd_loss(input, kd_target)
+        rd_loss = self.rd_loss(student_output, target)
+        loss = self.lmbda_1 * latent_kd_loss + self.lmbda_2 * output_kd_loss + self.lmbda_3 * rd_loss["loss"]
+        loss_dict = {
+            "loss": loss,
+            "latent_kd_loss": latent_kd_loss,
+            "output_kd_loss": output_kd_loss,
+            "rd_loss": rd_loss["loss"],
+            "mse_loss": rd_loss["mse_loss"],
+            "bpp_loss": rd_loss["bpp_loss"]
+        }
+        return loss, loss_dict
