@@ -158,35 +158,28 @@ M = 192
 
 # Load networks
 
-# RD loss
+# RD loss - teacher quality 5
 # lmbdas = [0.0250, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
 # ids = [None, 280392, 281662, 281976, 281979, 274461]
-# teacher_quality = 5
+# TEACHER_QUALITY = 5
 
-# networks = {
-#     "teacher": None,
-#     "student_1": None,
-#     "student_2": None,
-#     "student_3": None,
-#     "student_4": None,
-#     "student_5": None,
-# }
-
-# RD loss
-lmbdas = [0.0018, 0.0018, 0.0067, 0.025]
-ids = [None, 289751, 289745, 289742]
-teacher_quality = 1
+# RD loss - teacher quality 1
+lmbdas = [0.0018, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
+ids = [None, 289751, 295889, 289745, 296544, 289742]
+TEACHER_QUALITY = 1
 
 networks = {
     "teacher": None,
     "student_1": None,
     "student_2": None,
     "student_3": None,
+    "student_4": None,
+    "student_5": None,
 }
 
 for name, id_ in zip(networks.keys(), ids):
     if name == "teacher":
-        url = model_urls["bmshj2018-hyperprior"]["mse"][teacher_quality]
+        url = model_urls["bmshj2018-hyperprior"]["mse"][TEACHER_QUALITY]
         state_dict = load_state_dict_from_url(url, progress=False)
         state_dict = load_pretrained(state_dict)
         net = ScaleHyperprior.from_state_dict(state_dict).eval().to(DEVICE)
@@ -418,14 +411,14 @@ for img_name in dataset_imgs:
     # pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
     # psnrs = [m["psnr"] for _, m in metrics.items()]
-    # # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+    # # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="ours")
 
     # pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
     # axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
     #             linewidth=1, label="pre-trained")
 
     # msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    # # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+    # # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="ours")
 
     # pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
     # axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
@@ -575,7 +568,7 @@ for name in pretrained_networks:
     pretrained_avg_metrics[name]["bit-rate"] = np.average(pretrained_avg_metrics[name]["bit-rate"])
 
 # Save average metrics
-all_avg_metrics = {"proposed": avg_metrics, "pretrained": pretrained_avg_metrics}
+all_avg_metrics = {"ours": avg_metrics, "pretrained": pretrained_avg_metrics}
 with open(os.path.join(output_folder,
                        f"avg_metrics_{dataset_name}.json"),
                        "w", encoding="utf-8") as f:
@@ -610,10 +603,10 @@ fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 axs[0].plot(pretrained_brs[:-3], pretrained_psnrs[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
 axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1,
-            label=f"proposed\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
+            label=f"ours\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
 axs[1].plot(pretrained_brs[:-3], pretrained_msssim[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
-axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="ours")
 
 for name, m in pretrained_avg_metrics.items():
     if name in ["1", "2", "3", "4", "5"]:

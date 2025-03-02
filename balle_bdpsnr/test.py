@@ -123,9 +123,9 @@ lambdas = [0.0018, 0.0035, 0.0067, 0.0130, 0.0250, 0.0483, 0.0932, 0.1800]
 # ids = [234218, 234220, 234222, 235713, 235714, 235715, 235716, 235717]
 ids = [239167, 239169, 239170, 239171, 239172, 239173, 239174, 239175]
 
-for quality, id in enumerate(ids, start=1):
+for quality, id_ in enumerate(ids, start=1):
     net = bmshj2018_hyperprior(quality=quality, pretrained=False)
-    checkpoint = torch.load(f"train_res/{id}/checkpoint.pth.tar",
+    checkpoint = torch.load(f"train_res/{id_}/checkpoint.pth.tar",
                             weights_only=True, map_location=torch.device("cpu"))
     net.load_state_dict(checkpoint["state_dict"])
     net.eval().to(device)
@@ -143,16 +143,16 @@ for quality in range(1, 9):
 
 # Create dict for average metrics
 avg_metrics = {}
-for name in networks.keys():
+for name in networks:
     avg_metrics[name] = {
             "psnr": [],
             "ms-ssim": [],
             "bit-rate": [],
         }
-    
+
 # Create dict for pre-trained average metrics
 pretrained_avg_metrics = {}
-for name in pretrained_networks.keys():
+for name in pretrained_networks:
     pretrained_avg_metrics[name] = {
             "psnr": [],
             "ms-ssim": [],
@@ -164,17 +164,16 @@ for name in pretrained_networks.keys():
 ###############################################################################
 
 # Find images
-dataset_path = "/home/ids/fallemand-24/PRIM/data/kodak"
-# dataset_path = "/home/ids/fallemand-24/PRIM/data/clic/clic_validation"
-# dataset_path = "/home/ids/fallemand-24/PRIM/data/clic/clic_test"
-dataset_name = dataset_path.split("/")[-1]
+DATASET_PATH = "/home/ids/fallemand-24/PRIM/data/kodak"
+# DATASET_PATH = "/home/ids/fallemand-24/PRIM/data/clic/clic_validation"
+# DATASET_PATH = "/home/ids/fallemand-24/PRIM/data/clic/clic_test"
+dataset_name = DATASET_PATH.split("/")[-1]
 
-dataset_imgs = [p for p in os.listdir(dataset_path) if p.endswith(".png")]
+dataset_imgs = [p for p in os.listdir(DATASET_PATH) if p.endswith(".png")]
 
 for img_name in dataset_imgs:
     # Load image
-    img = Image.open(os.path.join(dataset_path,
-                                               img_name)).convert("RGB")
+    img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
     # img = img.crop((0, 0, 768, 512)) # For CLIC dataset
     x = transforms.ToTensor()(img).unsqueeze(0).to(device)
     img_name = img_name.split(".")[0]
@@ -213,10 +212,10 @@ for img_name in dataset_imgs:
     fig, axs = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
     for ax in axs.ravel():
         ax.axis("off")
-    
+
     axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
     axs.ravel()[0].title.set_text("Original")
-        
+
     for i, (name, rec) in enumerate(reconstructions.items()):
         axs.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
         axs.ravel()[i + 1].title.set_text(name)
@@ -233,10 +232,10 @@ for img_name in dataset_imgs:
     fig, axs = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
     for ax in axs.ravel():
         ax.axis("off")
-    
+
     axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
     axs.ravel()[0].title.set_text("Original")
-        
+
     for i, (name, rec) in enumerate(pretrained_reconstructions.items()):
         axs.ravel()[i + 1].imshow(rec.crop((468, 212, 768, 512))) # cropped for easy comparison
         axs.ravel()[i + 1].title.set_text(name)
@@ -276,7 +275,8 @@ for img_name in dataset_imgs:
     # Save metrics
     all_metrics = metrics | pretrained_metrics
     with open(os.path.join(output_folder,
-                           f"metrics_{dataset_name}_{img_name}.json"), "w") as f:
+                           f"metrics_{dataset_name}_{img_name}.json"),
+                           "w", encoding="utf-8") as f:
         json.dump(all_metrics, f)
 
     # Plot rate-distortion curves
@@ -311,19 +311,21 @@ for img_name in dataset_imgs:
     pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
     pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
-    axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+    axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
+                linewidth=1, label="pre-trained")
 
     psnrs = [m["psnr"] for _, m in metrics.items()]
-    axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+    axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="ours")
 
     axs[0].grid(True)
     axs[0].legend(loc="best")
 
     pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
-    axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
+    axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
+                linewidth=1, label="pre-trained")
 
     msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+    axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="ours")
 
     axs[1].grid(True)
     axs[1].legend(loc="best")
@@ -351,7 +353,7 @@ for name in pretrained_networks:
     pretrained_avg_metrics[name]["bit-rate"] = np.average(pretrained_avg_metrics[name]["bit-rate"])
 
 # Save average metrics
-all_avg_metrics = {"proposed": avg_metrics, "pretrained": pretrained_avg_metrics}
+all_avg_metrics = {"ours": avg_metrics, "pretrained": pretrained_avg_metrics}
 with open(os.path.join(output_folder,
                        f"avg_metrics_{dataset_name}.json"),
                        "w", encoding="utf-8") as f:
@@ -404,14 +406,15 @@ for name, m in pretrained_avg_metrics.items():
     axs[1].set_xlabel("Bit rate [bpp]")
     axs[1].title.set_text("MS-SSIM (log) comparison")
 
-axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--", linewidth=1, label="pre-trained")
+axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
+            linewidth=1, label="pre-trained")
 axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1,
-            label=f"proposed\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
+            label=f"ours\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
 axs[0].grid(True)
 axs[0].legend(loc="best")
 
 axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--", linewidth=1, label="pre-trained")
-axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="ours")
 axs[1].grid(True)
 axs[1].legend(loc="best")
 
