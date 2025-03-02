@@ -24,7 +24,7 @@ def model_memory_size(model):
     return size_all_mb
 \end{pythonCode}
 
-\acrshort{flop}s are measured once per model using the \textsf{FlopCountAnalysis} from the fvcore library. We use two liraries to compute the inference time and energy consumption of the models: pynvml and zeus. By iterating 50 times through the test dataset images loaded on the GPU beforehand, we are able to achieve meaningful average values per frame. Both libraries present similar results and we ultimatly chose the zeus library for our final results. The value of inference time per frame is used to compute the model througput.
+\acrshort{flop}s are measured once per model using the \textsf{FlopCountAnalysis} from the fvcore library. We use two liraries to compute the inference time and energy consumption of the models: pynvml and zeus. By iterating 50 times through the test dataset images loaded on the same Nvidia RTX 3090 GPU beforehand, we are able to achieve meaningful average values per frame. Both libraries present similar results and we ultimatly chose the zeus library for our final results. The value of inference time per frame is used to compute the model througput.
 
 \chapter{Figures}
 
@@ -55,6 +55,14 @@ def model_memory_size(model):
     \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.}
     \label{appendix:kd_lic_2:a}
 \end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/kd_lic_rd_lambda_2.png}
+    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs and a teacher focusing on minimising bit rate.]{Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs and a teacher focusing on minimising bit rate.}
+    \label{appendix:kd_lic_4_bis}
+\end{figure}
+% Use 289751, 295889, 289745, 296544, 289742
 
 \begin{figure}
     \centering
