@@ -1,7 +1,7 @@
 # 👨🏻‍🔬 Projet de Recherche et d’Innovation Master (PRIM)
 
 ## 🖼️ Learned Image Compression on FPGA
-With the recent progress of machine learning, new compression algorithms appeared. These probabilistic algorithms are based on neural networks that can learn a better way to encode data with a minimum number of bits. The only issue being that these methods require way more processing power than previous state of the art compression algorithms. The goal of this project is to achieve real-time image compression on resource constrained platforms using frugal machine learning techniques such as pruning, quantisation and knowledge distillation.
+With recent advancements of machine learning, new compression algorithms appeared. These probabilistic algorithms are based on neural networks that can learn a better way to encode data with a minimum number of bits. The only issue being that these methods require way more processing power than previous state of the art compression algorithms. The goal of this project is to achieve real-time image compression on resource constrained platforms using frugal machine learning techniques such as pruning, quantisation and knowledge distillation.
 
 ## 🗂️ Reporistory Organisation
 ```
