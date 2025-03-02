@@ -22,7 +22,7 @@ import pynvml
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from models import ScaleHyperprior
+from models import TeacherAE, StudentAE
 
 # Set-up PyTorch
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,7 +32,7 @@ plt.rcParams["axes.prop_cycle"] = plt.rcParams["axes.prop_cycle"][1:]
 
 # Create output directory
 time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-output_folder = f"/home/ids/fallemand-24/PRIM/kd_ae/test_res/{time_stamp}"
+output_folder = f"/home/ids/fallemand-24/PRIM/kd_ae_test/test_res/{time_stamp}"
 os.makedirs(output_folder)
 
 ###############################################################################
@@ -151,18 +151,19 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 M = 192
 
 # Load networks
-Ns = [128, 64, 64, 64]
-ids = [254451, 254452, 257451, 257452]
+ids = [274518, 274520, 298339]
 
 networks = {
     "teacher": None,
     "student": None,
-    "student_kd_1": None,
-    "student_kd_2": None,
+    "student_kd": None,
 }
 
-for name, N, id_ in zip(networks.keys(), Ns, ids):
-    net = ScaleHyperprior(N, M)
+for name, id_ in zip(networks.keys(), ids):
+    if name == "teacher":
+        net = TeacherAE()
+    else:
+        net = StudentAE()
     checkpoint = torch.load(f"train_res/{id_}/checkpoint_best.pth.tar",
         weights_only=True, map_location=torch.device("cpu"))
     net.load_state_dict(checkpoint["state_dict"])
@@ -274,9 +275,9 @@ for img_name in dataset_imgs:
         for name, net in networks.items():
             # Run inference
             start = time.time()
-            out = net(x)
+            latent, y = net(x)
             stop = time.time()
-            out["x_hat"].clamp_(0, 1)
+            y.clamp_(0, 1)
 
             # Save output
             outputs[name] = out
@@ -284,9 +285,9 @@ for img_name in dataset_imgs:
             # Compute metrics
             metrics[name] = {
                 "inference-time": stop - start,
-                "mse": criterion(out["x_hat"], x).item(),
-                "psnr": compute_psnr(out["x_hat"], x),
-                "ms-ssim": compute_msssim(out["x_hat"], x),
+                "mse": criterion(y, x).item(),
+                "psnr": compute_psnr(y, x),
+                "ms-ssim": compute_msssim(y, x),
                 "bit-rate": compute_bpp(out),
             }
             avg_metrics[name]["inference-time"].append(metrics[name]["inference-time"])
@@ -333,10 +334,10 @@ for img_name in dataset_imgs:
 ## Plots (single image) #######################################################
 ###############################################################################
 
-    reconstructions = {name: transforms.ToPILImage()(out["x_hat"].squeeze())
+    reconstructions = {name: transforms.ToPILImage()(y.squeeze())
                        for name, out in outputs.items()}
 
-    diffs = [torch.mean((out["x_hat"] - x).abs(), axis=1).squeeze()
+    diffs = [torch.mean((y - x).abs(), axis=1).squeeze()
              for out in outputs.values()]
 
     pretrained_reconstructions = {name: transforms.ToPILImage()(out["x_hat"].squeeze())
