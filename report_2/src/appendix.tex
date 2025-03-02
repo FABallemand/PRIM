@@ -3,18 +3,28 @@
 \chapter{Reproducibility}
 
 \section{Implementation Details}
-Here is a list of useful details regarding our implementation:
-\begin{itemize}
-    \item Python 3.12.7
-    \item Anaconda virtual environment
-    \item compressAI 1.2.6
-    \item Code hosted on private GitHub repository
-    \item Processing power provided by Télécom Paris GPU cluster (\url{https://docs.google.com/document/d/1lXykfpEUJCrbNh22D2f2kxNS0gV6t-j9A_juWFdiEnI/edit?tab=t.0})
-\end{itemize}
+All our experiment are conducted using Python 3.12.7 and the version 1.2.6 of compressAI (see requirements file for other libraries version). We used an Anaconda virtual environment on the Télécom Paris GPU cluster which provides the processign power to perform our trainings and testings. All the code for our experiments is available on the following GitHub repository: \url{}
 
-\section{Measures}
+We also need to adress how we obtain the measures of Section \ref{application_resource_contrained_platforms}. Utilizing PyTorch properties, we use the following functions to compute the number of parameters and the memory footprint of the models:
 
-% TODO
+\begin{pythonCode}
+def model_nb_param(model):
+    return sum(p.numel() for p in model.parameters()) / 1_000_000 # Convert to M parameters
+
+
+def model_memory_size(model):
+    param_size = 0
+    for param in model.parameters():
+        param_size += param.nelement() * param.element_size()
+    buffer_size = 0
+    for buffer in model.buffers():
+        buffer_size += buffer.nelement() * buffer.element_size()
+
+    size_all_mb = (param_size + buffer_size) / 1024**2 # Convert to MB
+    return size_all_mb
+\end{pythonCode}
+
+\acrshort{flop}s are measured once per model using the \textsf{FlopCountAnalysis} from the fvcore library. We use two liraries to compute the inference time and energy consumption of the models: pynvml and zeus. By iterating 50 times through the test dataset images loaded on the GPU beforehand, we are able to achieve meaningful average values per frame. Both libraries present similar results and we ultimatly chose the zeus library for our final results. The value of inference time per frame is used to compute the model througput.
 
 \chapter{Figures}
 
@@ -55,9 +65,30 @@ Here is a list of useful details regarding our implementation:
 
 \begin{figure}
     \centering
+    \includegraphics[width=15cm]{img/kd_lic_bar_size.png}
+    \caption[Number of parameters, memory footprint, \acrshort{psnr} and bit rate bar chart for teacher and student models.]{Number of parameters, memory footprint, \acrshort{psnr} and bit rate bar chart for teacher and student models.}
+    \label{appendix:kd_lic_bar_size}
+\end{figure}
+
+\begin{figure}
+    \centering
     \includegraphics[width=15cm]{img/kd_lic_time.png}
     \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students inference time.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students inference time.}
     \label{appendix:kd_lic_time}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/kd_lic_bar_compute.png}
+    \caption[\acrshort{flop}s, throughput, \acrshort{psnr} and bit rate bar chart for teacher and student models.]{\acrshort{flop}s, throughput, \acrshort{psnr} and bit rate bar chart for teacher and student models.}
+    \label{appendix:kd_lic_bar_compute}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{img/kd_lic_bar_energy.png}
+    \caption[Consumed energy, \acrshort{psnr} and bit rate bar chart for teacher and student models.]{Consumed energy, \acrshort{psnr} and bit rate bar chart for teacher and student models.}
+    \label{appendix:kd_lic_bar_energy}
 \end{figure}
 
 \begin{sidewaystable}[]
