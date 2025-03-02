@@ -1,6 +1,7 @@
 # Private data
 administrative/
-private/
+private/secret.md
+private/*.pdf
 kd_tutorial/
 
 # Datasets

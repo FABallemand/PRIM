@@ -11,4 +11,4 @@
 - [CLIC](https://www.compression.cc/tasks/#image)
 
 ## Assets
-- stmalo_fracape.png from compressai
+- stmalo_fracape.png from compressAI

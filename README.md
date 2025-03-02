@@ -12,11 +12,9 @@ PRIM/
     ├── kd_ae/              # Experiments with KD for image reconstruction
     ├── kd_ae_test/         # Experiments with KD for image reconstruction
     ├── kd_lic_experiments/ # Experiments with KD for LIC
+    ├── private/            # Personal data
     ├── report_1/           # Intermediate report
     ├── report_2/           # Final report
-    ├── commands.md         # Useful commands
-    ├── logbook.md          # Logbook
-    ├── reading_notes.md    # Notes for understanding papers
     ├── README.md           # README
     └── requirements.txt    # Requirements
 ```
