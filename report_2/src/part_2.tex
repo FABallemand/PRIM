@@ -10,24 +10,22 @@ In the context of this study, applying \acrshort{kd} to auto-encoders for image 
 \subsection{Custom Auto-encoder}
 This experiment focuses on experimenting \acrshort{kd} on known architectures such as convolutional \acrshort{ae} and assessing the effect of \acrshort{kd}. To do so, we train a large model (the teacher model) and a small model with and without \acrshort{kd}. We expect the model trained with \acrshort{kd} (the student model) to achieve better image reconstruction performance than the other small model. In the best case scenario, the student model would give results similar to that of the teacher model.
 
-We design the teacher encoder with three stages each containing two convolutions with ReLU followed by a maximum pooling. This is followed by a two-layer fully connected network to achieve a latent space size of 256. The teacher decoder follows the same structure but reversed with transpose convolutions instead of convolutions and up-sampling to replace pooling. The small architecture is analogous with only one convolution (or transpose convolution) per stage.
+We design the teacher encoder with three stages each containing two convolutions with ReLU followed by a maximum pooling. This is followed by a two-layer fully connected network to achieve a latent space size of 256. The teacher decoder follows the same structure but reversed with transpose convolutions instead of convolutions and up-sampling to replace pooling. The small architecture is analogous with only one convolution (or transpose convolution) per stage. The student model is trained based on its output (by comparing the input and output images using \acrshort{mse}) but also based on the latent representation and the output of the teacher model (using \acrshort{mse} for both).
 
 [TODO: retrain + results]
 
-An interesting experiment to perform would be to create another student architecture with the same encoder as the teacher and only a smaller decoder. This set-up would fit more the context of image compression with a single sender that compresses the image with a powerful encoder and multiple resource constrained receivers using an efficient decoder.
+% An interesting experiment to perform would be to create another student architecture with the same encoder as the teacher and only a smaller decoder. This set-up would fit more the context of image compression with a single sender that compresses the image with a powerful encoder and multiple resource constrained receivers using an efficient decoder.
 
 \subsection{Scale Hyperprior Model as Auto-encoder}
 \label{scale_hyperprior_ae}
-With the previous section showing the benefits of \acrshort{kd} for auto-encoders, the hope for this technique to work for image compression increases. Following a step-by-step approach, we first try to observe similar results with the architectures used for image compression. The goal of the following experiment is to use the state-of-the-art scale hyperprior model as an auto-encoder for image reconstruction. As discussed previously, image reconstruction is very similar to image compression but with no entropy constrain on the latent space. The scale hyperprior model, designed for \acrshort{lic} should reach satisfactory performances on this easier task.\footnote{The additional benefit of this experiment being that the code used will form a foundation for future experiments focused on \acrshort{lic}.}
-
-% Optional: KD from scratch...
+With the previous section showing the benefits of \acrshort{kd} for auto-encoders, the hope for this technique to work for image compression increases. Following a step-by-step approach, we first try to observe similar results with the architectures used for image compression. The goal of the following experiment is to use the state-of-the-art scale hyperprior model as an auto-encoder for image reconstruction. As discussed previously, image reconstruction is very similar to image compression but with no entropy constrain on the latent space. The scale hyperprior model, designed for \acrshort{lic} should reach satisfactory performances on this easier task.\footnote{The additional benefit of this experiment being that the code forms a foundation for future experiments focused on \acrshort{lic}.}
 
 Now that we are familiar with \acrshort{kd}, we should highlight the importance of the "quality" of the teacher. If we continue the analogy of the teacher and student relationship, it makes sense that a good teacher is more likely to train a good student than a bad teacher. This principle can be applied to \acrshort{kd}. As the student learns partially from the output of the teacher, we must use a powerful teacher network, otherwise the student network will learn poor latent representations as well as reconstructions. In order to achieve the best possible results, we decide to perform the upcoming experiments using pre-trained networks from the compressAI model zoo as teachers. On top of dramatically reducing the training time for each experiment, it also allow us to easily compare our models to state-ot-the-art results.
 
 The following experiment consists in training five students models with different architectures. Using the pre-trained scale hyperprior model optimised for MSE with \textsf{quality} set to 5 (with 128 channels and a latent space of size 192) as teacher, we train models with different number of channels. We define five models with 16, 32, 64, 96 and 112 channels while preserving the size of the latent space. We use the following \acrshort{kd} loss function:
 
 \begin{equation}
-    L = \lambda_{1}\, MSE(z_{student}, z_{teacher}) + \lambda_{2}\, MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3}\, MSE(\hat{x}_{student}, x)
+    L = \lambda_{1}\, MSE(\hat{y}_{student}, \hat{y}_{teacher}) + \lambda_{2}\, MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3}\, MSE(\hat{x}_{student}, x)
     \label{loss_1}
 \end{equation}
 
@@ -65,8 +63,11 @@ In this section aims at evaluating the \acrshort{rd} performance gain achievable
 \acrshort{lic} distinguish itself from other computer vision tasks (such as dimensionality reduction) by minimising the entropy of the latent representation. In dimensionality reduction, the latent representation has no practical application. When it comes to image compression, it is the latent representation of the image that will be stored or transmitted. Having the smallest possible entropy allows for a smaller entropy coding which means less bits to handle in real world applications. This is why the rate-distortion loss is used in \acrshort{lic} as it allows to find a tradeoff between image quality and bit rate according that fits the requirements of the application. In order to have similar results with \acrshort{lic}, the previous loss function, introduced in Equation \eqref{loss_1}, is updated as follow:
 
 \begin{align}
-    L &= \lambda_{1}\, MSE(z_{student}, z_{teacher}) + \lambda_{2}\, MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3}\, RD(z_{student}, \hat{x}_{student}, x)\label{loss_2}\\
-      &= \lambda_{1}\, MSE(z_{student}, z_{teacher}) + \lambda_{2}\, MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3}\, (-E[\log_{2}z_{student}] + \lambda\, MSE(\hat{x}_{student}, x)) \nonumber
+    L &= \lambda_{1}\, MSE(\hat{y}_{student}, \hat{y}_{teacher}) + \lambda_{2}\, MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3}\, RD(\hat{y}_{student}, \hat{x}_{student}, x)\label{loss_2}
+\end{align}
+
+\begin{align}
+RD(\hat{y}_{student}, \hat{x}_{student}, x) &= -E[\log_{2}\hat{y}_{student} + \log_{2}\hat{z}_{student}] + \lambda\, MSE(\hat{x}_{student}, x)
 \end{align}
 
 \subsubsection{Architecture Size Tradeoff}
