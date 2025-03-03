@@ -13,8 +13,7 @@ PRIM/
     ├── kd_ae_test/         # Experiments with KD for image reconstruction
     ├── kd_lic_experiments/ # Experiments with KD for LIC
     ├── private/            # Personal data
-    ├── report_1/           # Intermediate report
-    ├── report_2/           # Final report
+    ├── reports/            # Reports (intermediate, final, paper)
     ├── README.md           # README
     └── requirements.txt    # Requirements
 ```
@@ -27,7 +26,7 @@ PRIM/
 
 ## 🔗 Related Links
 
-## Learned Image Compression
+### Learned Image Compression
 - [Neural/Learned Image Compression: An Overview](https://medium.com/@loijilai_me/learned-image-compression-an-overview-625f3ab709f2)
 - [End-to-end optimization of nonlinear transform codes for perceptual quality](https://arxiv.org/abs/1607.05006)
 - [End-to-end Optimized Image Compression](https://arxiv.org/abs/1611.01704)
@@ -36,7 +35,7 @@ PRIM/
 - [The Devil Is in the Details: Window-based Attention for Image Compression](https://arxiv.org/abs/2203.08450)
 - [A Survey on Visual Transformer](https://arxiv.org/abs/2012.12556)
 
-## Knowledge Distillation
+### Knowledge Distillation
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
 - [Microdosing: Knowledge Distillation for GAN based Compression](https://arxiv.org/abs/2201.02624)
 - [Fast and High-Performance Learned Image Compression With Improved Checkerboard Context Model, Deformable Residual Module, and Knowledge Distillation](https://arxiv.org/abs/2309.02529)

@@ -22,7 +22,7 @@ With the previous section showing the benefits of \acrshort{kd} for auto-encoder
 
 Now that we are familiar with \acrshort{kd}, we should highlight the importance of the "quality" of the teacher. If we continue the analogy of the teacher and student relationship, it makes sense that a good teacher is more likely to train a good student than a bad teacher. This principle can be applied to \acrshort{kd}. As the student learns partially from the output of the teacher, we must use a powerful teacher network, otherwise the student network will learn poor latent representations as well as reconstructions. In order to achieve the best possible results, we decide to perform the upcoming experiments using pre-trained networks from the compressAI model zoo as teachers. On top of dramatically reducing the training time for each experiment, it also allow us to easily compare our models to state-ot-the-art results.
 
-The following experiment consists in training five students models with different architectures. Using the pre-trained scale hyperprior model optimised for MSE with \textsf{quality} set to 5 (with 128 channels and a latent space of size 192) as teacher, we train models with different number of channels. We define five models with 16, 32, 64, 96 and 112 channels while preserving the size of the latent space. We use the following \acrshort{kd} loss function:
+The following experiment consists in training five students models with different architectures. Using the pre-trained scale hyperprior model optimised for MSE with \textsf{quality} set to 5 (with 128 channels and a latent space of size 192) as teacher, we train models with different number of channels. We define five models with 16, 32, 64, 96 and 112 channels (symbolised by the parameter N in Figure \ref{scale_hyperprior_1:b}) while preserving the size of the latent space. We use the following \acrshort{kd} loss function:
 
 \begin{equation}
     L = \lambda_{1}\, MSE(\hat{y}_{student}, \hat{y}_{teacher}) + \lambda_{2}\, MSE(\hat{x}_{student}, \hat{x}_{teacher}) + \lambda_{3}\, MSE(\hat{x}_{student}, x)
@@ -35,9 +35,9 @@ Figure \ref{kd_ae_1:a} shows reconstructions of image 14 of the Kodak dataset wi
 
 \begin{figure}[H]
     \centering
-    \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=8cm]{img/kd_ae_kodak_14.png} \label{kd_ae_1:a}}
+    \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=8cm]{../img/kd_ae_kodak_14.png} \label{kd_ae_1:a}}
     \qquad
-    \subfloat[Average \acrshort{mse} curve on the Kodak dataset for students with different number of channels.]{\includegraphics[width=8cm]{img/kd_ae_mse.png} \label{kd_ae_1:b}}
+    \subfloat[Average \acrshort{mse} curve on the Kodak dataset for students with different number of channels.]{\includegraphics[width=8cm]{../img/kd_ae_mse.png} \label{kd_ae_1:b}}
     \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image reconstruction.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image reconstruction. Student models with fewer channels propose less detailed image reconstruction. This is noticeable on single image reconstructions or on average using \acrshort{mse} measures.}
     \label{kd_ae_1}
 \end{figure}
@@ -46,7 +46,7 @@ For reference, we show in Figure \ref{kd_ae_2} the \acrshort{rd} performance of 
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_ae_rd.png}
+    \includegraphics[width=15cm]{../img/kd_ae_rd.png}
     \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels.]{Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels. Eventhough they were guided by a \acrshort{lic} model during their training, the student models poorly compares to state-of-the-art models in \acrshort{rd}.}
     \label{kd_ae_2}
 \end{figure}
@@ -54,7 +54,7 @@ For reference, we show in Figure \ref{kd_ae_2} the \acrshort{rd} performance of 
 Whether it is for custom convolutional \acrshort{ae} or models specifically designed for \acrshort{lic}, there is no denial that \acrshort{kd} positively influence the performance of small models. This section certify this result for image reconstruction, we now transfer this technique to \acrshort{lic} domain.
 
 \section{Knowledge Distillation for Image Compression}
-Having assessed the effectiveness of \acrshort{kd} for computer vision tasks similar to image compression, we investigate the success of this frugal \acrshort{ai} technique on \acrshort{nn} based image compression. Still using the scale hyperprior model introduced in \cite{ballé2018variationalimagecompressionscale}, we train a serie of student models with \acrshort{kd} to evaluate both their \acrshort{rd} performance and their ability to be deployed on resource constrained platforms.
+Having assessed the effectiveness of \acrshort{kd} for computer vision tasks similar to image compression, we investigate the success of this frugal \acrshort{ai} technique on \acrshort{nn}-based image compression. Still using the scale hyperprior model introduced in \cite{ballé2018variationalimagecompressionscale}, we train a serie of student models with \acrshort{kd} to evaluate both their \acrshort{rd} performance and their ability to be deployed on resource constrained platforms.
 
 \subsection{Rate-Distortion Performance}
 In this section aims at evaluating the \acrshort{rd} performance gain achievable through \acrshort{kd}. By guiding small models during their training with a teacher model, we hope to increase their ability to compress images. We first explain our method then we present our results.
@@ -72,7 +72,7 @@ RD(\hat{y}_{student}, \hat{x}_{student}, x) &= -E[\log_{2}\hat{y}_{student} + \l
 
 \subsubsection{Architecture Size Tradeoff}
 \label{architecture_size_tradeoff}
-The objective of \acrshort{kd} is to improve the performance of small models using a large one. However, there is no definition of "a small model" so we start by experimenting with model sizes. Following our training method, we create five new models using \acrshort{kd} and the loss function from Equation \ref{loss_2}. We use \(\lambda = 0.025\) in the \acrshort{rd} part of the loss, the same value used by the teacher model during its training. The five models have different sizes. We modify their architecture by changing the number of channels. The smallest deals with as few as 16 channels while the largest student has 112. It should be noted that the size of the latent space remains the same accross all models, teacher and students.
+The objective of \acrshort{kd} is to improve the performance of small models using a large one. However, there is no definition of "a small model" so we start by experimenting with model sizes. Following our training method, we create five new models using \acrshort{kd} and the loss function from Equation \ref{loss_2}. We use \(\lambda = 0.025\) in the \acrshort{rd} part of the loss, the same value used by the teacher model during its training. The five models have different sizes. We modify their architecture by changing the number of channels. The smallest deals with as few as 16 channels while the largest student has 112 (number of channels is indicated by the parameter N in Figure \ref{scale_hyperprior_1:b}). It should be noted that the size of the latent space remains the same accross all models, teacher and students.
 
 Unsurprisingly, using \acrshort{RD} loss yields far better results for image compression. Contrary to similar models trained with \acrshort{mse} only (Section \ref{scale_hyperprior_ae}), these new models can be found in the same operational \acrshort{rd} area as state-of-the-art models (Figure \ref{kd_lic_1}).
 
@@ -80,7 +80,7 @@ Results depicted in Figure \ref{kd_lic_1} follow our intuition. Students with la
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_lic_rd_channels.png}
+    \includegraphics[width=15cm]{../img/kd_lic_rd_channels.png}
     \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels.]{Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels. Despite being trained similarly, all models have different outputs. Models with at least 64 channels performs alike their teacher but 16 and 32 channels are not sufficient to preserve the same image quality.}
     \label{kd_lic_1}
 \end{figure}
@@ -88,9 +88,9 @@ Results depicted in Figure \ref{kd_lic_1} follow our intuition. Students with la
 
 \begin{figure}[H]
     \centering
-    \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=8cm]{img/kd_lic_kodak_14.png} \label{kd_lic_2:a}}
+    \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=8cm]{../img/kd_lic_kodak_14.png} \label{kd_lic_2:a}}
     \qquad
-    \subfloat[Average MSE curve on the Kodak dataset for students with different number of channels.]{\includegraphics[width=8cm]{img/kd_lic_mse.png} \label{kd_lic_2:b}}
+    \subfloat[Average MSE curve on the Kodak dataset for students with different number of channels.]{\includegraphics[width=8cm]{../img/kd_lic_mse.png} \label{kd_lic_2:b}}
     \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression. Meticulous visual inspection and average \acrshort{mse} of the output prove the importance of the number of channels when limiting compression loss.}
     \label{kd_lic_2}
 \end{figure}
@@ -102,8 +102,8 @@ As a reminder, the pre-trained models in Figure \ref{kd_lic_4} all have 128 chan
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_lic_rd_lambda_1.png}
-    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs.]{Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs. Trained by a teacher with an emphasis on image quality, students 1, 2 and 3 achieve better \acrshort{psnr} than their pre-trained counter part. Students 4 and 5 are held back by the limited number of channels.}
+    \includegraphics[width=15cm]{../img/kd_lic_rd_lambda_1.png}
+    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs.]{Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs. Trained by a teacher with an emphasis on image quality, students 1, 2 and 3 achieve better \acrshort{psnr} than their pre-trained counterpart. Students 4 and 5 are held back by the limited number of channels.}
     \label{kd_lic_4}
 \end{figure}
 % Use 280392, 281662, 281976, 281979, 274461
@@ -120,7 +120,7 @@ Most resource constrained computers deal with a limited amount of memory. This l
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_lic_parameters.png}
+    \includegraphics[width=15cm]{../img/kd_lic_parameters.png}
     \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students number of parameters.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students number of parameters. Reducing the number of parameters graduatly decrease \acrshort{rd} results. Similar results are observed for memory footprint. In our testing, a fair balance between \acrshort{rd} and memory footprint is using 64 channels as it virtually does not degrade performance while reducing the memory footprint by 68 \%.}
     \label{kd_lic_parameters}
 \end{figure}
@@ -145,14 +145,14 @@ Computers can only perform a certain amount of operations per unit of time. When
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_lic_flop.png}
+    \includegraphics[width=15cm]{../img/kd_lic_flop.png}
     \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students \acrshort{flop}s.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students \acrshort{flop}s. Our knowledge distilled models are good candidates for devices with limited compute power. They all offer lower \acrshort{flop} counts than standard models. However, this comes at a non-negligeable cost in image quality and bit rate for the smallest models.}
     \label{kd_lic_flop}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_lic_fps.png}
+    \includegraphics[width=15cm]{../img/kd_lic_fps.png}
     \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students throughput.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students throughput. All models, exceed standard frame rate. With, higher throughput than pre-trained models, our knowledge distilled models have more headroom for higher resolution frames or lower energy consumption depending the real world application.}
     \label{kd_lic_fps}
 \end{figure}
@@ -177,7 +177,7 @@ Most edge devices also have access to a limited amount of energy whether it is i
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/kd_lic_energy.png}
+    \includegraphics[width=15cm]{../img/kd_lic_energy.png}
     \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students consumed energy.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students consumed energy. \acrshort{kd} is a great method to create energy friendly \acrshort{lic} models. If energy consumption is not too restricted, we recommand using the student with 64 channels that consumes 35 \% less energy per frame and achieve image compression on par with the teacher model.}
     \label{kd_lic_energy}
 \end{figure}

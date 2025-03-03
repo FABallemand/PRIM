@@ -6,7 +6,7 @@ This chapter is dedicated to setting up our environment for the research project
 % As explained in Chapter \ref{sota}, current \acrshort{lic} models achieve impressive results: they provide encoding of images that contain very few bits while preserving their content. However, these models require a lot of processing power making them unsuitable for real-time application on resource constrained devices.
 The goal of this project is to explore solutions to reduce the processing power used by current \acrshort{lic} models. In order to do that, it is necessary to have access to state-of-the-art \acrshort{lic} models, the image datasets used to train them and enough processing power to train and test such models.
 
-CompressAI \cite{compressai} is a Python library for learned compression. Based on the well known machine learning library PyTorch, compressAI provides custom operations, layers and models for deep learning based data compression and pre-trained end-to-end compression models for \acrshort{lic}. Amongs the pre-trained models is the model from Ballé et al. \cite{ballé2018variationalimagecompressionscale} that will be used throughout the project.
+CompressAI \cite{compressai} is a Python library for learned compression. Based on the well known machine learning library PyTorch, compressAI provides custom operations, layers and models for deep learning-based data compression and pre-trained end-to-end compression models for \acrshort{lic}. Amongs the pre-trained models is the model from Ballé et al. \cite{ballé2018variationalimagecompressionscale} that will be used throughout the project.
 
 Usually, researchers train their models on the OpenImages dataset \cite{openimages} but pre-trained models on compressAI have been trained on the Vimeo90K dataset \cite{xue2019video}. In order to perform proper model comparisons, we will also use the Vimeo dataset for training during this project. For testing, two datasets will be used: the Kodak dataset \cite{kodak} and the dataset from the \acrfull{clic} \cite{clic}. Similarly to compressAI, visual inspection are also performed on a photograph of the port of Saint-Malo available in the GitHub repository of the library.
 
@@ -16,18 +16,27 @@ The computing power required for training and using models is offered by the GPU
 As for all research work, we need to define and share our methods for consistency throughout the study as well as reproducibility purpose. The following parts explain our choice of \acrshort{nn} as well as our training and testing methods.
 
 \subsection{Neural Network}
-For this project, we selected the scale hyperprior model introduced in 2018 by Ballé et al. \cite{ballé2018variationalimagecompressionscale}. This model has the advantage of being straightforward and yet complex enough to be challenging but not impossible to run on resource constrained computers. Its simple two stages architecture, schematised in Figure \ref{scale_hyperprior_1}, makes it a suitable candidate to perform \acrshort{kd} experiments using the latent spaces.
+For this project, we selected the scale hyperprior model introduced in 2018 by Ballé et al. \cite{ballé2018variationalimagecompressionscale}. This model has the advantage of being straightforward and yet complex enough to be challenging but not impossible to run on resource constrained computers. Its simple two stages architecture, schematised in Figure \ref{scale_hyperprior_1:a}, makes it a suitable candidate to perform \acrshort{kd} experiments using the latent spaces.
 
-\begin{figure}
+\begin{figure}[H]
     \centering
-    \includegraphics[width=8cm]{img/scale_hyperprior_1.png}
-    \caption[Diagram showing the operational structure of the scale hyperprior compression model.]{Diagram showing the operational structure of the scale hyperprior compression model. Arrows indicate the flow of data, and boxes represent transformations of the data. Boxes labeled U | Q represent either addition of uniform noise applied during training (producing vectors labeled with a tilde), or quantization and arithmetic coding/decoding during testing (producing vectors labeled with a hat).}
-    \label{scale_hyperprior_1}
-\end{figure} % TODO: move to LIC chapter ??
+    \subfloat[Diagram showing the operational structure of the scale hyperprior compression model. Arrows indicate the flow of data, and boxes represent transformations of the data. Boxes labeled U | Q indicate either addition of uniform noise applied during training (producing vectors labeled with a tilde), or quantization and arithmetic coding/decoding during testing (producing vectors labeled with a hat).]{\includegraphics[width=6cm]{../img/scale_hyperprior_1.png} \label{scale_hyperprior_1:a}}
+    \qquad
+    \subfloat[Detailed architecture of the scale hyperprior compression model. The parameters N in the convolution layers designate the number of channels.]{\includegraphics[width=10cm]{../img/scale_hyperprior_2.png} \label{scale_hyperprior_1:b}}
+    \caption[Representations of the scale hyperprior model.]{Representations of the scale hyperprior model.}
+    \label{kd_lic_2}
+\end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=8cm]{../img/scale_hyperprior_1.png}
+%     \caption[Diagram showing the operational structure of the scale hyperprior compression model.]{Diagram showing the operational structure of the scale hyperprior compression model. Arrows indicate the flow of data, and boxes represent transformations of the data. Boxes labeled U | Q represent either addition of uniform noise applied during training (producing vectors labeled with a tilde), or quantization and arithmetic coding/decoding during testing (producing vectors labeled with a hat).}
+%     \label{scale_hyperprior_1}
+% \end{figure}
 
 \subsection{Training Method}
 \label{training_method}
-As experiments parameters are not disclosed in the paper, we use compressAI pre-trained models as our baseline comparison. For fair comparison, we match as best as we can the training method described in the compressAI documentation \cite{compressai_train}. Models were trained between 4 and 5 million steps on 256x256 image patches randomly extracted and cropped from the Vimeo90K dataset. The batch size is 16 or 32 (we choose 16). The initial learning rate is 1e-4 and decreases over time (it is divided by 2 when the evaluation loss reaches a plateau). Two different metrics can be used: MSE or MS-SSIM. We keep the default metric (i.e. MSE) which corresponds to using the following loss function: \(L = \lambda\, 255^{2}\, D + R\) with \(D\) and \(R\) respectively the mean distortion and the mean estimated bit rate. The parameter \(\lambda\) allows to adjust the tradeoff between compression and image quality. Higher values give more importance to distortion encouraging the model to produce reconstructed images with high quality at the expense of bit rate. Inversely, lower values of \(\lambda\) imply more compression and more data loss. CompressAI proposes eight pre-trained models with different values of \(\lambda\) represented by the argument \textsf{quality}. The correspondance between this argument and the value of \(\lambda\) is summarised in Table \ref{tab_quality_lambda}. It is important to note that the \textsf{quality} argument in compressAI also impacts the network architecture (number of channels and size of the latent space). Pre-trained models with \textsf{quality} lower or equal to 5 have 128 channels and a latent space with 192 dimensions. Other pre-trained models have 192 channels and a larger latent space with 320 components. 
+As experiments parameters are not disclosed in the paper, we use compressAI pre-trained models as our baseline comparison. For fair comparison, we match as best as we can the training method described in the compressAI documentation \cite{compressai_train}. Models were trained between 4 and 5 million steps on 256x256 image patches randomly extracted and cropped from the Vimeo90K dataset. The batch size is 16 or 32 (we choose 16). The initial learning rate is 1e-4 and decreases over time (it is divided by 2 when the evaluation loss reaches a plateau). Two different metrics can be used: MSE or MS-SSIM. We keep the default metric (i.e. MSE) which corresponds to using the following loss function: \(L = \lambda\, 255^{2}\, D + R\) with \(D\) and \(R\) respectively the mean distortion and the mean estimated bit rate. The parameter \(\lambda\) allows to adjust the tradeoff between compression and image quality. Higher values give more importance to distortion encouraging the model to produce reconstructed images with high quality at the expense of bit rate. Inversely, lower values of \(\lambda\) imply more compression and more data loss. CompressAI proposes eight pre-trained models with different values of \(\lambda\) denoted by the argument \textsf{quality}. The correspondance between this argument and the value of \(\lambda\) is summarised in Table \ref{tab_quality_lambda}. It is important to note that the \textsf{quality} argument in compressAI also impacts the network architecture (number of channels and size of the latent space). Pre-trained models with \textsf{quality} lower or equal to 5 have 128 channels and a latent space with 192 dimensions. Other pre-trained models have 192 channels and a larger latent space with 320 components. 
 
 \begin{table}[]
     \centering
@@ -51,7 +60,7 @@ Image compression deals with two caracteristics: image quality and bit rate. In 
 
 \acrshort{rd} curves are a common tool to compare compression codecs and \acrshort{nn} architectures in \acrshort{lic}. It consists in plotting the average distortion in function of the average bit rate evaluated on a set of images. Using a range of \acrshort{rd} tradeoffs allows to easily evaluate and compare the overall \acrshort{rd} performance of an architecture.
 
-These curves can then be used to compute the Bjøntegaard Deltas for both bit rate and image quality, respectively called BD-Rate and BD-\acrshort{psnr}. As explained in \cite{barman2024bjontegaarddeltabdtutorial}, these values represent bit rate and quality differences between two \acrshort{rd} curves (using \acrshort{psnr} as distortion metric) by measuring the area between the curves. % TODO: more details
+These curves can then be used to compute the Bjøntegaard Deltas for both bit rate and image quality, respectively called BD-Rate and BD-\acrshort{psnr}. As explained in \cite{barman2024bjontegaarddeltabdtutorial}, these values characterise bit rate and quality differences between two \acrshort{rd} curves (using \acrshort{psnr} as distortion metric) by measuring the area between the curves. % TODO: more details
 
 \section{State-of-the-art Results Reproduction}
 Reproducing state-of-the-art results is key as it guarantees that our work environnement and methods are correct. This also provides shared baseline results between papers and our work that can be used to compare our future results. This task is divided in two parts. First, we try to train a single model and compare it to other pre-trained models. Then we train several models in order to produce \acrshort{rd} curves.
@@ -63,17 +72,17 @@ First, we try a single inference with this newly trained model. Figure \ref{ball
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_diff.png}
+    \includegraphics[width=15cm]{../img/balle_repro_diff.png}
     \caption[Comparison of the reconstructed image with the original image.]{Comparison of the reconstructed image with the original image. At first glance, the reconstructed image (middle) looks very similar to the original (left). Further inspection using the difference between the two images (right) unveils the loss of details attributed to lossy image compression/decompression. As expected, parts of the image containing details are the most affected whereas plain areas are mostly untouched.}
     \label{balle_repro_1}
 \end{figure}
 
-We proceed to compare our model to traditional methods. In the following paragraphs, we used JPEG and Webp to math the performance of our \acrshort{nn} based solution. Figure \ref{balle_repro_2} shows encoding of the image at the same bit rate using different methods. It is clear that the \acrshort{nn} (top right) is the more accurate among the three methods used: JPEG introduces a lot of bloc artifacts and Webp does not retains as much details as the network, especially on the city buildings. This visual analysis is coherent with values of \acrshort{psnr}.
+We proceed to compare our model to traditional methods. In the following paragraphs, we used JPEG and Webp to math the performance of our \acrshort{nn}-based solution. Figure \ref{balle_repro_2} shows encoding of the image at the same bit rate using different methods. It is clear that the \acrshort{nn} (top right) is the more accurate among the three methods used: JPEG introduces a lot of bloc artifacts and Webp does not retains as much details as the network, especially on the city buildings. This visual analysis is coherent with values of \acrshort{psnr}.
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_bpp.png}
-    \caption[Comparison to classical codecs (quality comparison at similar bit rate).]{Comparison to classical codecs (quality comparison at similar bit rate). Both qualitative and quantitative analysis show that the \acrshort{nn} based approach is better than JPEG and Webp at a given bit rate.}
+    \includegraphics[width=15cm]{../img/balle_repro_bpp.png}
+    \caption[Comparison to classical codecs (quality comparison at similar bit rate).]{Comparison to classical codecs (quality comparison at similar bit rate). Both qualitative and quantitative analysis show that the \acrshort{nn}-based approach is better than JPEG and Webp at a given bit rate.}
     \label{balle_repro_2}
 \end{figure}
 
@@ -81,7 +90,7 @@ For the same distortion rate, our model has the smallest bit rate out of the thr
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_psnr.png}
+    \includegraphics[width=15cm]{../img/balle_repro_psnr.png}
     \caption[Comparison to classical codecs (bit rate coparison at similar PSNR).]{Comparison to classical codecs (bit rate coparison at similar PSNR). This experiment highlights the clear advantage of \acrshort{lic} when models are trained to prioritise rate. For the same image quality (\acrshort{psnr}), JPEG and Webp results require more \acrshort{bpp}.}
     \label{balle_repro_3}
 \end{figure}
@@ -92,14 +101,14 @@ Finally, we compare our model to other \acrshort{lic} models accessbible in the 
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_models.png}
+    \includegraphics[width=15cm]{../img/balle_repro_models.png}
     \caption[Comparison to other \acrshort{lic} models (image reconstruction).]{Comparison to other \acrshort{lic} models (image reconstruction). Our model retains more details from the original image than the other pre-trained models.}
     \label{balle_repro_4}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_rd_1.png}
+    \includegraphics[width=15cm]{../img/balle_repro_rd_1.png}
     \caption[Comparison to other \acrshort{lic} models (\acrshort{rd}).]{Comparison to other \acrshort{lic} models (\acrshort{rd}). Our version of the scale hyperprior model outperforms all other models in terms of image quality. However, when it comes to \acrshort{bpp}, it delivers poor performance on this specific image.}
     \label{balle_repro_5}
 \end{figure}
@@ -108,7 +117,7 @@ As evaluation on a single image is not representative, we also evaluate our scal
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/balle_repro_rd_2.png}
+    \includegraphics[width=15cm]{../img/balle_repro_rd_2.png}
     \caption[Comparison to pre-trained scale hyperprior models (\acrshort{rd}).]{Comparison to pre-trained scale hyperprior models (\acrshort{rd}). When properly compared to compressAI similar pre-trained models, our model reaches state-of-the-art \acrshort{rd} performance.}
     \label{balle_repro_6}
 \end{figure}
@@ -124,8 +133,8 @@ Let us start by passing a single image through the networks. The image from the 
 
 \begin{figure}[H]
     \centering
-    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_kodak_14.png} \label{bdpsnr_1:a}}}
-    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{img/bdpsnr_kodak_14_pretrained.png} \label{bdpsnr_1:b}}}
+    \subfloat[Our networks]{{\includegraphics[width=8.5cm]{../img/bdpsnr_kodak_14.png} \label{bdpsnr_1:a}}}
+    \subfloat[Pre-trained networks]{{\includegraphics[width=8.5cm]{../img/bdpsnr_kodak_14_pretrained.png} \label{bdpsnr_1:b}}}
     \caption[Reconstruction results on image 14 of the Kodak dataset for different \acrshort{rd} tradeoffs.]{Reconstruction results on image 14 of the Kodak dataset for different \acrshort{rd} tradeoffs. For a given \acrshort{rd} compromise, our models produce results visually similar to the pre-trained models. The level of detail increases with the value of \(\lambda\), highlighting the \acrshort{rd} tradeoff.}
     \label{bdpsnr_1}
 \end{figure}
@@ -134,7 +143,7 @@ We can produce \acrshort{rd} curve for this single image (Figure \ref{bdpsnr_2})
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/bdpsnr_rd_kodak_14.png}
+    \includegraphics[width=15cm]{../img/bdpsnr_rd_kodak_14.png}
     \caption[Rate-distortion curve for image 14 of the Kodak dataset.]{Rate-distortion curve for image 14 of the Kodak dataset. Our low bit rate models manage to perform on par with the pre-trained models on this image instance. This is not the case for higher bit rates where our models do not manage to maintain the quality of the image.}
     \label{bdpsnr_2}
 \end{figure}
@@ -143,7 +152,7 @@ It should be noted that the previous \acrshort{rd} curve corresponds to the resu
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{img/bdpsnr_rd.png}
+    \includegraphics[width=15cm]{../img/bdpsnr_rd.png}
     \caption[Average \acrshort{rd} curve on the Kodak dataset.]{Average \acrshort{rd} curve on the Kodak dataset. Overall, our models are not as good as the pre-trained models. Ours present higher bit rate for a lower measured image quality, especially for high bit rates.}
     \label{bdpsnr_3}
 \end{figure}

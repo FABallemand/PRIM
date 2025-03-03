@@ -161,7 +161,7 @@
 - Understand KD:
   - Read and create reading notes
   - Read Distilling the Knowledge in a Neural Network
-  - Read Microdosing: Knowledge Distillation for GAN based Compression
+  - Read Microdosing: Knowledge Distillation for GAN-based Compression
 
 ## 13/12/2024
 - Apply KD to AE:
@@ -172,7 +172,7 @@
   - Train student AE with KD
 - Understand KD:
   - Read and create reading notes
-  - Read Microdosing: Knowledge Distillation for GAN based Compression
+  - Read Microdosing: Knowledge Distillation for GAN-based Compression
 
 ## 14/12/2024
 - Understand KD:
