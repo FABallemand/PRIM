@@ -12,7 +12,12 @@ import torch.nn as nn
 from torchvision import transforms
 from pytorch_msssim import ms_ssim
 
-from compressai.zoo.image import bmshj2018_hyperprior
+from compressai.zoo.image import (
+    model_urls,
+    load_state_dict_from_url,
+    load_pretrained,
+    bmshj2018_hyperprior
+)
 
 from fvcore.nn import FlopCountAnalysis
 from zeus.monitor import ZeusMonitor
@@ -22,7 +27,7 @@ import pynvml
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from models import TeacherAE, StudentAE
+from models import ScaleHyperprior
 
 # Set-up PyTorch
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,7 +37,7 @@ plt.rcParams["axes.prop_cycle"] = plt.rcParams["axes.prop_cycle"][1:]
 
 # Create output directory
 time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-output_folder = f"/home/ids/fallemand-24/PRIM/kd_ae_test/test_res/{time_stamp}"
+output_folder = f"/home/ids/fallemand-24/PRIM/kd_lic_experiments/test_res/{time_stamp}"
 os.makedirs(output_folder)
 
 ###############################################################################
@@ -151,22 +156,44 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 M = 192
 
 # Load networks
-ids = [274518, 274520, 298339]
+
+# Wrong set of parameters
+# Ns = [128, 16, 32, 64, 96, 112]
+# ids = [None, 258263, 258258, 258259, 258262]
+
+# No RD loss
+# Ns = [128, 16, 32, 64, 96, 112]
+# ids = [None, 259782, 259783, 259784, 259785, 259786]
+
+# No RD loss (+ KL Div)
+# Ns = [128, 16, 32, 64, 96, 112, 112]
+# ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
+
+# RD loss
+Ns = [128, 16, 32, 64, 96, 112]
+ids = [None, 263674, 274457, 274461, 274464, 263691]
 
 networks = {
     "teacher": None,
-    "student": None,
-    "student_kd": None,
+    "student_16": None,
+    "student_32": None,
+    "student_64": None,
+    "student_96": None,
+    "student_112": None,
+    # "student_112_kl": None,
 }
 
-for name, id_ in zip(networks.keys(), ids):
+for name, N, id_ in zip(networks.keys(), Ns, ids):
     if name == "teacher":
-        net = TeacherAE()
+        url = model_urls["bmshj2018-hyperprior"]["mse"][5]
+        state_dict = load_state_dict_from_url(url, progress=False)
+        state_dict = load_pretrained(state_dict)
+        net = ScaleHyperprior.from_state_dict(state_dict).eval().to(DEVICE)
     else:
-        net = StudentAE()
-    checkpoint = torch.load(f"train_res/{id_}/checkpoint_best.pth.tar",
-        weights_only=True, map_location=torch.device("cpu"))
-    net.load_state_dict(checkpoint["state_dict"])
+        net = ScaleHyperprior(N, M)
+        checkpoint = torch.load(f"train_res/{id_}/checkpoint_best.pth.tar",
+            weights_only=True, map_location=torch.device("cpu"))
+        net.load_state_dict(checkpoint["state_dict"])
     networks[name] = net.eval().to(DEVICE)
 
 # Create dict for average metrics
@@ -192,9 +219,10 @@ for name, net in networks.items():
 # Load pre-trained networks
 pretrained_networks = {}
 
-for quality in range(1, 9):
+for quality in range(1, 6):
     net = bmshj2018_hyperprior(quality=quality,
                                pretrained=True).eval().to(DEVICE)
+
     pretrained_networks[f"{quality}"] = net
 
 # Create dict for pre-trained average metrics
@@ -275,12 +303,7 @@ for img_name in dataset_imgs:
         for name, net in networks.items():
             # Run inference
             start = time.time()
-            latent, x_hat = net(x)
-            out = {
-                "x_hat": x_hat,
-                "likelihoods": {"y": torch.ones_like(latent),
-                                "z": torch.ones_like(latent)}, # Placeholders...
-            }
+            out = net(x)
             stop = time.time()
             out["x_hat"].clamp_(0, 1)
 
