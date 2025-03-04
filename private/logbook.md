@@ -448,6 +448,16 @@
 - Report
 - Pending tests
 
+## 03/03/2025
+- Pending tests
+- Reports
+
+## 04/03/2025
+- Pending tests
+- Reports
+- Compare to codecs:
+  - Test with PIL
+
 ## TODO
 - Do LIC chapter 1
 - Name figures properly
