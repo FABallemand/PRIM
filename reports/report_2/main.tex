@@ -18,7 +18,7 @@
 % \usepackage{fancyhdr}
 % \pagestyle{fancy}
 \usepackage[backend=biber]{biblatex}
-\addbibresource{src/bibliography.bib}
+\addbibresource{src/references.bib}
 \usepackage{appendix}
 \usepackage{float}
 \usepackage{graphicx}
@@ -53,26 +53,6 @@
 \newcommand\emptypage{
     \null
     \newpage}
-
-% Command to create a glossary entry with correspondent acronym.
-% https://tex.stackexchange.com/questions/8946/how-to-combine-acronym-and-glossary
-% Args : 1: entry, 2: acronym/name, 3: long name, 4: description
-\newcommand{\newglossaryentrywithacronym}[4]{
-    %%% The glossary entry the acronym links to   
-    \newglossaryentry{#1_gls}{
-        name={#2},
-        long={#3},
-        description={#4}
-    }
-
-    % Acronym pointing to glossary
-    \newglossaryentry{#1}{
-        type=\acronymtype,
-        name={#2},
-        description={#3},
-        see=[Glossary:]{#1_gls}
-    }
-}
 
 \definecolor{LightGray}{gray}{0.9}
 

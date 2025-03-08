@@ -458,10 +458,11 @@
 - Compare to codecs:
   - Test with PIL
 
+## 07/03/2025
+- Reports
+
+## 08/03/2025
+- Reports
+
 ## TODO
-- Do LIC chapter 1
-- Name figures properly
-- Add BD metrics
-- Retrain TeacherAE and StudentAe for longer and do torchview for report (https://github.com/mert-kurttutan/torchview)
-- Remake pdf of first report (correct errors)
-- Do article (Our work on this topic can be summarised as follow: ...)
+- Do proper codecs testing/comparison

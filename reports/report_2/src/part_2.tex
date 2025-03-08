@@ -50,7 +50,7 @@ For reference, we show in Figure \ref{kd_ae_2} the \acrshort{rd} performance of 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../img/kd_ae_rd.png}
-    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels.]{Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels. Eventhough they were guided by a \acrshort{lic} model during their training, the student models poorly compares to state-of-the-art models in \acrshort{rd}.}
+    \caption[Average \acrshort{rd} performance on the Kodak dataset for students with different number of channels.]{Average \acrshort{rd} performance on the Kodak dataset for students with different number of channels. Eventhough they were guided by a \acrshort{lic} model during their training, the student models poorly compares to state-of-the-art models in \acrshort{rd}. (The pre-trained models are compressAI scale hyperperior models with \extsf{quality} from 1 to 8).}
     \label{kd_ae_2}
 \end{figure}
 
@@ -70,8 +70,12 @@ In this section aims at evaluating the \acrshort{rd} performance gain achievable
 \end{align}
 
 \begin{align}
-RD(\hat{y}_{student}, \hat{x}_{student}, x) &= -E[\log_{2}\hat{y}_{student} + \log_{2}\hat{z}_{student}] + \lambda\, MSE(\hat{x}_{student}, x)
+    RD(\hat{y}_{student}, \hat{x}_{student}, x) &= -E[\log_{2}\hat{y}_{student} + \log_{2}\hat{z}_{student}] + \lambda\, MSE(\hat{x}_{student}, x)
 \end{align}
+
+We also tried to use the Kullback-Leibler divergence instead of \acrshort{mse} loss function on the latent space but found that it resulted in slightly higher bit rates. Outcome of this experiment is exposed in Figure \ref{appendix:kd_lic_1_kld}.
+
+For easier comparison and because our study focuses on low bit rate image compression, we compare our results to compressAI pre-trained models with \textsf{quality} from 1 to 5.
 
 \subsubsection{Architecture Size Tradeoff}
 \label{architecture_size_tradeoff}
@@ -199,6 +203,23 @@ Most edge devices also have access to a limited amount of energy whether it is i
     \end{tabular}
     \caption[Consumed energy, \acrshort{psnr} and bit rate for teacher and student models.]{Consumed energy, \acrshort{psnr} and bit rate for teacher and student models.}
     \label{tab_energy}
+\end{table}
+
+% Please add the following required packages to your document preamble:
+% \usepackage[table,xcdraw]{xcolor}
+% Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+\begin{table}[]
+    \centering
+    \begin{tabular}{|c|r|r|r|}
+    \hline
+    Codec     & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Energy\\ {[}mJ/frame{]}\end{tabular}} & \multicolumn{1}{c|}{PSNR} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Bit rate\\ {[}bpp{]}\end{tabular}} \\ \hline
+    JPEG      & 843.39                                                                               & 26.65                     & 0.33                                                                              \\ \hline
+    JPEG 2000 & 2894.59                                                                              & 70.00                     & 13.45                                                                             \\ \hline
+    PNG       & 2642.24                                                      & 70.00                     & 13.51                                                                             \\ \hline
+    Webp      & 663.84                                                                               & 29.15                     & 0.30                                                                              \\ \hline
+    \end{tabular}
+    \caption[Consumed energy, \acrshort{psnr} and bit rate for different codecs.]{Consumed energy, \acrshort{psnr} and bit rate for different codecs.}
+    \label{tab_codecs}
 \end{table}
 
 This section is a deep dive into the resource consumption of standard and knowledge distilled models. Based on measures of memory usage, required computing power and energy consumption on students architectures with varying number of channels, we prove that \acrshort{kd} indeed create frugal models. In all experiments, our \acrshort{kd} models consume less resources that standard models at a (sometimes negligeable) cost in \acrshort{rd} performance. On a not-too-constrained platform, we would recommand the use of the student with 64 channels. It has a limited use of resources without noticeable impact on image compression.
