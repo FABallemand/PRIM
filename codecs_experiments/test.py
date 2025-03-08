@@ -32,9 +32,19 @@ os.makedirs(output_folder)
 ## Utils ######################################################################
 ###############################################################################
 
-def pillow_encode(img, fmt="jpeg", quality=10):
+# def pillow_encode(img, fmt="jpeg", quality=10):
+#     tmp = io.BytesIO()
+#     img.save(tmp, format=fmt, quality=quality)
+#     tmp.seek(0)
+#     filesize = tmp.getbuffer().nbytes
+#     bpp = filesize * float(8) / (img.size[0] * img.size[1])
+#     rec = Image.open(tmp)
+#     return rec, bpp
+
+
+def pillow_encode(img, fmt="jpeg", params=None):
     tmp = io.BytesIO()
-    img.save(tmp, format=fmt, quality=quality)
+    img.save(tmp, format=fmt, **params)
     tmp.seek(0)
     filesize = tmp.getbuffer().nbytes
     bpp = filesize * float(8) / (img.size[0] * img.size[1])
@@ -198,8 +208,14 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 ## Codecs #####################################################################
 ###############################################################################
 
-# List of codecs
-codecs = ["jpeg", "jpeg2000", "webp", "png"]
+# Codecs
+jpeg_codecs = {f"jpeg_{quality}": {"quality": quality}
+               for quality in range(0, 96, 5)}
+webp_codecs = {f"webp_{quality}_{speed}": {"quality": quality, "speed": speed}
+               for quality in range(0, 101, 5) for speed in range(0, 7, 1)}
+jpeg2000_codecs = {"jpeg2000_rates": {"quality_mode": "rates"},
+                   "jpeg2000_dB": {"quality_mode": "dB"}}
+codecs = jpeg_codecs | webp_codecs | jpeg2000_codecs
 
 # Create dict for average metrics
 avg_metrics = {}
@@ -253,10 +269,10 @@ for img_name in dataset_imgs:
     outputs = {}
     metrics = {}
     with torch.no_grad():
-        for codec in codecs:
+        for codec, params in codecs.items():
             # Compression
             start = time.time()
-            out, bpp = pillow_encode(img, codec)
+            out, bpp = pillow_encode(img, codec.split("_")[0], params)
             stop = time.time()
 
             # Save output
@@ -287,31 +303,32 @@ for img_name in dataset_imgs:
 ## Plots (single image) #######################################################
 ###############################################################################
 
-    reconstructions = {codec: out
-                       for codec, out in outputs.items()}
+    if img_name == "kodim14.png":
+        reconstructions = {codec: out
+                        for codec, out in outputs.items()}
 
-    diffs = [torch.mean((transforms.ToTensor()(out).unsqueeze(0) - x).abs(), axis=1).squeeze()
-             for out in outputs.values()]
+        diffs = [torch.mean((transforms.ToTensor()(out).unsqueeze(0) - x).abs(), axis=1).squeeze()
+                for out in outputs.values()]
 
-    # Compare codecs
-    n_rows = math.ceil((len(reconstructions) + 1) / 3)
-    n_cols = 3
-    fig, axs = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
-    for ax in axs.ravel():
-        ax.axis("off")
+        # Compare codecs
+        n_rows = math.ceil((len(reconstructions) + 1) / 3)
+        n_cols = 3
+        fig, axs = plt.subplots(n_rows, n_cols, figsize=(n_cols*3, n_rows*3))
+        for ax in axs.ravel():
+            ax.axis("off")
 
-    axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
-    axs.ravel()[0].title.set_text("Original")
+        axs.ravel()[0].imshow(img.crop((468, 212, 768, 512)))
+        axs.ravel()[0].title.set_text("Original")
 
-    for i, (codec, out) in enumerate(reconstructions.items()):
-        axs.ravel()[i + 1].imshow(out.crop((468, 212, 768, 512))) # cropped for easy comparison
-        axs.ravel()[i + 1].title.set_text(codec)
+        for i, (codec, out) in enumerate(reconstructions.items()):
+            axs.ravel()[i + 1].imshow(out.crop((468, 212, 768, 512))) # cropped for easy comparison
+            axs.ravel()[i + 1].title.set_text(codec)
 
-    fig.tight_layout()
+        fig.tight_layout()
 
-    plt.savefig(os.path.join(output_folder,
-                             f"codecs_{dataset_name}_{img_name}.png"))
-    plt.close()
+        plt.savefig(os.path.join(output_folder,
+                                f"codecs_{dataset_name}_{img_name}.png"))
+        plt.close()
 
 ###############################################################################
 ## Metrics (average) ##########################################################
@@ -332,13 +349,13 @@ for img_codec in dataset_imgs:
 zeus_monitor = ZeusMonitor(approx_instant_energy=False)
 
 # Iterate over codecs
-for codec in codecs:
+for codec, params in codecs.items():
     # Iterate over images
     zeus_monitor.begin_window("compression")
     for _ in range(DATASET_ITER):
         for x in loaded_dataset_imgs:
             # Compression
-            pillow_encode(img, codec)
+            pillow_encode(img, codec.split("_")[0], params)
     mes = zeus_monitor.end_window("compression")
 
     sec_per_frame = (mes.time / (DATASET_ITER * len(loaded_dataset_imgs)))
@@ -351,14 +368,14 @@ pynvml.nvmlInit()
 handle = pynvml.nvmlDeviceGetHandleByIndex(0) # First GPU
 
 # Iterate over networks
-for codec in codecs:
+for codec, params in codecs.items():
     start_time = time.time()
     start_energy = pynvml.nvmlDeviceGetTotalEnergyConsumption(handle)
     # Iterate over images
     for _ in range(DATASET_ITER):
         for x in loaded_dataset_imgs:
             # Compression
-            pillow_encode(img, codec)
+            pillow_encode(img, codec.split("_")[0], params)
     torch.cuda.synchronize()  # Synchronizes CPU and GPU time.
     elapsed_time = time.time() - start_time
     consumed_energy = pynvml.nvmlDeviceGetTotalEnergyConsumption(handle) - start_energy

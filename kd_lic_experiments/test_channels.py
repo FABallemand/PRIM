@@ -169,7 +169,7 @@ M = 192
 # Ns = [128, 16, 32, 64, 96, 112, 112]
 # ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
 
-# RD loss
+# RD loss (latent = MSE)
 Ns = [128, 16, 32, 64, 96, 112]
 ids = [None, 263674, 274457, 274461, 274464, 263691]
 
@@ -180,8 +180,18 @@ networks = {
     "student_64": None,
     "student_96": None,
     "student_112": None,
-    # "student_112_kl": None,
 }
+
+# RD loss (latent = KLD)
+# Ns = [128, 16, 64, 112]
+# ids = [None, 299061, 299062, 299063]
+
+# networks = {
+#     "teacher": None,
+#     "student_16": None,
+#     "student_64": None,
+#     "student_112": None,
+# }
 
 for name, N, id_ in zip(networks.keys(), Ns, ids):
     if name == "teacher":
