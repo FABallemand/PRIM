@@ -26,6 +26,8 @@ def model_memory_size(model):
 
 \acrshort{flop}s are measured once per model using the \textsf{FlopCountAnalysis} from the fvcore library. We use two liraries to compute the inference time and energy consumption of the models: pynvml and zeus. By iterating 50 times through the test dataset images loaded on the same Nvidia RTX 3090 GPU beforehand, we are able to achieve meaningful average values per frame. Both libraries present similar results and we ultimatly chose the zeus library for our final results. The value of inference time per frame is used to compute the model througput.
 
+In Section \ref{application_resource_contrained_platforms}, we use the PIL Python library to convert images from the Kodak dataset to JPEG-2000, JPEG and Webp. We follow the same method as for evaluating \acrshort{nn}s.
+
 \chapter{Figures}
 
 \begin{figure}
@@ -121,3 +123,24 @@ def model_memory_size(model):
     \caption[Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.]{Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.}
     \label{appendix:tab_resources}
 \end{sidewaystable}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{../img/codecs_rd.png}
+    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels and codecs.]{Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels and codecs.}
+    \label{appendix:codecs_rd}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{../img/codecs_fps.png}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs throughput.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs throughput.}
+    \label{appendix:codecs_fps}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{../img/codecs_energy.png}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs consumed energy.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs consumed energy.}
+    \label{appendix:codecs_energy}
+\end{figure}

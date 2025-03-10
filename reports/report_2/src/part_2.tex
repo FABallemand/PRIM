@@ -16,7 +16,7 @@ Exposed in Figure \ref{kd_ae_test_1} are the first results obtained. While medio
 
 \begin{figure}
     \centering
-    \includegraphics[width=15cm]{../img/kd_ae_test_1.png}
+    \includegraphics[width=10cm]{../img/kd_ae_test_1.png}
     \caption[Image reconstruction comparison of teacher and student architectures.]{Image reconstruction comparison of teacher and student architectures. In this experiment, the teacher (top row) converged to a degenerate solution. The student architecture without \acrshort{kd} (middle row) did not collapse and reach a \acrshort{mse} of 0.004 on this sample. When trained by the underperforming teacher, the student architecture (bottom row) suffers a performance loss: the \acrshort{mse} increases to 0.020. The impact of \acrshort{kd} is very noticable: the reconstructed image lacks details and is darker.}
     \label{kd_ae_test_1}
 \end{figure}
@@ -83,7 +83,7 @@ The objective of \acrshort{kd} is to improve the performance of small models usi
 
 Unsurprisingly, using \acrshort{RD} loss yields far better results for image compression. Contrary to similar models trained with \acrshort{mse} only (Section \ref{scale_hyperprior_ae}), these new models can be found in the same operational \acrshort{rd} area as state-of-the-art models (Figure \ref{kd_lic_1}).
 
-Results depicted in Figure \ref{kd_lic_1} follow our intuition. Students with larger number of channels (i.e. 64, 96 and 112) take full advantage of \acrshort{kd} and reach roughly the same \acrshort{bpp} and \acrshort{psnr} as the teacher. Models with 16 and 32 channels cannot reach the same level of image quality. Both of them end up far behind pre-trained models in \acrshort{rd} performance and results in higher \acrshort{mse} error (Figure \ref{kd_lic_2:b}). Eventhough they produce visually impressive results (see Figure \ref{kd_lic_2:a}) for models with so few parameters, they are not relevant candidates when taking into account only \acrshort{rd} performance. The number of channels definitely impact the output quality in extreme scenarios (e.g. very few channels) but can be reduced to some extend without degrading image quality.
+Results depicted in Figure \ref{kd_lic_1} follow our intuition. Students with larger number of channels (i.e. 64, 96 and 112) take full advantage of \acrshort{kd} and reach roughly the same \acrshort{bpp} and \acrshort{psnr} as the teacher. Models with 16 and 32 channels cannot reach the same level of image quality. Both of them end up far behind pre-trained models in \acrshort{rd} performance and results in higher \acrshort{mse} error (Figure \ref{kd_lic_2:b}). Eventhough they produce visually impressive results (Figure \ref{kd_lic_2:a}) for models with so few parameters, they are not relevant candidates when taking into account only \acrshort{rd} performance. The number of channels definitely impact the output quality in extreme scenarios (e.g. very few channels) but can be reduced to some extend without degrading image quality.
 
 \begin{figure}
     \centering
@@ -205,20 +205,24 @@ Most edge devices also have access to a limited amount of energy whether it is i
     \label{tab_energy}
 \end{table}
 
-% Please add the following required packages to your document preamble:
-% \usepackage[table,xcdraw]{xcolor}
-% Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+In order to put our results into context, we also measured throughput, energy consumption, \acrshort{psnr} and bit rate for three image compression codecs, namely: JPEG-2000, JPEG and Webp. The first row of Table \ref{tab_energy} shows that JPEG-2000 is not suited for our application due to its emphasis on image quality. The bit rate and energy consumption are to high. In addition to this, the throughput is very low making it unusable in real-time. Our experiments show that studied \acrshort{lic} models outperform JPEG and Webp in \acrshort{rd} (Figure \ref{appendix:codecs_rd}). Both JPEG and Webp could be used in real-time albeit at a lower frame rate than our \accrhort{nn}s (Figure \ref{appendix:codecs_fps}). However, when it comes to energy consumption, the superiority of \acrshort{lic} models is challenged: JPEG achieves better \acrshort{psnr} and bit rate with less energy (Figure \ref{appendix:codecs_energy}). This brief comparison with traditional codecs show that \acrshort{lic} models, and especially our distilled models, are relevant candidates for real-time image compression on resource constrained platforms. These models propose an interesting compromise between throughput, energy consumption and quality of image compression.
+
 \begin{table}[]
     \centering
-    \begin{tabular}{|c|r|r|r|}
-    \hline
-    Codec     & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Energy\\ {[}mJ/frame{]}\end{tabular}} & \multicolumn{1}{c|}{PSNR} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Bit rate\\ {[}bpp{]}\end{tabular}} \\ \hline
-    JPEG      & 843.39                                                                               & 26.65                     & 0.33                                                                              \\ \hline
-    JPEG 2000 & 2894.59                                                                              & 70.00                     & 13.45                                                                             \\ \hline
-    PNG       & 2642.24                                                      & 70.00                     & 13.51                                                                             \\ \hline
-    Webp      & 663.84                                                                               & 29.15                     & 0.30                                                                              \\ \hline
-    \end{tabular}
-    \caption[Consumed energy, \acrshort{psnr} and bit rate for different codecs.]{Consumed energy, \acrshort{psnr} and bit rate for different codecs.}
+    \begin{tabular}{|c|r|r|r|r|}
+        \hline
+        Codec                  & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Throughput\\ {[}FPS{]}\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Energy\\ {[}mJ/frame{]}\end{tabular}} & \multicolumn{1}{c|}{PSNR}                            & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Bit rate\\ {[}bpp{]}\end{tabular}} \\ \hline
+        JPEG 2000              & 10.15                                                                               & 2308.87                                                                              & 70.0                                                 & 13.45                                                                             \\ \hline
+                               & 130.12                                                                              & \cellcolor[HTML]{32CB00}185.84                                                       & 26.65                                                & 0.33                                                                              \\ \cline{2-5} 
+                               & \cellcolor[HTML]{32CB00}134.30                                                      & \cellcolor[HTML]{CB0000}804.04                                                       & \cellcolor[HTML]{CB0000}21.41                        & \cellcolor[HTML]{32CB00}0.17                                                      \\ \cline{2-5} 
+        \multirow{-3}{*}{JPEG} & \cellcolor[HTML]{CB0000}86.51                                                       & 274.94                                                                               & \cellcolor[HTML]{32CB00}{\color[HTML]{333333} 40.55} & \cellcolor[HTML]{CB0000}3.40                                                      \\ \hline
+                               & \cellcolor[HTML]{CB0000}19.11                                                       & 1216.75                                                                              & 43.03                                                & 3.85                                                                              \\ \cline{2-5} 
+                               & \cellcolor[HTML]{32CB00}39.61                                                       & 603.38                                                                               & 25.85                                                & 0.11                                                                              \\ \cline{2-5} 
+                               & 39.56                                                                               & \cellcolor[HTML]{32CB00}{\color[HTML]{333333} 595.61}                                & \cellcolor[HTML]{CB0000}25.85                        & \cellcolor[HTML]{32CB00}0.11                                                      \\ \cline{2-5} 
+                               & 19.12                                                                               & 1220.86                                                                              & \cellcolor[HTML]{32CB00}43.03                        & \cellcolor[HTML]{CB0000}3.85                                                      \\ \cline{2-5} 
+        \multirow{-5}{*}{Webp} & 19.14                                                                               & \cellcolor[HTML]{CB0000}1232.84                                                      & 43.03                                                & 3.85                                                                              \\ \hline
+        \end{tabular}
+    \caption[Throughput, consumed energy, \acrshort{psnr} and bit rate for different codecs.]{Consumed energy, \acrshort{psnr} and bit rate for different codecs.}
     \label{tab_codecs}
 \end{table}
 
