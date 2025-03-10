@@ -431,14 +431,14 @@ for img_name in dataset_imgs:
     # pretrained_brs = [m["bit-rate"] for _, m in pretrained_metrics.items()]
 
     # psnrs = [m["psnr"] for _, m in metrics.items()]
-    # # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="proposed")
+    # # axs[0].plot(brs, psnrs, "red", linestyle="--", linewidth=1, label="ours")
 
     # pretrained_psnrs = [m["psnr"] for _, m in pretrained_metrics.items()]
     # axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
     #             linewidth=1, label="pre-trained")
 
     # msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in metrics.items()]
-    # # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="proposed")
+    # # axs[1].plot(brs, msssim, "red", linestyle="--", linewidth=1, label="ours")
 
     # pretrained_msssim = [-10*np.log10(1-m["ms-ssim"]) for _, m in pretrained_metrics.items()]
     # axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
@@ -585,7 +585,7 @@ for name in pretrained_networks:
     pretrained_avg_metrics[name]["bit-rate"] = np.average(pretrained_avg_metrics[name]["bit-rate"])
 
 # Save average metrics
-all_avg_metrics = {"proposed": avg_metrics, "pretrained": pretrained_avg_metrics}
+all_avg_metrics = {"ours": avg_metrics, "pretrained": pretrained_avg_metrics}
 with open(os.path.join(output_folder,
                        f"avg_metrics_{dataset_name}.json"),
                        "w", encoding="utf-8") as f:

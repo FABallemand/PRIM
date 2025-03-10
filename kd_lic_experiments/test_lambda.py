@@ -159,14 +159,14 @@ M = 192
 # Load networks
 
 # RD loss - teacher quality 5
-# lmbdas = [0.0250, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
-# ids = [None, 280392, 281662, 281976, 281979, 274461]
-# TEACHER_QUALITY = 5
+lmbdas = [0.0250, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
+ids = [None, 280392, 281662, 281976, 281979, 274461]
+TEACHER_QUALITY = 5
 
 # RD loss - teacher quality 1
-lmbdas = [0.0018, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
-ids = [None, 289751, 295889, 289745, 296544, 289742]
-TEACHER_QUALITY = 1
+# lmbdas = [0.0018, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
+# ids = [None, 289751, 295889, 289745, 296544, 289742]
+# TEACHER_QUALITY = 1
 
 networks = {
     "teacher": None,
