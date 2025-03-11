@@ -464,5 +464,9 @@
 ## 08/03/2025
 - Reports
 
+## 08/03/2025
+- Compare to codecs
+- Reports
+
 ## TODO
 - Do proper codecs testing/comparison

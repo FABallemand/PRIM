@@ -27,26 +27,19 @@ For this project, we selected the scale hyperprior model introduced in 2018 by B
     \label{kd_lic_2}
 \end{figure}
 
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=8cm]{../img/scale_hyperprior_1.png}
-%     \caption[Diagram showing the operational structure of the scale hyperprior compression model.]{Diagram showing the operational structure of the scale hyperprior compression model. Arrows indicate the flow of data, and boxes represent transformations of the data. Boxes labeled U | Q represent either addition of uniform noise applied during training (producing vectors labeled with a tilde), or quantization and arithmetic coding/decoding during testing (producing vectors labeled with a hat).}
-%     \label{scale_hyperprior_1}
-% \end{figure}
-
 \subsection{Training Method}
 \label{training_method}
 As experiments parameters are not disclosed in the paper, we use compressAI pre-trained models as our baseline comparison. For fair comparison, we match as best as we can the training method described in the compressAI documentation \cite{compressai_train}. Models were trained between 4 and 5 million steps on 256x256 image patches randomly extracted and cropped from the Vimeo90K dataset. The batch size is 16 or 32 (we choose 16). The initial learning rate is 1e-4 and decreases over time (it is divided by 2 when the evaluation loss reaches a plateau). Two different metrics can be used: MSE or MS-SSIM. We keep the default metric (i.e. MSE) which corresponds to using the following loss function: \(L = \lambda\, 255^{2}\, D + R\) with \(D\) and \(R\) respectively the mean distortion and the mean estimated bit rate. The parameter \(\lambda\) allows to adjust the tradeoff between compression and image quality. Higher values give more importance to distortion encouraging the model to produce reconstructed images with high quality at the expense of bit rate. Inversely, lower values of \(\lambda\) imply more compression and more data loss. CompressAI proposes eight pre-trained models with different values of \(\lambda\) denoted by the argument \textsf{quality}. The correspondance between this argument and the value of \(\lambda\) is summarised in Table \ref{tab_quality_lambda}. It is important to note that the \textsf{quality} argument in compressAI also impacts the network architecture (number of channels and size of the latent space). Pre-trained models with \textsf{quality} lower or equal to 5 have 128 channels and a latent space with 192 dimensions. Other pre-trained models have 192 channels and a larger latent space with 320 components. 
 
 \begin{table}[]
     \centering
+    \caption{Correspondance between the argument \textsf{quality} in compressAI and the value of \(\lambda\) when using MSE.}
+    \label{tab_quality_lambda}
     \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
     \hline
     \textsf{quality}             & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\ \hline
     Value of \(\lambda\) for MSE & 0.0018 & 0.0035 & 0.0067 & 0.0130 & 0.0250 & 0.0483 & 0.0932 & 0.1800 \\ \hline
     \end{tabular}
-    \caption{Correspondance between the argument \textsf{quality} in compressAI and the value of \(\lambda\) when using MSE.}
-    \label{tab_quality_lambda}
 \end{table}
 
 \subsection{Testing Method}
