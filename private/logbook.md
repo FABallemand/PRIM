@@ -468,5 +468,18 @@
 - Compare to codecs
 - Reports
 
+## 09/03/2025
+- Reports
+
+## 10/03/2025
+- Reports
+
+## 11/03/2025
+- Reports
+
+## 12/03/2025
+- Reports
+- Final presentation
+
 ## TODO
-- Do proper codecs testing/comparison
+- Report: replace fig by bar plots with correct colors for teacher and models

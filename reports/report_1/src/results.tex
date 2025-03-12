@@ -43,7 +43,7 @@ After training we can evaluate our model. First, we try a single inference with 
     \label{balle_repro_1}
 \end{figure}
 
-Figure \ref{balle_repro_2} shows encoding of the image at the same bit rate using different methods. It is clear that the network is the more accurate among the three methods used: the reconstructed image is closer to the original image. JPEG introduces a lot of artifacts (blocs) and Webp does not retains as much details as the network, especially in the water.
+Figure \ref{balle_repro_2} shows encoding of the image at the same bit rate using different methods. It is clear that the network is the more accurate among the three methods used: the reconstructed image is closer to the original image. JPEG introduces a lot of artifacts (blocs) and WepP does not retains as much details as the network, especially in the water.
 
 \begin{figure}
     \centering
@@ -52,7 +52,7 @@ Figure \ref{balle_repro_2} shows encoding of the image at the same bit rate usin
     \label{balle_repro_2}
 \end{figure}
 
-For the same distortion rate, our model has the smallest bit rate out of the three methods, that is to say: for the same visual quality, measured by the \acrfull{psnr}, the image is more compressed. Figure \ref{balle_repro_3} shows that it achieves less than 0.5 bits per pixel whereas traditional compression methods like Webp or JPEG achieve respectively 0.698 and 1.054 bit per pixels.
+For the same distortion rate, our model has the smallest bit rate out of the three methods, that is to say: for the same visual quality, measured by the \acrfull{psnr}, the image is more compressed. Figure \ref{balle_repro_3} shows that it achieves less than 0.5 bits per pixel whereas traditional compression methods like WepP or JPEG achieve respectively 0.698 and 1.054 bit per pixels.
 
 \begin{figure}
     \centering
@@ -86,7 +86,7 @@ Finally, we compare our models to other \acrshort{lic} models accessbible in the
     \label{balle_repro_6}
 \end{figure}
 
-This section show that we are able to train a \acrshort{lic} model that can compress and reconstruct images while mostly preserving its content. Our models perform better than deterministic codecs like JPEG or Webp but our models does not produce the same results as the pre-trained ones. It should be noted that, at this point, we are mainly checking if training is working properly on the GPU cluster and that we are now comparing models that were trained differently. Next section focuses more on the models parameters and the impact on the bit rate/distortion tradeoff.
+This section show that we are able to train a \acrshort{lic} model that can compress and reconstruct images while mostly preserving its content. Our models perform better than deterministic codecs like JPEG or WepP but our models does not produce the same results as the pre-trained ones. It should be noted that, at this point, we are mainly checking if training is working properly on the GPU cluster and that we are now comparing models that were trained differently. Next section focuses more on the models parameters and the impact on the bit rate/distortion tradeoff.
 
 \subsection{Rate-Distortion Curves}
 Using the training script provided by compressAI and following the same method, we train 8 different models: one for each value of \textsf{quality}. That is to say, one for each couple of \(\lambda\) value and corresponding model architecture. However, to quickly achieve comparable results, we limit the number of epochs to 65, just under what the GPU cluster is able to compute in 24 hours.
