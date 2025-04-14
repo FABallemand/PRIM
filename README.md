@@ -34,6 +34,7 @@ PRIM/
 - [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736)
 - [The Devil Is in the Details: Window-based Attention for Image Compression](https://arxiv.org/abs/2203.08450)
 - [A Survey on Visual Transformer](https://arxiv.org/abs/2012.12556)
+- [Learned Image Compression with Mixed Transformer-CNN Architectures](https://arxiv.org/abs/2303.14978)
 
 ### Knowledge Distillation
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)

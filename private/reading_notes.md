@@ -76,6 +76,15 @@ Driven by the interest of the machine learning and image processing communities 
 
 Inspired by success of autoregressive prior in generative models, the authors of ... extend their previous work (Variational Image Compression with a Scale Hyperprior [CITE]). They generalise hierarchical Gaussian Scale Mixture model to Gaussian Mixture model and add an autoregressive component. The autoregressive components captures the context of each pixel, that is to say is allows the model to find spacial dependencies in the image leading to improved image reconstruction. The authors highlight the fact that dimensionality reduction is different from compression which consists in reducing the entropy of the representation under a prior probability model shared between the sender and the receiver, not only the dimensionality. Experimental results show that the end-to-end optimisation of the model can learn the optimal bottleneck size: if the bottleneck size is large enough, the same latent value is generated and a probability of 1 is assigned for useless channels. This wastes computation but requires no additional entropy. Conversely, small sizes of bottleneck can impact rate-distortion performance. When optimised for MS-SSIM, the proposed model outperforms all conventional and NN-based methods in both PSNR and MS-SSIM (including BPG) in RD performance as well as visual results.
 
+### [Learned Image Compression with Mixed Transformer-CNN Architectures](https://arxiv.org/abs/2303.14978)
+- Most existing LIC methods are CNN or tansformer based
+- Each method has its advantage (CNN -> lcoal modeling, transformer -> non-local modeling)
+- Questions: how to fuse networks? how to achieve higher perf with suitable complexity?
+- Introduce Transformer-CNN Mix (TCM) block with controllable complexity
+- LIC model that has both local and non-local modeling abilities
+- Also introduce a channel-wise entropy model with parameter-efficient swin-transformer-based attention (SWAtten) modules by using channel squeezing (???)
+- SOTA results if not better!
+
 ## Knowledge Distillation
 
 ### [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)

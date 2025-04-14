@@ -481,5 +481,17 @@
 - Reports
 - Final presentation
 
+## 11/04/2025
+- Generate better barplots (correct colors)
+- Try to fix cluster
+
+## 14/04/2025
+- GPU cluster (error with 3090 partition only...)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE, lmbda=(0.3, 0.3, 0.4))
+  - 319228 (16)
+  - 319229 (32)
+  - 319230 (64)
+  - 319231 (96)
+  - 319233 (112)
+
 ## TODO
-- Report: replace fig by bar plots with correct colors for teacher and models
