@@ -104,31 +104,16 @@ def make(config):
     student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
 
     # Create loss
-    if config.loss == "MSE":
-        if config.latent_loss == "MSE":
-            criterion = KDLoss_MSE(latent=True)
-        elif config.latent_loss == "KLD":
-            criterion = KDLoss_KLD(latent=True)
-        elif config.latent_loss == None:
-            criterion = KDLoss_MSE(latent=False)
-        else:
-            raise ValueError("Invalid latent loss")
-    elif config.loss == "RD":
-        if config.latent_loss == "MSE":
-            criterion = KDLoss_RD_MSE(latent=True, rd_lmbda=config.rd_lmbda)
-        elif config.latent_loss == "KLD":
-            criterion = KDLoss_RD_KLD(latent=True, rd_lmbda=config.rd_lmbda)
-        elif config.latent_loss == None:
-            criterion = KDLoss_RD_MSE(latent=False)
-        else:
-            raise ValueError("Invalid latent loss")
+    if config.criterion == "KDLoss_RD_MSE":
+        criterion = KDLoss_RD_MSE(config.kd_l_lmbda, config.kd_hl_lmbda,
+                                  config.kd_o_lmbda, config.o_lmbda,
+                                  config.rd_lmbda)
+    elif config.criterion == "KDLoss_RD_KLD":
+        criterion = KDLoss_RD_KLD(config.kd_l_lmbda, config.kd_hl_lmbda,
+                                  config.kd_o_lmbda, config.o_lmbda,
+                                  config.rd_lmbda)
     else:
-        raise ValueError("Invalid loss")
-
-    # Set criterion parameters
-    criterion.lmbda_1 = config.lmbda_1
-    criterion.lmbda_2 = config.lmbda_2
-    criterion.lmbda_3 = config.lmbda_3
+        raise ValueError("Invalid criterion")
 
     # Create optimizer
     optimizer = torch.optim.Adam(student_model.parameters(),
@@ -156,8 +141,11 @@ def train_epoch(
         # Forward pass
         teacher_output = teacher_model(teacher_x)
         student_output = student_model(student_x)
-        loss, loss_dict = criterion(student_output, teacher_output["y_hat"].to(student_device),
-                                    teacher_output["x_hat"].to(student_device), student_x)
+        loss, loss_dict = criterion(student_output,
+                                    teacher_output["y_hat"].to(student_device),
+                                    teacher_output["z_hat"].to(student_device),
+                                    teacher_output["x_hat"].to(student_device),
+                                    student_x)
 
         # Backward pass
         optimizer.zero_grad()
@@ -191,6 +179,7 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion, conf
     # Init measures
     avg_loss = AverageMeter()
     avg_latent_kd_loss = AverageMeter()
+    avg_hyper_latent_kd_loss = AverageMeter()
     avg_output_kd_loss = AverageMeter()
     if config.loss == "RD":
         avg_rd_loss = AverageMeter()
@@ -211,11 +200,15 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion, conf
             # Forward pass
             teacher_output = teacher_model(teacher_x)
             student_output = student_model(student_x)
-            loss, loss_dict = criterion(student_output, teacher_output["y_hat"].to(student_device),
-                                        teacher_output["x_hat"].to(student_device), student_x)
+            loss, loss_dict = criterion(student_output,
+                                    teacher_output["y_hat"].to(student_device),
+                                    teacher_output["z_hat"].to(student_device),
+                                    teacher_output["x_hat"].to(student_device),
+                                    student_x)
             # Update measures
             avg_loss.update(loss_dict["loss"])
             avg_latent_kd_loss.update(loss_dict["latent_kd_loss"])
+            avg_hyper_latent_kd_loss.update(loss_dict["hyper_latent_kd_loss"])
             avg_output_kd_loss.update(loss_dict["output_kd_loss"])
             if config.loss == "RD":
                 avg_rd_loss.update(loss_dict["rd_loss"])
@@ -233,6 +226,7 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion, conf
             "epoch": epoch,
             "validation_loss": avg_loss.avg,
             "validation_latent_kd_loss": avg_latent_kd_loss.avg,
+            "validation_hyper_latent_kd_loss": avg_hyper_latent_kd_loss.avg,
             "validation_output_kd_loss": avg_output_kd_loss.avg,
             "validation_rd_loss": avg_rd_loss.avg,
             "validation_mse_loss": avg_mse_loss.avg,
@@ -246,6 +240,7 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion, conf
             "epoch": epoch,
             "validation_loss": avg_loss.avg,
             "validation_latent_kd_loss": avg_latent_kd_loss.avg,
+            "validation_hyper_latent_kd_loss": avg_hyper_latent_kd_loss.avg,
             "validation_output_kd_loss": avg_output_kd_loss.avg,
             "validation_output_loss": avg_output_loss.avg,
             "validation_psnr": avg_psnr.avg,
@@ -343,7 +338,7 @@ def test(student_model, data_loader, config):
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_kd_experiments_kd_lagrangian", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_dkd_experiments", config=config):
         # Access config
         config = wandb.config
         print(config)
@@ -370,18 +365,18 @@ if __name__ == "__main__":
     config = dict(
         job_id=job_id,
         dataset="Vimeo90K",
-        N_student=64,
+        N_student=16,
         M=192,
         teacher_quality=5,
         epochs=1000,
         batch_size=16,
         learning_rate=1e-4,
-        lmbda_1=0.1, # 0.2
-        lmbda_2=0.1, # 0.2
-        lmbda_3=0.8, # 0.6
-        loss="RD",
+        criterion="KDLoss_RD_MSE",
+        kd_l_lmbda=0.2, # 0.2
+        kd_hl_lmbda=0.2, # 0.2
+        kd_o_lmbda=0.2, # 0.2
+        o_lmbda=0.4, # 0.4
         rd_lmbda=0.025,
-        latent_loss="MSE",
         save_path=f"train_res/{job_id}"
     )
 
@@ -394,12 +389,12 @@ if __name__ == "__main__":
         epochs=100,
         batch_size=16,
         learning_rate=1e-4,
-        lmbda_1=0.2,
-        lmbda_2=0.2,
-        lmbda_3=0.6,
-        loss="RD",
+        criterion="KDLoss_RD_KLD",
+        kd_l_lmbda=0.2, # 0.2
+        kd_hl_lmbda=0.2, # 0.2
+        kd_o_lmbda=0.2, # 0.2
+        o_lmbda=0.4, # 0.4
         rd_lmbda=0.025,
-        latent_loss="KLD",
         save_path=f"train_res/{job_id}"
     )
 

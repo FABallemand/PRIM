@@ -37,7 +37,7 @@ plt.rcParams["axes.prop_cycle"] = plt.rcParams["axes.prop_cycle"][1:]
 
 # Create output directory
 time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-output_folder = f"/home/ids/fallemand-24/PRIM/kd_lic_experiments/test_res/{time_stamp}"
+output_folder = f"/home/ids/fallemand-24/PRIM/dkd_lic_experiments/test_res/{time_stamp}"
 os.makedirs(output_folder)
 
 ###############################################################################

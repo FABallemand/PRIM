@@ -130,7 +130,7 @@ os.makedirs(output_folder)
 ids = [260502]
 
 networks = {
-    "our": None
+    "ours": None
 }
 
 for name, id in zip(networks.keys(), ids):

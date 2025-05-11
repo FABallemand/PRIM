@@ -6,16 +6,17 @@ With recent advancements of machine learning, new compression algorithms appeare
 ## 🗂️ Reporistory Organisation
 ```
 PRIM/
-    ├── balle_bdpsnr/       # Reproducing SOTA results
-    ├── balle_reproduction/ # Reproducing SOTA results
-    ├── data/               # Datasets
-    ├── kd_ae/              # Experiments with KD for image reconstruction
-    ├── kd_ae_test/         # Experiments with KD for image reconstruction
-    ├── kd_lic_experiments/ # Experiments with KD for LIC
-    ├── private/            # Personal data
-    ├── reports/            # Reports (intermediate, final, paper)
-    ├── README.md           # README
-    └── requirements.txt    # Requirements
+    ├── balle_bdpsnr/        # Reproducing SOTA results
+    ├── balle_reproduction/  # Reproducing SOTA results
+    ├── data/                # Datasets
+    ├── dkd_lic_experiments/ # Experiments with KD for LIC (latent representation, hyper-latent representation and output)
+    ├── kd_ae/               # Experiments with KD for image reconstruction (latent representation and output)
+    ├── kd_ae_test/          # Experiments with KD for image reconstruction (latent representation and output)
+    ├── kd_lic_experiments/  # Experiments with KD for LIC (latent representation and output)
+    ├── private/             # Personal data
+    ├── reports/             # Reports (intermediate, final, papers)
+    ├── README.md            # README
+    └── requirements.txt     # Requirements
 ```
 
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.

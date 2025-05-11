@@ -110,6 +110,7 @@ class ScaleHyperprior(CompressionModel):
         return {
             "x_hat": x_hat,
             "y_hat": y_hat,
+            "z_hat": z_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
 
@@ -212,6 +213,7 @@ class MeanScaleHyperprior(ScaleHyperprior):
         return {
             "x_hat": x_hat,
             "y_hat": y_hat,
+            "z_hat": z_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
 
@@ -361,6 +363,7 @@ class JointAutoregressiveHierarchicalPriors(MeanScaleHyperprior):
         return {
             "x_hat": x_hat,
             "y_hat": y_hat,
+            "z_hat": z_hat,
             "likelihoods": {"y": y_likelihoods, "z": z_likelihoods},
         }
 
