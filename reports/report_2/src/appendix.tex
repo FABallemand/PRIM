@@ -26,26 +26,28 @@ def model_memory_size(model):
 
 \acrshort{flop}s are measured once per model using the \textsf{FlopCountAnalysis} from the fvcore library. We use two liraries to compute the inference time and energy consumption of the models: pynvml and zeus. By iterating 50 times through the test dataset images loaded on the same Nvidia RTX 3090 GPU beforehand, we are able to achieve meaningful average values per frame. Both libraries present similar results and we ultimatly chose the zeus library for our final results. The value of inference time per frame is used to compute the model througput.
 
+In Section \ref{application_resource_contrained_platforms}, we use the PIL Python library to convert images from the Kodak dataset to JPEG-2000, JPEG and WepP. We follow the same method as for evaluating \acrshort{nn}s.
+
 \chapter{Figures}
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../img/bdpsnr_kodak_14_pretrained.png}
-    \caption[econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (pre-trained models).]{econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (pre-trained models).}
+    \caption[Reconstruction results on image 14 of the Kodak dataset for different RD tradeoffs (pre-trained models).]{Reconstruction results on image 14 of the Kodak dataset for different RD tradeoffs (pre-trained models).}
     \label{appendix:bdpsnr_1:a}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../img/bdpsnr_kodak_14.png}
-    \caption[econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (our models).]{econstruction results on image 14 of the Kodak dataset for different RD tradeoffs (our models).}
+    \caption[Reconstruction results on image 14 of the Kodak dataset for different RD tradeoffs (our models).]{Reconstruction results on image 14 of the Kodak dataset for different RD tradeoffs (our models).}
     \label{appendix:bdpsnr_1:b}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../img/kd_ae_kodak_14.png}
-    \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image reconstruction: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image reconstruction: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.}
+    \caption[Reconstruction results on image 14 of the Kodak dataset for image reconstruction with different architectures.]{Reconstruction results on image 14 of the Kodak dataset for image reconstruction with different architectures (pre-trained teacher with \textsf{quality} set to 5 and our student models with different number of channels trained for image reconstruction).}
     \label{appendix:kd_ae_1:a}
 \end{figure}
 
@@ -59,17 +61,9 @@ def model_memory_size(model):
 \begin{figure}
     \centering
     \includegraphics[width=15cm]{../img/kd_lic_kodak_14.png}
-    \caption[Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{Evaluation on the Kodak dataset of the scale hyperprior student models trained for image compression: reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.}
+    \caption[Reconstruction results on image 14 of the Kodak dataset for image compression with different architectures.]{Reconstruction results on image 14 of the Kodak dataset for image compression with different architectures (pre-trained teacher with \textsf{quality} set to 5 and our student models with different number of channels trained for image compression).}
     \label{appendix:kd_lic_2:a}
 \end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=15cm]{../img/kd_lic_rd_lambda_2.png}
-    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs and a teacher focusing on minimising bit rate.]{Average \acrshort{rd} curve on the Kodak dataset for students with different \acrshort{rd} tradeoffs and a teacher focusing on minimising bit rate.}
-    \label{appendix:kd_lic_4_bis}
-\end{figure}
-% Use 289751, 295889, 289745, 296544, 289742
 
 \begin{figure}
     \centering
@@ -108,6 +102,8 @@ def model_memory_size(model):
 
 \begin{sidewaystable}[]
     \centering
+    \caption[Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.]{Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.}
+    \label{appendix:tab_resources}
     \begin{tabular}{|c|c|lr|lr|lr|lr|lr|lr|lr|}
         \hline
         Model                     & \begin{tabular}[c]{@{}c@{}}Number\\ of channels\end{tabular} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Number of\\ parameters {[}M{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Memory\\ footprint {[}MB{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Floating point\\ operations\\ {[}GFLOP/frame{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Throughput\\ {[}FPS{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Energy\\ {[}mJ/frame{]}\end{tabular}} & \multicolumn{2}{c|}{PSNR}               & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Bit rate\\ {[}bpp{]}\end{tabular}}      \\ \hline
@@ -118,6 +114,25 @@ def model_memory_size(model):
                                   & 32                         & {\color[HTML]{656565} -87.46 \%}                         & 0.64                         & {\color[HTML]{656565} -87.97 \%}                         & 2.43                         & {\color[HTML]{656565} -91.31 \%}                         & 2.98                         & {\color[HTML]{656565} +25.89 \%}                         & 231.90                         & {\color[HTML]{656565} -60.45 \%}                         & 699.18                          & {\color[HTML]{656565} -5.25 \%}                         & 32.71                         & {\color[HTML]{656565} -10.73 \%}                        & 0.60                         \\ \cline{2-16} 
         \multirow{-5}{*}{Student} & 16                         & {\color[HTML]{656565} -94.77 \%}                         & 0.27                         & {\color[HTML]{656565} -94.98 \%}                         & 1.01                         & {\color[HTML]{656565} -97.01 \%}                         & 1.02                         & {\color[HTML]{656565} +26.83 \%}                         & 233.63                         & {\color[HTML]{656565} -61.28 \%}                         & 684.45                          & {\color[HTML]{656565} -13.17 \%}                        & 29.98                         & {\color[HTML]{656565} -32.44 \%}                        & 0.45                         \\ \hline
     \end{tabular}
-    \caption[Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.]{Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.}
-    \label{appendix:tab_resources}
 \end{sidewaystable}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{../img/codecs_rd.png}
+    \caption[Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels and codecs.]{Average \acrshort{rd} curve on the Kodak dataset for students with different number of channels and codecs.}
+    \label{appendix:codecs_rd}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{../img/codecs_fps.png}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs throughput.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs throughput.}
+    \label{appendix:codecs_fps}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=15cm]{../img/codecs_energy.png}
+    \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs consumed energy.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students and codecs consumed energy.}
+    \label{appendix:codecs_energy}
+\end{figure}

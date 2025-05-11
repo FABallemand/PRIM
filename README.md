@@ -21,7 +21,7 @@ PRIM/
 
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.
 - The second step was to reproduce state-of-the-art results for different bit rate/quality tradeoffs, this is contained in the `balle_bdpsnr` folder.
-- I then learned how to use knowledge distillation and tried to apply it on a simple autoencoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae_test`. Results are not impressive to say the least...
+- I then learned how to use knowledge distillation and tried to apply it on a simple auto-encoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae_test`. Results are not impressive to say the least...
 - Next, I proceeded in implementing knowledge distillation on state-of-the-art image reconstruction model but using them as auto-encoders. Training teacher and student model from scratch produced great visual results. The code and results can be found in `kd_ae`.
 - Finally, I adapted the previous code to perform LIC. I experimented with different student architectures (number of channels). Code and results are in the `kd_lic_experiments` folder.
 
@@ -35,6 +35,7 @@ PRIM/
 - [Joint Autoregressive and Hierarchical Priors for Learned Image Compression](https://arxiv.org/abs/1809.02736)
 - [The Devil Is in the Details: Window-based Attention for Image Compression](https://arxiv.org/abs/2203.08450)
 - [A Survey on Visual Transformer](https://arxiv.org/abs/2012.12556)
+- [Learned Image Compression with Mixed Transformer-CNN Architectures](https://arxiv.org/abs/2303.14978)
 
 ### Knowledge Distillation
 - [Distilling the Knowledge in a Neural Network](https://arxiv.org/abs/1503.02531)
