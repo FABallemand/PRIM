@@ -101,7 +101,7 @@ def make(config):
     state_dict = load_state_dict_from_url(url, progress=False)
     state_dict = load_pretrained(state_dict)
     teacher_model = ScaleHyperprior.from_state_dict(state_dict).eval().to(teacher_device)
-    student_model = ScaleHyperprior(config.N_student, config.M).to(student_device)
+    student_model = ScaleHyperprior(config.N_student, config.N_teacher, config.M).to(student_device)
 
     # Create loss
     if config.criterion == "KDLoss_RD_MSE":
@@ -365,7 +365,8 @@ if __name__ == "__main__":
     config = dict(
         job_id=job_id,
         dataset="Vimeo90K",
-        N_student=16,
+        N_teacher=128,
+        N_student=64,
         M=192,
         teacher_quality=5,
         epochs=1000,
@@ -383,6 +384,7 @@ if __name__ == "__main__":
     config_kld = dict(
         job_id=job_id,
         dataset="Vimeo90K",
+        N_teacher=128,
         N_student=112,
         M=192,
         teacher_quality=5,
