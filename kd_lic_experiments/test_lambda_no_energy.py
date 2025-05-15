@@ -131,53 +131,48 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 ###############################################################################
 
 # Networks parameters
+N = 64
 M = 192
 
 # Load networks
 
-# Wrong set of parameters
-# Ns = [128, 16, 32, 64, 96, 112]
-# ids = [None, 258263, 258258, 258259, 258262]
+# RD loss - teacher quality 5
+# lmbdas = [0.0250, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
+# ids = [None, 280392, 281662, 281976, 281979, 274461]
+# TEACHER_QUALITY = 5
 
-# No RD loss
-# Ns = [128, 16, 32, 64, 96, 112]
-# ids = [None, 259782, 259783, 259784, 259785, 259786]
-
-# No RD loss (+ KL Div)
-# Ns = [128, 16, 32, 64, 96, 112, 112]
-# ids = [None, 259782, 259783, 259784, 259785, 259786, 261095]
-
-# RD loss (latent = MSE)
-# Ns = [128, 16, 32, 64, 96, 112]
-# ids = [None, 263674, 274457, 274461, 274464, 263691]
-
-# RD loss (latent = MSE, lmbdas=(0.3, 0.3, 0.4))
-Ns = [128, 16, 32, 64, 96, 112]
-ids = [None, 319228, 319229, 319230, 319231, 319233]
-
-networks = {
-    "teacher": None,
-    "student_16": None,
-    "student_32": None,
-    "student_64": None,
-    "student_96": None,
-    "student_112": None,
-}
-
-# RD loss (latent = KLD)
-# Ns = [128, 16, 64, 112]
-# ids = [None, 299061, 299062, 299063]
+# RD loss - teacher quality 1
+# lmbdas = [0.0018, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
+# ids = [None, 289751, 295889, 289745, 296544, 289742]
+# TEACHER_QUALITY = 1
 
 # networks = {
 #     "teacher": None,
-#     "student_16": None,
-#     "student_64": None,
-#     "student_112": None,
+#     "student_1": None,
+#     "student_2": None,
+#     "student_3": None,
+#     "student_4": None,
+#     "student_5": None,
 # }
 
-for name, N, id_ in zip(networks.keys(), Ns, ids):
+# RD loss - teacher quality 5 - all lmbda different
+# 319230 lmbda=(0.3, 0.3, 0.4)
+# 332617 lmbda=(0.4, 0.4, 0.2)
+# 332618 lmbda=(0.1, 0.1, 0.8)
+lmbdas = [0.0250, 0.0250, 0.0250, 0.0250]
+ids = [None, 332618, 319230, 332617]
+TEACHER_QUALITY = 5
+
+networks = {
+    "teacher": None,
+    "student_1": None,
+    "student_2": None,
+    "student_3": None,
+}
+
+for name, id_ in zip(networks.keys(), ids):
     if name == "teacher":
-        url = model_urls["bmshj2018-hyperprior"]["mse"][5]
+        url = model_urls["bmshj2018-hyperprior"]["mse"][TEACHER_QUALITY]
         state_dict = load_state_dict_from_url(url, progress=False)
         state_dict = load_pretrained(state_dict)
         net = ScaleHyperprior.from_state_dict(state_dict).eval().to(DEVICE)
@@ -192,7 +187,6 @@ for name, N, id_ in zip(networks.keys(), Ns, ids):
 avg_metrics = {}
 for name, net in networks.items():
     avg_metrics[name] = {
-            "inference-time": [],
             "mse": [],
             "psnr": [],
             "ms-ssim": [],
@@ -202,7 +196,7 @@ for name, net in networks.items():
 # Load pre-trained networks
 pretrained_networks = {}
 
-for quality in range(1, 6):
+for quality in range(1, 9):
     net = bmshj2018_hyperprior(quality=quality,
                                pretrained=True).eval().to(DEVICE)
 
@@ -212,7 +206,6 @@ for quality in range(1, 6):
 pretrained_avg_metrics = {}
 for name, net in pretrained_networks.items():
     pretrained_avg_metrics[name] = {
-            "inference-time": [],
             "mse": [],
             "psnr": [],
             "ms-ssim": [],
@@ -296,6 +289,13 @@ for img_name in dataset_imgs:
             pretrained_avg_metrics[name]["ms-ssim"].append(pretrained_metrics[name]["ms-ssim"])
             pretrained_avg_metrics[name]["bit-rate"].append(pretrained_metrics[name]["bit-rate"])
 
+    # Save metrics
+    all_metrics = metrics | pretrained_metrics
+    with open(os.path.join(output_folder,
+                           f"metrics_{dataset_name}_{img_name}.json"),
+                           "w", encoding="utf-8") as f:
+        json.dump(all_metrics, f)
+
 ###############################################################################
 ## Plots (single image) #######################################################
 ###############################################################################
@@ -336,15 +336,6 @@ for img_name in dataset_imgs:
 ## Metrics (average) ##########################################################
 ###############################################################################
 
-loaded_dataset_imgs = []
-for img_name in dataset_imgs:
-    # Load image
-    img = Image.open(os.path.join(DATASET_PATH, img_name)).convert("RGB")
-    if dataset_name == "clic":
-        img = img.crop((0, 0, 768, 512)) # For CLIC dataset
-    x = transforms.ToTensor()(img).unsqueeze(0).to(DEVICE)
-    loaded_dataset_imgs.append(x)
-
 # Compute average metrics
 for name in networks:
     avg_metrics[name]["mse"] = np.average(avg_metrics[name]["mse"])
@@ -365,20 +356,6 @@ with open(os.path.join(output_folder,
                        f"avg_metrics_{dataset_name}.json"),
                        "w", encoding="utf-8") as f:
     json.dump(all_avg_metrics, f)
-
-# Compute average gains
-avg_gains = {}
-for name in networks:
-    avg_gains[name] = {}
-    for metric in avg_metrics[name]:
-        diff = avg_metrics[name][metric] - avg_metrics["teacher"][metric]
-        avg_gains[name][metric] = (100 * diff) / avg_metrics["teacher"][metric]
-
-# Save gains
-with open(os.path.join(output_folder,
-                       f"avg_gains_{dataset_name}.json"),
-                       "w", encoding="utf-8") as f:
-    json.dump(avg_gains, f)
 
 # Retrieve average metrics as lists
 brs = [m["bit-rate"] for _, m in avg_metrics.items()]
@@ -406,23 +383,27 @@ with open(os.path.join(output_folder,
 # Plot average rate-distortion curves
 fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
-axs[0].plot(pretrained_brs, pretrained_psnrs, "blue", linestyle="--",
+axs[0].plot(pretrained_brs[:-3], pretrained_psnrs[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
-axs[1].plot(pretrained_brs, pretrained_msssim, "blue", linestyle="--",
+axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1,
+            label=f"ours\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
+axs[1].plot(pretrained_brs[:-3], pretrained_msssim[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
+axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="ours")
 
 for name, m in pretrained_avg_metrics.items():
-    axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
-    axs[0].grid(True)
-    axs[0].set_ylabel("PSNR [dB]")
-    axs[0].set_xlabel("Bit rate [bpp]")
-    axs[0].title.set_text("PSNR comparison")
+    if name in ["1", "2", "3", "4", "5"]:
+        axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
+        axs[0].grid(True)
+        axs[0].set_ylabel("PSNR [dB]")
+        axs[0].set_xlabel("Bit rate [bpp]")
+        axs[0].title.set_text("PSNR comparison")
 
-    axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
-    axs[1].grid(True)
-    axs[1].set_ylabel("MS-SSIM [dB]")
-    axs[1].set_xlabel("Bit rate [bpp]")
-    axs[1].title.set_text("MS-SSIM (log) comparison")
+        axs[1].plot(m["bit-rate"], -10*np.log10(1-m["ms-ssim"]), "o", color="blue")
+        axs[1].grid(True)
+        axs[1].set_ylabel("MS-SSIM [dB]")
+        axs[1].set_xlabel("Bit rate [bpp]")
+        axs[1].title.set_text("MS-SSIM (log) comparison")
 
 for name, m in avg_metrics.items():
     axs[0].plot(m["bit-rate"], m["psnr"],
@@ -445,15 +426,15 @@ axs[1].legend(loc="best")
 fig.tight_layout()
 
 plt.savefig(os.path.join(output_folder,
-                         f"avg_rd_{dataset_name}.png"))
+                         f"avg_rd_curve_{dataset_name}.png"))
 plt.close()
 
-# Plot mse and channel
+# Plot mse and lambda
 fig, axs = plt.subplots(1, 1, figsize=(6, 5))
 
-axs.plot(Ns[1:], [m["mse"] for _, m in avg_metrics.items()][1:], "red", linestyle="--", linewidth=1)
+axs.plot(lmbdas, [m["mse"] for _, m in avg_metrics.items()], "red", linestyle="--", linewidth=1)
 for i, (name, m) in enumerate(avg_metrics.items()):
-    axs.plot(Ns[i], m["mse"],
+    axs.plot(lmbdas[i], m["mse"],
               "s" if name == "teacher" else "o", label=name)
 axs.grid(True)
 axs.set_ylabel("MSE")
@@ -464,5 +445,5 @@ axs.legend(loc="best")
 fig.tight_layout()
 
 plt.savefig(os.path.join(output_folder,
-                         f"avg_mse_{dataset_name}.png"))
+                         f"avg_mse_curve_{dataset_name}.png"))
 plt.close()

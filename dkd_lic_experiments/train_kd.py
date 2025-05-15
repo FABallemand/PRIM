@@ -23,7 +23,7 @@ from compressai.zoo.image import (
 import wandb
 
 from models import ScaleHyperprior
-from losses import AverageMeter, KDLoss_MSE, KDLoss_KLD, KDLoss_RD_MSE, KDLoss_RD_KLD
+from losses import AverageMeter, KDLoss_RD_MSE, KDLoss_RD_KLD
 
 # Set seeds
 torch.backends.cudnn.deterministic = True
@@ -181,12 +181,9 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion, conf
     avg_latent_kd_loss = AverageMeter()
     avg_hyper_latent_kd_loss = AverageMeter()
     avg_output_kd_loss = AverageMeter()
-    if config.loss == "RD":
-        avg_rd_loss = AverageMeter()
-        avg_mse_loss = AverageMeter()
-        avg_bpp_loss = AverageMeter()
-    else:
-        avg_output_loss = AverageMeter()
+    avg_output_loss = AverageMeter()
+    avg_mse_loss = AverageMeter()
+    avg_bpp_loss = AverageMeter()
     avg_psnr = AverageMeter()
     avg_msssim = AverageMeter()
     avg_bpp = AverageMeter()
@@ -201,52 +198,36 @@ def validation(epoch, data_loader, teacher_model, student_model, criterion, conf
             teacher_output = teacher_model(teacher_x)
             student_output = student_model(student_x)
             loss, loss_dict = criterion(student_output,
-                                    teacher_output["y_hat"].to(student_device),
-                                    teacher_output["z_hat"].to(student_device),
-                                    teacher_output["x_hat"].to(student_device),
-                                    student_x)
+                                        teacher_output["y_hat"].to(student_device),
+                                        teacher_output["z_hat"].to(student_device),
+                                        teacher_output["x_hat"].to(student_device),
+                                        student_x)
             # Update measures
             avg_loss.update(loss_dict["loss"])
             avg_latent_kd_loss.update(loss_dict["latent_kd_loss"])
             avg_hyper_latent_kd_loss.update(loss_dict["hyper_latent_kd_loss"])
             avg_output_kd_loss.update(loss_dict["output_kd_loss"])
-            if config.loss == "RD":
-                avg_rd_loss.update(loss_dict["rd_loss"])
-                avg_mse_loss.update(loss_dict["mse_loss"])
-                avg_bpp_loss.update(loss_dict["bpp_loss"])
-            else:
-                avg_output_loss.update(loss_dict["output_loss"])
+            avg_output_loss.update(loss_dict["output_loss"])
+            avg_mse_loss.update(loss_dict["mse_loss"])
+            avg_bpp_loss.update(loss_dict["bpp_loss"])
             avg_psnr.update(compute_psnr(student_x, student_output["x_hat"]))
             avg_msssim.update(compute_msssim(student_x, student_output["x_hat"]))
             avg_bpp.update(compute_bpp(student_output))
 
     # Logging
-    if config.loss == "RD":
-        log_dict = {
-            "epoch": epoch,
-            "validation_loss": avg_loss.avg,
-            "validation_latent_kd_loss": avg_latent_kd_loss.avg,
-            "validation_hyper_latent_kd_loss": avg_hyper_latent_kd_loss.avg,
-            "validation_output_kd_loss": avg_output_kd_loss.avg,
-            "validation_rd_loss": avg_rd_loss.avg,
-            "validation_mse_loss": avg_mse_loss.avg,
-            "validation_bpp_loss": avg_bpp_loss.avg,
-            "validation_psnr": avg_psnr.avg,
-            "validation_msssim": avg_msssim.avg,
-            "validation_bpp": avg_bpp.avg
-        }
-    else:
-        log_dict = {
-            "epoch": epoch,
-            "validation_loss": avg_loss.avg,
-            "validation_latent_kd_loss": avg_latent_kd_loss.avg,
-            "validation_hyper_latent_kd_loss": avg_hyper_latent_kd_loss.avg,
-            "validation_output_kd_loss": avg_output_kd_loss.avg,
-            "validation_output_loss": avg_output_loss.avg,
-            "validation_psnr": avg_psnr.avg,
-            "validation_msssim": avg_msssim.avg,
-            "validation_bpp": avg_bpp.avg
-        }
+    log_dict = {
+        "epoch": epoch,
+        "validation_loss": avg_loss.avg,
+        "validation_latent_kd_loss": avg_latent_kd_loss.avg,
+        "validation_hyper_latent_kd_loss": avg_hyper_latent_kd_loss.avg,
+        "validation_output_kd_loss": avg_output_kd_loss.avg,
+        "validation_output_loss": avg_output_loss.avg,
+        "validation_mse_loss": avg_mse_loss.avg,
+        "validation_bpp_loss": avg_bpp_loss.avg,
+        "validation_psnr": avg_psnr.avg,
+        "validation_msssim": avg_msssim.avg,
+        "validation_bpp": avg_bpp.avg
+    }
     wandb.log(log_dict)
     print(
         f"Validation: {[f'{k} = {v:.6f}' for k, v in log_dict.items()]}"
