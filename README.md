@@ -17,6 +17,8 @@ PRIM/
     ├── reports/             # Reports (intermediate, final, papers)
     ├── README.md            # README
     └── requirements.txt     # Requirements
+
+    # Rename: dkd -> hyper
 ```
 
 - The `balle_reproduction` contains the first step of the project, reproducing Ballé state-of-the-art results on a single model.
