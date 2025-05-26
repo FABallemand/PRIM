@@ -6,7 +6,6 @@
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=4
-#SBATCH --partition=3090
 
 DATE=$(date +'%Y%m%d_%H%M%S')
 echo $DATE
@@ -16,4 +15,4 @@ eval "$(conda shell.bash hook)"
 conda activate prim_env
 
 set -x
-srun python3 -u test_lambda.py
+srun python3 -u test_channels_no_energy.py

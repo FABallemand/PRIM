@@ -6,17 +6,18 @@ With recent advancements of machine learning, new compression algorithms appeare
 ## 🗂️ Reporistory Organisation
 ```
 PRIM/
-    ├── balle_bdpsnr/        # Reproducing SOTA results
-    ├── balle_reproduction/  # Reproducing SOTA results
-    ├── data/                # Datasets
-    ├── dkd_lic_experiments/ # Experiments with KD for LIC (latent representation, hyper-latent representation and output)
-    ├── kd_ae/               # Experiments with KD for image reconstruction (latent representation and output)
-    ├── kd_ae_test/          # Experiments with KD for image reconstruction (latent representation and output)
-    ├── kd_lic_experiments/  # Experiments with KD for LIC (latent representation and output)
-    ├── private/             # Personal data
-    ├── reports/             # Reports (intermediate, final, papers)
-    ├── README.md            # README
-    └── requirements.txt     # Requirements
+    ├── balle_bdpsnr/              # Reproducing SOTA results
+    ├── balle_reproduction/        # Reproducing SOTA results
+    ├── data/                      # Datasets
+    ├── dkd_lic_experiments/       # Experiments with KD for LIC (latent + hyper-latent representation and output)
+    ├── hybrid_kd_lic_experiments/ # Experiments with KD for LIC (latent + hyper-latent representation and output with two different teachers)
+    ├── kd_ae/                     # Experiments with KD for image reconstruction (latent representation and output)
+    ├── kd_ae_test/                # Experiments with KD for image reconstruction (latent representation and output)
+    ├── kd_lic_experiments/        # Experiments with KD for LIC (latent representation and output)
+    ├── private/                   # Personal data
+    ├── reports/                   # Reports (intermediate, final, papers)
+    ├── README.md                  # README
+    └── requirements.txt           # Requirements
 
     # Rename: dkd -> hyper
 ```
@@ -26,6 +27,8 @@ PRIM/
 - I then learned how to use knowledge distillation and tried to apply it on a simple auto-encoder model for image denoising / reconstruction, the experiments and results can be found in `kd_ae_test`. Results are not impressive to say the least...
 - Next, I proceeded in implementing knowledge distillation on state-of-the-art image reconstruction model but using them as auto-encoders. Training teacher and student model from scratch produced great visual results. The code and results can be found in `kd_ae`.
 - Finally, I adapted the previous code to perform LIC. I experimented with different student architectures (number of channels). Code and results are in the `kd_lic_experiments` folder.
+- As discussed with tutors, it should also be possible to apply knowledge distillation on the hyper-latent space. This is what is done in `dkd_kd_lic_experiments`.
+- I wanted to see if using two different teacher networks (one focused on rate for the hyper-latent space and one focused on distortion for the latent space and output) could yield improved results. This research work is contained in `hybrid_kd_lic_experiments`.
 
 ## 🔗 Related Links
 
