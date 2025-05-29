@@ -137,38 +137,38 @@ M = 192
 # Load networks
 
 # RD loss - teacher quality 5
-# lmbdas = [0.0250, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
-# ids = [None, 280392, 281662, 281976, 281979, 274461]
-# TEACHER_QUALITY = 5
+lmbdas = [0.0250, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
+ids = [None, 280392, 281662, 281976, 281979, 274461]
+TEACHER_QUALITY = 5
 
 # RD loss - teacher quality 1
 # lmbdas = [0.0018, 0.0018, 0.0035, 0.0067, 0.0130, 0.0250]
 # ids = [None, 289751, 295889, 289745, 296544, 289742]
 # TEACHER_QUALITY = 1
 
-# networks = {
-#     "teacher": None,
-#     "student_1": None,
-#     "student_2": None,
-#     "student_3": None,
-#     "student_4": None,
-#     "student_5": None,
-# }
-
-# RD loss - teacher quality 5 - all lmbda different
-# 319230 lmbda=(0.3, 0.3, 0.4)
-# 332617 lmbda=(0.4, 0.4, 0.2)
-# 332618 lmbda=(0.1, 0.1, 0.8)
-lmbdas = [0.0250, 0.0250, 0.0250, 0.0250]
-ids = [None, 332618, 319230, 332617]
-TEACHER_QUALITY = 5
-
 networks = {
     "teacher": None,
     "student_1": None,
     "student_2": None,
     "student_3": None,
+    "student_4": None,
+    "student_5": None,
 }
+
+# RD loss - teacher quality 5 - all lmbda different
+# 319230 lmbda=(0.3, 0.3, 0.4)
+# 332617 lmbda=(0.4, 0.4, 0.2)
+# 332618 lmbda=(0.1, 0.1, 0.8)
+# lmbdas = [0.0250, 0.0250, 0.0250, 0.0250]
+# ids = [None, 332618, 319230, 332617]
+# TEACHER_QUALITY = 5
+
+# networks = {
+#     "teacher": None,
+#     "student_1": None,
+#     "student_2": None,
+#     "student_3": None,
+# }
 
 for name, id_ in zip(networks.keys(), ids):
     if name == "teacher":
@@ -385,14 +385,15 @@ fig, axs = plt.subplots(1, 2, figsize=(13, 5))
 
 axs[0].plot(pretrained_brs[:-3], pretrained_psnrs[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
-axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1,
-            label=f"ours\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
+# axs[0].plot(brs[1:], psnrs[1:], "red", linestyle="--", linewidth=1,
+#             label=f"ours\nBD-Rate: {avg_bd_metrics["bd_rate"]:.2f} %\nBD-PSNR: {avg_bd_metrics["bd_psnr"]:.2f} dB")
 axs[1].plot(pretrained_brs[:-3], pretrained_msssim[:-3], "blue", linestyle="--",
             linewidth=1, label="pre-trained")
-axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="ours")
+# axs[1].plot(brs[1:], msssim[1:], "red", linestyle="--", linewidth=1, label="ours")
 
 for name, m in pretrained_avg_metrics.items():
-    if name in ["1", "2", "3", "4", "5"]:
+    # if name in ["1", "2", "3", "4", "5"]:
+    if name in ["4", "5"]:
         axs[0].plot(m["bit-rate"], m["psnr"], "o", color="blue")
         axs[0].grid(True)
         axs[0].set_ylabel("PSNR [dB]")
