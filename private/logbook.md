@@ -494,4 +494,72 @@
   - 319231 (96)
   - 319233 (112)
 
+## 11/05/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE, lmbda=(0.3, 0.3, 0.4))
+  - 319228 (16)
+  - 319229 (32)
+  - 319230 (64)
+  - 319231 (96)
+  - 319233 (112)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE, 64 channels)
+  - 319230 lmbda=(0.3, 0.3, 0.4)
+  - 332617 lmbda=(0.4, 0.4, 0.2)
+  - 332618 lmbda=(0.1, 0.1, 0.8)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4))
+  - ? (16)
+  - ? (32)
+  - ? (64)
+  - ? (96)
+  - ? (112)
+- Need to fix issue (entropy bottleneck size depends on N...)
+
+## 12/05/2025
+- Fix issue with entropy bottle neck size (define N_entropy for student, to be considered for future comparisons)
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4))
+  - ? (16)
+  - ? (32)
+  - ? (64)
+  - ? (96)
+  - ? (112)
+
+## 13/05/2025
+- Fix code
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4, 0.025))
+  - ? (16)
+  - ? (32)
+  - 335897 (64)
+  - ? (96)
+  - ? (112)
+
+## 15/05/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE, 64 channels)
+  - 319230 lmbda=(0.3, 0.3, 0.4)
+  - 332617 lmbda=(0.4, 0.4, 0.2)
+  - 332618 lmbda=(0.1, 0.1, 0.8)
+- Interesting results but requires zoom
+
+## 16/05/2025
+- Create script for hybrid KD
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality r,d=1,5, student KD with RD loss, latent and hyper latent loss MSE, 64 channels)
+  - 336202 lmbda=(0.2, 0.2, 0.2, 0.4, 0.025)
+
+## 26/05/2025
+- Test ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4, 0.025))
+  - ? (16)
+  - ? (32)
+  - 335897 (64)
+  - ? (96)
+  - ? (112)
+- Test ScaleHyperPrior models (image compression, pre-trained teacher quality r,d=1,5, student KD with RD loss, latent and hyper latent loss MSE, 64 channels)
+  - 336202 lmbda=(0.2, 0.2, 0.2, 0.4, 0.025)
+
+## 29/05/2025
+- Create figures of the latest experiments for paper
+
+## 30/05/2025
+- Update paper draft
+
+## 31/05/2025
+- Update paper draft
+
 ## TODO
