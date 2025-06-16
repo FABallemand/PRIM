@@ -319,7 +319,7 @@ def test(student_model, data_loader, config):
 
 def model_pipeline(config):
     # Link to wandb project
-    with wandb.init(project="bmshj2018_hyperprior_dkd_experiments", config=config):
+    with wandb.init(project="bmshj2018_hyperprior_hyper_kd_experiments", config=config):
         # Access config
         config = wandb.config
         print(config)
