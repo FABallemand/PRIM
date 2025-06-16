@@ -43,16 +43,16 @@ class KDLoss(nn.Module):
             f"{self.o_lmbda} * {self.o_criterion}"
         )
         return s
-    
+
     def compute_kd_l_loss(self, l_output, kd_l_target):
         return self.kd_l_criterion(l_output, kd_l_target)
 
     def compute_kd_hl_loss(self, hl_output, kd_hl_target):
         return self.kd_hl_criterion(hl_output, kd_hl_target)
-    
+
     def forward(
             self, student_output, kd_l_target, kd_hl_target, kd_target, target):
-        
+
         l_output = student_output["y_hat"]
         hl_output = student_output["z_hat"]
         o_output = student_output["x_hat"]
@@ -87,10 +87,10 @@ class KDLoss_RD_MSE(KDLoss):
         super().__init__(kd_l_lmbda, kd_hl_lmbda, kd_o_lmbda, o_lmbda, rd_lmbda)
 
 
-class KDLoss_RD_KLD(nn.Module):
+class KDLoss_RD_KLD(KDLoss):
 
     def __init__(self, kd_l_lmbda, kd_hl_lmbda, kd_o_lmbda, o_lmbda, rd_lmbda=0.025):
-        super().__init__(kd_l_lmbda, kd_hl_lmbda, kd_o_lmbda, o_lmbda)
+        super().__init__(kd_l_lmbda, kd_hl_lmbda, kd_o_lmbda, o_lmbda, rd_lmbda)
 
         self.kd_l_loss = nn.KLDivLoss(log_target=True)
         self.kd_hl_loss = nn.KLDivLoss(log_target=True)

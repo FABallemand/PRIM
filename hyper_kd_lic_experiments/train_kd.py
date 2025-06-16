@@ -95,13 +95,11 @@ def make(config):
     )
 
     # Create models
-    # teacher_model = bmshj2018_hyperprior(quality=5, # Best quality with (N, M) = (128, 192)
-    #                                      pretrained=True).eval().to(teacher_device)
     url = model_urls["bmshj2018-hyperprior"]["mse"][config.teacher_quality]
     state_dict = load_state_dict_from_url(url, progress=False)
     state_dict = load_pretrained(state_dict)
     teacher_model = ScaleHyperprior.from_state_dict(state_dict).eval().to(teacher_device)
-    student_model = ScaleHyperprior(config.N_student, config.N_teacher, config.M).to(student_device)
+    student_model = ScaleHyperprior(config.N_student, config.N_student, config.N_teacher, config.M).to(student_device)
 
     # Create loss
     if config.criterion == "KDLoss_RD_MSE":
@@ -121,7 +119,7 @@ def make(config):
 
     # Learning rate scheduler
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
-    
+
     return teacher_model, student_model, train_loader, validation_loader, test_loader, criterion, optimizer, lr_scheduler
 
 
@@ -347,7 +345,7 @@ if __name__ == "__main__":
         job_id=job_id,
         dataset="Vimeo90K",
         N_teacher=128,
-        N_student=64,
+        N_student=96,
         M=192,
         teacher_quality=5,
         epochs=1000,
