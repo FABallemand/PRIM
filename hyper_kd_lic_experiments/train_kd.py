@@ -345,7 +345,7 @@ if __name__ == "__main__":
         job_id=job_id,
         dataset="Vimeo90K",
         N_teacher=128,
-        N_student=96,
+        N_student=16,
         M=192,
         teacher_quality=5,
         epochs=1000,

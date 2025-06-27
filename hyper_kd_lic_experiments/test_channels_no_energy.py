@@ -132,19 +132,27 @@ def BD_RATE(R1, PSNR1, R2, PSNR2, piecewise=0):
 
 # Networks parameters
 N_teacher = 128
-N_student = 64
 M = 192
 
 # Load networks
 
-# RD loss - teacher quality 5 - student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4)
-Ns = [128, 64]
-ids = [None, 335897]
+# ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4, 0.025))
+#   - 355809 (16) 24h
+#   - 355808 (32) 24h
+#   - 355807 (64) 24h
+#   - 352578 (96) 99h
+#   - 352563 (112) 99h
+Ns = [128, 112, 96, 64, 32, 16]
+ids = [None, 352563, 352578, 355807, 355808, 355809]
 TEACHER_QUALITY = 5
 
 networks = {
     "teacher": None,
-    "student": None
+    "student_112": None,
+    "student_96": None,
+    "student_64": None,
+    "student_32": None,
+    "student_16": None,
 }
 
 for name, N, id_ in zip(networks.keys(), Ns, ids):
@@ -154,7 +162,7 @@ for name, N, id_ in zip(networks.keys(), Ns, ids):
         state_dict = load_pretrained(state_dict)
         net = ScaleHyperprior.from_state_dict(state_dict).eval().to(DEVICE)
     else:
-        net = ScaleHyperprior(N, N_teacher, M)
+        net = ScaleHyperprior(N, N, N_teacher, M)
         checkpoint = torch.load(f"train_res/{id_}/checkpoint_best.pth.tar",
             weights_only=True, map_location=torch.device("cpu"))
         net.load_state_dict(checkpoint["state_dict"])
@@ -164,7 +172,6 @@ for name, N, id_ in zip(networks.keys(), Ns, ids):
 avg_metrics = {}
 for name, net in networks.items():
     avg_metrics[name] = {
-            "inference-time": [],
             "mse": [],
             "psnr": [],
             "ms-ssim": [],
@@ -184,7 +191,6 @@ for quality in range(1, 6):
 pretrained_avg_metrics = {}
 for name, net in pretrained_networks.items():
     pretrained_avg_metrics[name] = {
-            "inference-time": [],
             "mse": [],
             "psnr": [],
             "ms-ssim": [],
