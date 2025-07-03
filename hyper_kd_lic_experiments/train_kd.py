@@ -352,9 +352,9 @@ if __name__ == "__main__":
         batch_size=16,
         learning_rate=1e-4,
         criterion="KDLoss_RD_MSE",
-        kd_l_lmbda=0.2, # 0.2
-        kd_hl_lmbda=0.2, # 0.2
-        kd_o_lmbda=0.2, # 0.2
+        kd_l_lmbda=0.3, # 0.2
+        kd_hl_lmbda=0.0, # 0.2
+        kd_o_lmbda=0.3, # 0.2
         o_lmbda=0.4, # 0.4
         rd_lmbda=0.025,
         save_path=f"train_res/{job_id}"
