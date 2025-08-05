@@ -562,4 +562,25 @@
 ## 31/05/2025
 - Update paper draft
 
+## 13/06/2025
+- Meeting with tutors
+
+## 16/06/2025
+- Upate models for hyper KD so that the student entropy model is smaller
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE + hyper-latent loss MSE, lmbda=(0.2, 0.2, 0.2, 0.4, 0.025))
+  - 355809 (16) 24h
+  - 355808 (32) 24h
+  - 355807 (64) 24h
+  - 352578 (96) 99h
+  - 352563 (112) 99h
+
+## 30/06/2025
+- Train ScaleHyperPrior models (image compression, pre-trained teacher quality 5, student KD with RD loss and latent loss MSE (+ hyper-latent loss MSE), lmbda=(0.3, 0.0, 0.3, 0.4, 0.025)) FOR BETTER COMPARISON
+  - 361263 (16) 24h
+  - 360681 (32) 24h
+  - 360680 (64) 24h
+  - 360679 (96) 24h
+  - 360678 (112) 24h
+
+
 ## TODO

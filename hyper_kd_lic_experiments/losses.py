@@ -61,7 +61,7 @@ class KDLoss(nn.Module):
         if self.kd_l_lmbda > 0.0:
             kd_l_loss = self.compute_kd_l_loss(l_output, kd_l_target)
         kd_hl_loss = 0.0
-        if self.kd_l_lmbda > 0.0:
+        if self.kd_hl_lmbda > 0.0:
             kd_hl_loss = self.compute_kd_hl_loss(hl_output, kd_hl_target)
         kd_o_loss = self.kd_o_criterion(o_output, kd_target)
         o_loss = self.o_criterion(student_output, target)
