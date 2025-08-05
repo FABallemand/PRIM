@@ -104,7 +104,7 @@ def make(config):
     state_dict = load_state_dict_from_url(url, progress=False)
     state_dict = load_pretrained(state_dict)
     teacher_model_d = ScaleHyperprior.from_state_dict(state_dict).eval().to(teacher_device_d)
-    student_model = ScaleHyperprior(config.N_student, config.N_teacher_r, config.M).to(student_device)
+    student_model = ScaleHyperprior(config.N_student, config.N_student, config.N_teacher_r, config.M).to(student_device)
 
     # Create loss
     if config.criterion == "KDLoss_RD_MSE":

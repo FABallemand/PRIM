@@ -49,10 +49,10 @@ class ScaleHyperprior(CompressionModel):
             encoder and last layer of the hyperprior decoder)
     """
 
-    def __init__(self, N, N_entropy, M, **kwargs):
+    def __init__(self, N, N_entropy, N_entropy_teacher, M, **kwargs):
         super().__init__(**kwargs)
 
-        self.entropy_bottleneck = EntropyBottleneck(N_entropy)
+        self.entropy_bottleneck = EntropyBottleneck(N_entropy_teacher)
 
         self.g_a = nn.Sequential(
             conv(3, N),
@@ -79,11 +79,11 @@ class ScaleHyperprior(CompressionModel):
             nn.ReLU(inplace=True),
             conv(N_entropy, N_entropy),
             nn.ReLU(inplace=True),
-            conv(N_entropy, N_entropy),
+            conv(N_entropy, N_entropy_teacher),
         )
 
         self.h_s = nn.Sequential(
-            deconv(N_entropy, N_entropy),
+            deconv(N_entropy_teacher, N_entropy),
             nn.ReLU(inplace=True),
             deconv(N_entropy, N_entropy),
             nn.ReLU(inplace=True),
@@ -94,6 +94,7 @@ class ScaleHyperprior(CompressionModel):
         self.gaussian_conditional = GaussianConditional(None)
         self.N = int(N)
         self.N_entropy = int(N_entropy)
+        self.N_entropy_teacher = int(N_entropy_teacher)
         self.M = int(M)
 
     @property
@@ -120,7 +121,7 @@ class ScaleHyperprior(CompressionModel):
         """Return a new model instance from `state_dict`."""
         N = state_dict["g_a.0.weight"].size(0)
         M = state_dict["g_a.6.weight"].size(0)
-        net = cls(N, N, M) # WARNING: methods works only for teacher model
+        net = cls(N, N, N, M) # WARNING: methods works only for teacher model
         net.load_state_dict(state_dict)
         return net
 
