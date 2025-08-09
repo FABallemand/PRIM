@@ -9,6 +9,7 @@ PRIM/
     ├── balle_bdpsnr/              # Reproducing SOTA results
     ├── balle_reproduction/        # Reproducing SOTA results
     ├── data/                      # Datasets
+    ├── codecs_experiments/        # Experiments with codecs (JPEG 2000, JPEG, Webp)
     ├── hybrid_kd_lic_experiments/ # Experiments with KD for LIC (latent + hyper-latent representation and output with two different teachers)
     ├── hyper_kd_lic_experiments/  # Experiments with KD for LIC (latent + hyper-latent representation and output)
     ├── kd_ae/                     # Experiments with KD for image reconstruction (latent representation and output)
@@ -16,6 +17,7 @@ PRIM/
     ├── kd_lic_experiments/        # Experiments with KD for LIC (latent representation and output)
     ├── private/                   # Personal data
     ├── reports/                   # Reports (intermediate, final, papers)
+    ├── PRIM.pdf                   # Initial presentation of the PRIM project
     ├── README.md                  # README
     └── requirements.txt           # Requirements
 ```
