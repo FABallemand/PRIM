@@ -2,42 +2,38 @@
 
 \usepackage{PRIMEarxiv}
 
+% --- Encoding and typography ---
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{hyperref}
 \usepackage{microtype}
+
+% --- Layout ---
 \usepackage{fancyhdr}
 \usepackage{appendix}
-\usepackage{csquotes}
+
+% --- Figures & tables ---
+\usepackage{graphicx}
 \usepackage{subfig}
+\usepackage{siunitx}
 \usepackage{multirow}
-\usepackage[table,xcdraw]{xcolor}
+\usepackage[table,xcdraw]{xcolor} % loads color automatically
 \usepackage{booktabs}
 \usepackage{colortbl}
-\usepackage{rotating}
-\usepackage{minted}
-% \usepackage[finalizecache,cachedir=.]{minted}
-% \usepackage[frozencache,cachedir=.]{minted}
-\usepackage{color}
-\usepackage{xcolor}
-\usepackage[acronym]{glossaries}
-\usepackage[backend=biber]{biblatex}
-\usepackage{siunitx}
+
+% --- biblatex ---
+\usepackage[backend=bibtex]{biblatex}
 \addbibresource{references.bib}
+
+% --- Hyperlinks ---
+\usepackage{hyperref}
+
+% --- Glossaries ---
+\usepackage[acronym]{glossaries}
 \glsdisablehyper
 \input{glossary.tex}
 
-\definecolor{LightGray}{gray}{0.9}
 \definecolor{Good}{HTML}{32CB00}
 \definecolor{Bad}{HTML}{CB0000}
-
-\newminted[pythonCode]{python}{
-    frame=lines,
-    framesep=2mm,
-    baselinestretch=1.2,
-    bgcolor=LightGray,
-    fontsize=\footnotesize,
-    linenos}
 
 % Header
 \pagestyle{fancy}
@@ -57,10 +53,16 @@
 	Télécom SudParis\\
 	\texttt{fabien.allemand@telecom-sudparis.eu}\\
 	\And
-	Attilio Fiandrotti, Sumanta Chaudhuri, Mazouz Alaa Eddine\\
+	Attilio Fiandrotti, Sumanta Chaudhuri, Alaa Eddine Mazouz\\
 	Télécom Paris\\
-	\texttt{\{attilio.fiandrotti, alaa.mazouz, sumanta.chaudhuri\}@telecom-paris.fr}\\
+	\texttt{\{attilio.fiandrotti, sumanta.chaudhuri, alaa.mazouz\}@telecom-paris.fr}\\
 }
+
+% --- Fix biblatex patch for arXiv ---
+\makeatletter
+\def\blx@patch@addtocontents{%
+  \typeout{Skipping biblatex \string\addtocontents patch (arXiv)}}
+\makeatother
 
 \begin{document}
 \maketitle
@@ -77,7 +79,7 @@ Data compression comes at a cost. There is a limit to how many bits can be remov
 
 \acrfull{lic} sits at the intersection of \acrfull{ml} and image processing. Recent advancements in \acrshort{ml} have led to the emergence of \acrshort{lic}, where \acrfull{nn} are leveraged to perform compression. With an \acrfull{ae} architecture, \acrshort{lic} models can learn how to encode and decode images with different \acrfull{rd} tradeoffs. On the encoder side, the image is projected to a low-dimensional latent space by a convolutional encoder. This representation is quantised, entropy-coded in the form of a binary bitstream and sent to the receiver. At the receiver, the bitstream is entropy-decoded, a convolutional decoder projects such representation back to the pixel domain, recovering an approximate representation of the image. Recent research work present deep \acrshort{nn}s that consistently outperform the most optimised conventional algorithms. However, their high computational demands make them unsuitable for real-time applications on resource-constrained devices, thus preventing their deployment and use for mainstream applications.
 
-Achieving real-time \acrshort{lic} on resource-constrained platforms requires more research in the fields of \acrshort{ml} and hardware specific implementation. This research contributes to this challenge by exploring frugal \acrfull{ai} techniques for \acrshort{lic}. Section \ref{sota} provides an overview of machine learned image compression and state-of-the-art models. \acrfull{kd} is also introduced alongside other related works. We propose a method to apply \acrshort{kd} to \acrshort{lic} in Section \ref{proposed_method}. We disclose our experiment settings in Section \ref{method} and Section \ref{experiments_and_results} presents the results of our experiments. The code is publicly available at: \url{https://github.com/FABallemand/PRIM}
+Achieving real-time \acrshort{lic} on resource-constrained platforms requires more research in the fields of \acrshort{ml} and hardware specific implementation. This research contributes to this challenge by exploring frugal \acrfull{ai} techniques for \acrshort{lic}. Section \ref{sota} provides an overview of machine learned image compression and state-of-the-art models. \acrfull{kd} is also introduced alongside other related works. We propose a method to apply \acrshort{kd} to \acrshort{lic} in Section \ref{proposed_method}. We disclose our experiment settings in Section \ref{method} and Section \ref{experiments_and_results} presents the results of our experiments.
 
 %#### State-of-the-art ########################################################
 \section{State-of-the-art}
@@ -99,9 +101,9 @@ Inspired by success of autoregressive prior in generative models, Ballé et al. 
 Early seminal works accounted for a unique latent representation modelled with a fully factored distribution. Since then, much of the research in the field has focused on improving the compression efficiency by refining the entropy model. This basic scheme was then improved by introducing an auxiliary latent space called hyperprior capturing spatial correlation within the image, furthering compression efficiency. \acrshort{lic} has shown the ability to outperform standardised video codecs in compression efficiency, fostering the demand for embedded hardware implementations.
 
 \subsection{Knowledge Distillation}
-Applying frugal \acrshort{ai} techniques can help reducing the load of the \acrshort{nn} on the computer. Such methods include pruning, quantisation or \acrfull{kd} \cite{touvron2021trainingdataefficientimagetransformers}. The latter being particularly well suited for \acrshort{lic} as it allows to train a small model to achieve the same performances as a larger one. It should be noted that \acrshort{kd} can be achieved between different architectures, opening the possibility to use a completely different network for decoding \cite{liu2022crossarchitectureknowledgedistillation}.
+Applying frugal \acrshort{ai} techniques can help reducing the load of the \acrshort{nn} on the computer. Such methods include pruning, quantisation or \acrfull{kd} \cite{touvron2021trainingdataefficientimagetransformers}. The latter being particularly well suited for \acrshort{lic} as it allows to train a small model to achieve the same performance as a larger one. It should be noted that \acrshort{kd} can be achieved between different architectures, opening the possibility to use a completely different network for decoding \cite{liu2022crossarchitectureknowledgedistillation}.
 
-Originally created to achieve the same results than ensemble of models with a lower computational cost, Hinton et al. \cite{hinton2015distillingknowledgeneuralnetwork} propose \acrlong{kd}. This novel technique consists in transferring the knowledge of a cumbersome model into a single smaller one. In this approach the knowledge of a \acrshort{nn} is not represented by its weights but by the vector to vector mapping it has learned. A large "teacher" model can be trained with unlimited computing power for a long time on large datasets, then a smaller "student" model can learn the mapping of the teacher by using the teacher's predictions as soft targets. Different from training a smaller model alone, as the student model has a higher ability to generalize while requiring fewer and possibly unlabeled data. To compensate the lack of entropy (information) of the soft targets of simple tasks, the authors propose to use a temperature parameter to soften the teacher model output distribution.
+Originally created to achieve the same results than ensemble of models with a lower computational cost, Hinton et al. \cite{hinton2015distillingknowledgeneuralnetwork} propose \acrlong{kd}. This novel technique consists in transferring the knowledge of a cumbersome model into a single smaller one. In this approach the knowledge of a \acrshort{nn} is not represented by its weights but by the vector to vector mapping it has learned. A large "teacher" model can be trained with unlimited computing power for a long time on large datasets, then a smaller "student" model can learn the mapping of the teacher by using the teacher's predictions as soft targets. This is different than training a smaller model alone as the student model has a higher ability to generalize while requiring fewer and possibly unlabeled data. To compensate the lack of entropy (information) of the soft targets of simple tasks, the authors propose to use a temperature parameter to soften the teacher model output distribution.
 
 In the context of LIC, it is often assumed that the encoding task is performed on a single sender with sufficient resources. The latent representation is then broadcasted and decoded on many receivers with various constraints such as latency and computing resources. Leveraging KD, a smaller and more efficient decoder can be trained while maintaining visual fidelity. Noting that GAN-based LIC frameworks (like state-of-the-art HiFiC) are able to reproduce texture using large general purpose networks, the approach proposed by Helminger et al. \cite{helminger2022microdosingknowledgedistillationgan} overfits a smaller decoder network for every sequence of images that can be sent alongside the latents (more precisely only the blocks responsible of the texture decompression are replaced by a smaller bloc). The smaller decoder is trained using KD on the encoder side. This approach dramatically reduces the decoder model size and the decoding time while providing a great image quality.
 
@@ -237,7 +239,7 @@ Results depicted in Figure \ref{kd_lic_1} follow our intuition. Students with la
     \label{kd_lic_1}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
     \centering
     \subfloat[Reconstruction results on image 14 of the Kodak dataset with teacher and student architectures.]{\includegraphics[width=7cm]{kd_lic_kodak_14.png} \label{kd_lic_2:a}}
     \qquad
@@ -265,7 +267,7 @@ As a reminder, the pre-trained models in Figure \ref{kd_lic_4} all have 128 chan
     \label{kd_lic_4_bis}
 \end{figure}
 
-Until now we used the following set of hyperparameters: \((\lambda_{1}, \lambda_{2}, \lambda_{3}) = (0.2, 0.2, 0.4)\) and varying \(\lambda\) in the \acrshort{rd} loss. We now fix \(\lambda = 0.025\) (the value used by \textsf{student\_5} in Figure \ref{kd_lic_4}) and train 3 new models with different sets of hyperparameters. Keeping in mind that these models should prioritize image quality, we can analyse Figure \ref{kd_lic_5} and focus on the distortion axis. \textsf{student\_5\_1} with \((\lambda_{1}, \lambda_{2}, \lambda_{3}) = (0.1, 0.1, 0.8)\) is the less performant due the lower weigthing of \acrshort{kd}. \((0.3, 0.3, 0.4)\) are the hyperparameters of \textsf{student\_5\_2}. Giving more weigth to the \acrshort{kd} results in better results as the student operates more like the teacher. However, giving to much weight (e.g. \((0.4, 0.4, 0.2)\)) is counter-productive. It seems that by trying to follow to closely the teacher, \textsf{student\_5\_3} did not managed as well to learn from the \acrshort{rd} loss feedback. In order to gain the most from \acrshort{kd}, the right balance should be found between \acrshort{kd} and \acrshort{rd} learning.
+Until now we used the following set of hyperparameters: \((\lambda_{1}, \lambda_{2}, \lambda_{3}) = (0.2, 0.2, 0.4)\) and varying \(\lambda\) in the \acrshort{rd} loss. We now fix \(\lambda = 0.025\) (the value used by \textsf{student\_5} in Figure \ref{kd_lic_4}) and train 3 new models with different sets of hyperparameters. Keeping in mind that these models should prioritize image quality, we can analyse Figure \ref{kd_lic_5} and focus on the distortion axis. \textsf{student\_5\_1} with \((\lambda_{1}, \lambda_{2}, \lambda_{3}) = (0.1, 0.1, 0.8)\) is the less performant due the lower weigthing of \acrshort{kd}. \((0.3, 0.3, 0.4)\) are the hyperparameters of \textsf{student\_5\_2}. Giving more weigth to the \acrshort{kd} results in better results as the student operates more like the teacher. However, giving to much weight (e.g. \((0.4, 0.4, 0.2)\)) is counter-productive. It seems that by trying to follow to closely the teacher, \textsf{student\_5\_3} does not manage as well to learn from the \acrshort{rd} loss feedback. In order to gain the most from \acrshort{kd}, the right balance should be found between \acrshort{kd} and \acrshort{rd} learning.
 
 \begin{figure}
     \centering
@@ -498,24 +500,7 @@ However, challenges remain, particularly in the complexity of the KD training pr
 \subsection{Implementation Details}
 All experiments are conducted using Python 3.12.7 and the version 1.2.6 of compressAI (see requirements file for other library version). We use an Anaconda virtual environment on the Télécom Paris GPU cluster which provides the processing power to perform our trainings and testings.
 
-We also need to address how we obtain the measures of Section \ref{application_resource_contrained_platforms}. Utilizing PyTorch properties, we use the following functions to compute the number of parameters and the memory footprint of the models:
-
-\begin{pythonCode}
-def model_nb_param(model):
-    return sum(p.numel() for p in model.parameters()) / 1_000_000 # Convert to M parameters
-
-
-def model_memory_size(model):
-    param_size = 0
-    for param in model.parameters():
-        param_size += param.nelement() * param.element_size()
-    buffer_size = 0
-    for buffer in model.buffers():
-        buffer_size += buffer.nelement() * buffer.element_size()
-
-    size_all_mb = (param_size + buffer_size) / 1024**2 # Convert to MB
-    return size_all_mb
-\end{pythonCode}
+Measures of Section \ref{application_resource_contrained_platforms} are obtained using PyTorch properties. By iterating through \textsf{model.parameters()}, it is possible to compute the number of parameters and the memory footprint of a model.
 
 \acrshort{flop}s are measured once per model using the \textsf{FlopCountAnalysis} from the fvcore library. We use two libraries to compute the inference time and energy consumption of the models: pynvml and zeus. By iterating 50 times through the test dataset images loaded on the same Nvidia RTX 3090 GPU beforehand, we are able to achieve meaningful average values per frame. Both libraries present similar results and we ultimately chose the zeus library for our final results. The value of inference time per frame is used to compute the model throughput.
 
@@ -564,22 +549,6 @@ In Section \ref{application_resource_contrained_platforms}, we use the PIL Pytho
   \caption[\acrshort{psnr} and bit rate on the Kodak dataset according to students inference time.]{\acrshort{psnr} and bit rate on the Kodak dataset according to students inference time.}
   \label{appendix:kd_lic_time}
 \end{figure}
-
-\begin{sidewaystable}
-  \centering
-  \begin{tabular}{|c|c|lr|lr|lr|lr|lr|lr|lr|}
-      \hline
-      Model                     & \begin{tabular}[c]{@{}c@{}}Number\\ of channels\end{tabular} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Number of\\ parameters {[}M{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Memory\\ footprint {[}MB{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Floating point\\ operations\\ {[}GFLOP/frame{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Throughput\\ {[}FPS{]}\end{tabular}} & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Energy\\ {[}mJ/frame{]}\end{tabular}} & \multicolumn{2}{c|}{PSNR}               & \multicolumn{2}{c|}{\begin{tabular}[c]{@{}c@{}}Bit rate\\ {[}bpp{]}\end{tabular}}      \\ \hline
-      Teacher                   & 128                        & {\color[HTML]{656565} }                                  & 5.08                         & {\color[HTML]{656565} }                                  & 20.18                        & {\color[HTML]{656565} }                                  & 34.24                        & {\color[HTML]{656565} }                                  & 184.20                         & {\color[HTML]{656565} }                                  & 1767.85                         & {\color[HTML]{656565} }                                 & 34.53                         & {\color[HTML]{656565} }                                 & 0.67                         \\ \hline
-                                & 112                        & {\color[HTML]{656565} -19.77 \%}                         & 4.07                         & {\color[HTML]{656565} -23.03 \%}                         & 15.53                        & {\color[HTML]{656565} -22.01 \%}                         & 26.70                        & {\color[HTML]{656565} +13.47 \%}                         & 209.01                         & {\color[HTML]{656565} -9.47 \%}                          & 1600.41                         & {\color[HTML]{656565} -0.26 \%}                         & 34.44                         & {\color[HTML]{656565} -1.03 \%}                         & 0.66                         \\ \cline{2-16} 
-                                & 96                         & {\color[HTML]{656565} -37.47 \%}                         & 3.17                         & {\color[HTML]{656565} -40.01 \%}                         & 12.11                        & {\color[HTML]{656565} -41.31 \%}                         & 20.10                        & {\color[HTML]{656565} +25.74 \%}                         & 231.61                         & {\color[HTML]{656565} -19.88 \%}                         & 1416.34                         & {\color[HTML]{656565} -0.33 \%}                         & 34.41                         & {\color[HTML]{656565} -0.58 \%}                         & 0.66                         \\ \cline{2-16} 
-                                & \cellcolor[HTML]{EFEFEF}64 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} -66.62 \%} & \cellcolor[HTML]{EFEFEF}1.69 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} -67.98 \%} & \cellcolor[HTML]{EFEFEF}6.46 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} -71.75 \%} & \cellcolor[HTML]{EFEFEF}9.67 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} +26.20 \%} & \cellcolor[HTML]{EFEFEF}232.47 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} -34.15 \%} & \cellcolor[HTML]{EFEFEF}1164.17 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} -1.21 \%} & \cellcolor[HTML]{EFEFEF}34.11 & \cellcolor[HTML]{EFEFEF}{\color[HTML]{656565} -0.91 \%} & \cellcolor[HTML]{EFEFEF}0.66 \\ \cline{2-16} 
-                                & 32                         & {\color[HTML]{656565} -87.46 \%}                         & 0.64                         & {\color[HTML]{656565} -87.97 \%}                         & 2.43                         & {\color[HTML]{656565} -91.31 \%}                         & 2.98                         & {\color[HTML]{656565} +25.89 \%}                         & 231.90                         & {\color[HTML]{656565} -60.45 \%}                         & 699.18                          & {\color[HTML]{656565} -5.25 \%}                         & 32.71                         & {\color[HTML]{656565} -10.73 \%}                        & 0.60                         \\ \cline{2-16} 
-      \multirow{-5}{*}{Student} & 16                         & {\color[HTML]{656565} -94.77 \%}                         & 0.27                         & {\color[HTML]{656565} -94.98 \%}                         & 1.01                         & {\color[HTML]{656565} -97.01 \%}                         & 1.02                         & {\color[HTML]{656565} +26.83 \%}                         & 233.63                         & {\color[HTML]{656565} -61.28 \%}                         & 684.45                          & {\color[HTML]{656565} -13.17 \%}                        & 29.98                         & {\color[HTML]{656565} -32.44 \%}                        & 0.45                         \\ \hline
-  \end{tabular}
-  \caption[Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.]{Number of parameters, memory footprint, \acrshort{flop}s, throughput, consumed energy, \acrshort{psnr} and bit rate for teacher and student models.}
-  \label{appendix:tab_resources}
-\end{sidewaystable}
 
 \begin{figure}
   \centering
